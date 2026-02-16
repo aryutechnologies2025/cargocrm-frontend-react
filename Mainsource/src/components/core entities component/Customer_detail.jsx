@@ -437,7 +437,7 @@ const Customer_detail = () => {
 
           </div>
         </div>
-        <div className="datatable-container">
+        <div className="bg-white datatable-container">
         
 
           {/* Responsive wrapper for the table */}

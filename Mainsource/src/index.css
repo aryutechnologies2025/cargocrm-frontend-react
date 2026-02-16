@@ -26,6 +26,7 @@ html {
   background: gray;
 }
 
+
 /* data table styling */
 
 /* Style for the active page button */
@@ -50,6 +51,9 @@ html {
 }
 
 /*  */
+.datatable-container{
+  padding: 5px;
+}
 .dt-length{
   text-transform: capitalize;
 }
@@ -68,12 +72,13 @@ html {
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
+  border: none !important;
 }
 
 .dt-input {
   width: 100%;
   padding: 10px 10px;
-  border: 1px solid rgba(213, 213, 213, 1);
+  border: 2px solid rgb(0, 0, 0) !important;
   border-radius: 14px !important;
   font-size: 14px;
   color: rgba(113, 142, 191, 1) !important;
@@ -82,6 +87,27 @@ html {
   outline: none !important;
   width: fit-content;
 }
+
+/* Entries Per Page dropdown */
+.dt-length select {
+  border: 1px solid #d3d3d3 !important;
+  border-radius: 6px;
+  padding: 6px 8px;
+  outline: none;
+}
+
+
+/* Search input box */
+.dt-search input,
+.dt-input {
+   border: 1px solid #d3d3d3 !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  background-color: #ffffff;
+  color: #616161 !important;
+  outline: none !important;
+}
+
 
 .dt-layout-cell {
   width: 100%;
