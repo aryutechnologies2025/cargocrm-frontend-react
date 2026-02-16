@@ -13,7 +13,7 @@ import Event_main from "./components/core entities component/Event_main";
 import Order_main from "./components/core entities component/Order_main";
 import Run_main from "./components/core entities component/Run_main";
 import ContactUs_main from "./components/Contact us component/ContactUs_main";
-import LoginLog_main from "./components/Login logs component/loginLog_main";
+import LoginLog_main from "./components/Login logs component/LoginLog_main";
 
 function App() {
   return (
