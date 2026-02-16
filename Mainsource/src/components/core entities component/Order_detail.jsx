@@ -42,6 +42,8 @@ const Order_detail = () => {
   const [statusFilter, setStatusFilter] = useState([]);
   const [beneficiaryFilter, setBeneficiaryFilter] = useState([]);
   const [senderFilter, setSenderFilter] = useState([]);
+  const [createdByFilter, setCreatedByFilter] = useState([]);
+  const [createdDateFilter, setCreatedDateFilter] = useState([]);
   const getToday = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
@@ -280,7 +282,7 @@ const Order_detail = () => {
     },
     {
       title: "Status",
-      data: "Status",
+      data: "status",
       render: (data) => {
         const textColor = data === 1 ? "red" : "green";
         const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
@@ -389,8 +391,8 @@ const Order_detail = () => {
         </div>
 
         {/* filter */}
-        <div className=" rounded-xl p-3 mb-3 mt-3 shadow-sm">
-          <div className="flex flex-wrap items-end gap-3 justify-between">
+        <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
+          <div className="flex flex-wrap items-end gap-5 justify-between">
 
             {/* Left Side Filters */}
             <div className="flex flex-wrap gap-3">
@@ -421,6 +423,31 @@ const Order_detail = () => {
                   <option value="0">22_cargo</option>
                   <option value="1">22_cargo</option>
                 </select>
+              </div>
+
+              {/* created by Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Created By</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={createdByFilter}
+                  onChange={(e) => setCreatedByFilter(e.target.value)}
+                >
+                  <option value="">Select created by</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Agent">Agent</option>
+                </select>
+              </div>
+
+              {/* sender Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">created Date</label>
+                <input
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  type="date"
+                  value={createdDateFilter}
+                  onChange={(e) => setCreatedDateFilter(e.target.value)}
+                />
               </div>
 
               {/* Status Filter */}
@@ -509,7 +536,7 @@ const Order_detail = () => {
           </div>
         </div>
 
-        <div className="datatable-container">
+        <div className=" bg-white datatable-container">
 
           {/* <div className="flex justify-start items-center ">
             <div className="relative">
@@ -557,7 +584,7 @@ const Order_detail = () => {
                 responsive: true, // Enable responsiveness
                 autoWidth: false, // Disable auto width for proper column adjustments
               }}
-              className="display nowrap bg-white"
+              className="display nowrap  bg-white"
               ref={(el) => (window.contactTable = el?.dt())}
             />
           </div>
@@ -583,36 +610,6 @@ const Order_detail = () => {
 
               <div className="px-5 lg:px-14 py-2 md:py-10">
                 <p className="text-2xl md:text-3xl font-medium">Add Order</p>
-
-
-                {/* <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Sender ID <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      value={senderId}
-                      placeholder="Enter sender ID"
-                      onChange={(e) => {
-                        setSenderId(e.target.value);
-                        setFormErrors({ ...formErrors, senderId: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.senderId && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.senderId}
-                      </p>
-                    )}
-                  </div>
-                </div> */}
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div>
@@ -646,36 +643,6 @@ const Order_detail = () => {
                     )}
                   </div>
                 </div>
-
-
-                {/* <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Beneficiary ID <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="number"
-                      value={beneficiaryId}
-                      placeholder="Enter Beneficiary ID"
-                      onChange={(e) => {
-                        setBeneficiaryId(e.target.value);
-                        setFormErrors({ ...formErrors, beneficiaryId: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.beneficiaryId && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.beneficiaryId}
-                      </p>
-                    )}
-                  </div>
-                </div> */}
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div>
@@ -934,71 +901,71 @@ const Order_detail = () => {
                   <div className="bg-white  rounded-xl w-full">
 
                     <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div>
-                    <label
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Sender ID <span className="text-red-500">*</span>
-                    </label>
-                  </div>
+                      <div>
+                        <label
+                          className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                        >
+                          Sender ID <span className="text-red-500">*</span>
+                        </label>
+                      </div>
 
-                  <div className="w-[60%] md:w-[50%]">
-                    <select
-                      value={editSenderId}
-                      onChange={(e) => {
-                        setSenderId(e.target.value);
-                        setFormErrors({ ...formErrors, editSenderId: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
+                      <div className="w-[60%] md:w-[50%]">
+                        <select
+                          value={editSenderId}
+                          onChange={(e) => {
+                            setSenderId(e.target.value);
+                            setFormErrors({ ...formErrors, editSenderId: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg 
       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="">Select Sender ID</option>
-                      <option value="S001">S001</option>
-                      <option value="S002">S002</option>
-                      <option value="S003">S003</option>
-                    </select>
+                        >
+                          <option value="">Select Sender ID</option>
+                          <option value="S001">S001</option>
+                          <option value="S002">S002</option>
+                          <option value="S003">S003</option>
+                        </select>
 
-                    {formErrors.editSenderId && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.editSenderId}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                        {formErrors.editSenderId && (
+                          <p className="text-red-500 text-sm mb-4 mt-1">
+                            {formErrors.editSenderId}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
 
                     <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div>
-                    <label
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Beneficiary ID <span className="text-red-500">*</span>
-                    </label>
-                  </div>
+                      <div>
+                        <label
+                          className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                        >
+                          Beneficiary ID <span className="text-red-500">*</span>
+                        </label>
+                      </div>
 
-                  <div className="w-[60%] md:w-[50%]">
-                    <select
-                      value={editBeneficiaryId}
-                      onChange={(e) => {
-                        setBeneficiaryId(e.target.value);
-                        setFormErrors({ ...formErrors, editBeneficiaryId: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
+                      <div className="w-[60%] md:w-[50%]">
+                        <select
+                          value={editBeneficiaryId}
+                          onChange={(e) => {
+                            setBeneficiaryId(e.target.value);
+                            setFormErrors({ ...formErrors, editBeneficiaryId: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg 
       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="">Select Beneficiary ID</option>
-                      <option value="101">101</option>
-                      <option value="102">102</option>
-                      <option value="103">103</option>
-                    </select>
+                        >
+                          <option value="">Select Beneficiary ID</option>
+                          <option value="101">101</option>
+                          <option value="102">102</option>
+                          <option value="103">103</option>
+                        </select>
 
-                    {formErrors.editBeneficiaryId && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.editBeneficiaryId}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                        {formErrors.editBeneficiaryId && (
+                          <p className="text-red-500 text-sm mb-4 mt-1">
+                            {formErrors.editBeneficiaryId}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -1027,57 +994,57 @@ const Order_detail = () => {
                     </div>
 
 
-                     <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Packed <span className="text-red-500">*</span>
-                    </label>
+                    <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                      <div className="">
+                        <label
+                          htmlFor="roleName"
+                          className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                        >
+                          Packed <span className="text-red-500">*</span>
+                        </label>
 
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <div className="flex items-center gap-6">
+                      </div>
+                      <div className="w-[60%] md:w-[50%]">
+                        <div className="flex items-center gap-6">
 
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="packed"
-                          value="Yes"
-                          checked={editPacked === "Yes"}
-                          onChange={(e) => {
-                            setEditPacked(e.target.value);
-                            setFormErrors({ ...formErrors, editPacked: "" });
-                          }}
-                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                        />
-                        Yes
-                      </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="packed"
+                              value="Yes"
+                              checked={editPacked === "Yes"}
+                              onChange={(e) => {
+                                setEditPacked(e.target.value);
+                                setFormErrors({ ...formErrors, editPacked: "" });
+                              }}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            />
+                            Yes
+                          </label>
 
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="packed"
-                          value="No"
-                          checked={editPacked === "No"}
-                          onChange={(e) => {
-                            setEditPacked(e.target.value);
-                            setFormErrors({ ...formErrors, editPacked: "" });
-                          }}
-                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                        />
-                        No
-                      </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="packed"
+                              value="No"
+                              checked={editPacked === "No"}
+                              onChange={(e) => {
+                                setEditPacked(e.target.value);
+                                setFormErrors({ ...formErrors, editPacked: "" });
+                              }}
+                              className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            />
+                            No
+                          </label>
 
+                        </div>
+                        {formErrors.editPacked && (
+                          <p className="text-red-500 text-sm mb-4 mt-1">
+                            {formErrors.editPacked}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    {formErrors.editPacked && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.editPacked}
-                      </p>
-                    )}
-                  </div>
-                </div>
 
 
                     <div className="mt-8 flex justify-between items-center">
@@ -1091,7 +1058,7 @@ const Order_detail = () => {
                  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                           onChange={(e) => {
                             setEditCreatedBy(e.target.value);
-                            setFormErrors({ ...formErrors, editCreatedBy: ""});
+                            setFormErrors({ ...formErrors, editCreatedBy: "" });
                           }}
                         >
                           <option >Select created by</option>
@@ -1118,10 +1085,15 @@ const Order_detail = () => {
                           value={editCreatedDate}
                           onChange={(e) => {
                             setEditCreatedDate(e.target.value);
-                            setFormErrors({ ...formErrors, editCargoMode: ""});
+                            setFormErrors({ ...formErrors, editCreatedDate: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editCreatedDate && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editCreatedDate}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -1130,21 +1102,25 @@ const Order_detail = () => {
                       <label className="block text-[15px] md:text-md font-medium mb-2">Status <span className="text-red-500">*</span></label>
                       <div className="w-[60%] md:w-[50%]">
                         <select
-                          name="status"
-                          id="status"
-                          value={selectedOrder?.status}
+                          value={editStatus}
+                          onChange={(e) => {
+                            setEditStatus(e.target.value);
+                            setFormErrors({ ...formErrors, editStatus: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
+                          <option>Select status</option>
                           <option value="1">Active</option>
                           <option value="0">InActive</option>
                         </select>
+                        {formErrors.editStatus && (
+                          <p className="text-red-500 text-sm mb-4">
+                            {formErrors.editStatus}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    {errors.status && (
-                      <p className="text-red-500 text-sm mb-4">
-                        {errors.status[0]}
-                      </p>
-                    )}
+
 
                     <div className="flex justify-end gap-2 mt-14">
                       <button

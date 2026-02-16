@@ -396,7 +396,7 @@ const User_detail = () => {
         </div>
 
 
-        <div className="datatable-container">
+        <div className="bg-white datatable-container">
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable

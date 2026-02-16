@@ -372,15 +372,49 @@ const Beneficiary_detail = () => {
 
           <p className="text-sm md:text-md text-[#057fc4]">Beneficiary</p>
         </div>
-        {/* Add Button */}
-        <div className="flex justify-end mt-8">
-          <button
-            onClick={openAddModal}
-            className="bg-[#057fc4] px-3 py-2 text-white w-20 rounded-2xl"
-          >
-            Add
-          </button>
-        </div>
+
+        {/* Filters */}
+        <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3 justify-between">
+
+            {/* Left Side Filters */}
+            <div className="flex flex-wrap gap-3">
+
+              {/* Status Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Status</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All Status</option>
+                  <option value="0">Active</option>
+                  <option value="1">Inactive</option>
+                </select>
+              </div>
+
+              {/* Date Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Date</label>
+                <input
+                  type="date"
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                />
+
+              </div>
+
+              {/* Reset */}
+              <div className="flex items-end">
+                <button
+                  onClick={resetFilters}
+                  className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
+                >
+                  Reset
+                </button>
+              </div>
 
                {/* customize */}
               <div className="flex justify-start items-center  ">
@@ -433,9 +467,8 @@ const Beneficiary_detail = () => {
         </div>
 
 
-        <div className="datatable-container">
-
-
+        <div className="bg-white datatable-container">
+          
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             
