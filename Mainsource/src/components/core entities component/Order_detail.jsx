@@ -39,6 +39,134 @@ const Order_detail = () => {
     created_date: true,
     status: true,
   });
+  const [statusFilter, setStatusFilter] = useState([]);
+  const [beneficiaryFilter, setBeneficiaryFilter] = useState([]);
+  const [senderFilter, setSenderFilter] = useState([]);
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // YYYY-MM-DD
+  };
+  const [dateFilter, setDateFilter] = useState(getToday());
+  const [formErrors, setFormErrors] = useState({});
+  const [senderId, setSenderId] = useState("");
+  const [beneficiaryId, setBeneficiaryId] = useState("");
+  const [cargoMode, setCargoMode] = useState("");
+  const [packed, setPacked] = useState("");
+  const [createdBy, setCreatedBy] = useState("");
+  const [createdDate, setCreatedDate] = useState("");
+  const [status, setStatus] = useState("");
+
+  const [editSenderId, setEditSenderId] = useState("");
+  const [editBeneficiaryId, setEditBeneficiaryId] = useState("");
+  const [editCargoMode, setEditCargoMode] = useState("");
+  const [editPacked, setEditPacked] = useState("");
+  const [editCreatedBy, setEditCreatedBy] = useState("");
+  const [editCreatedDate, setEditCreatedDate] = useState("");
+  const [editStatus, setEditStatus] = useState("");
+
+  const validateAddForm = () => {
+    let errors = {};
+
+    if (!senderId.trim()) {
+      errors.senderId = "Sender ID is required";
+    }
+    if (!beneficiaryId.trim()) {
+      errors.beneficiaryId = "Beneficiary ID is required";
+    }
+    if (!cargoMode.trim()) {
+      errors.cargoMode = "Cargo Mode is required";
+    }
+    if (!packed.trim()) {
+      errors.packed = "Packed is required";
+    }
+    if (createdBy.trim() === "") {
+      errors.createdBy = "Created By is required";
+    }
+    if (createdDate.trim() === "") {
+      errors.createdDate = "Created Date is required";
+    }
+    if (status === "") {
+      errors.status = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateEditForm = () => {
+    let errors = {};
+
+    if (!editSenderId.trim()) {
+      errors.editSenderId = "Sender ID is required";
+    }
+    if (!editBeneficiaryId.trim()) {
+      errors.editBeneficiaryId = "Beneficiary ID is required";
+    }
+    if (!editCargoMode.trim()) {
+      errors.editCargoMode = "Cargo Mode is required";
+    }
+    if (!editPacked.trim()) {
+      errors.editPacked = "Packed is required";
+    }
+    if (editCreatedBy.trim() === "") {
+      errors.editCreatedBy = "Created By is required";
+    }
+    if (editCreatedDate.trim() === "") {
+      errors.editCreatedDate = "Created Date is required";
+    }
+    if (editStatus === "") {
+      errors.editStatus = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleAddSubmit = () => {
+    if (!validateAddForm()) return;
+
+    const payload = {
+      beneficiary_id: beneficiaryId,
+      sender_id: senderId,
+      cargo_mode: cargoMode,
+      packed: packed,
+      created_by: createdBy,
+      created_date: createdDate,
+      status: status,
+    };
+
+    console.log("Add Payload:", payload);
+
+    //  Call your API here
+
+    closeAddModal();
+  };
+
+  const handleUpdate = () => {
+    if (!validateEditForm()) return;
+
+    const payload = {
+      id: selectedOrder._id,
+      beneficiary_id: editBeneficiaryId,
+      sender_id: editSenderId,
+      cargo_mode: editCargoMode,
+      packed: editPacked,
+      created_by: editCreatedBy,
+      created_date: editCreatedDate,
+      status: editStatus,
+    };
+
+    console.log("Update Payload:", payload);
+
+    closeEditModal();
+  };
+
+  const resetFilters = () => {
+    setStatusFilter("");
+    setBeneficiaryFilter("");
+    setSenderFilter("");
+    setDateFilter(""); // reset to today
+  };
 
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
@@ -65,8 +193,6 @@ const Order_detail = () => {
       return newState;
     });
   };
-
-
 
   const openAddModal = () => {
     setIsAddModalOpen(true);
@@ -97,8 +223,18 @@ const Order_detail = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (tracking_no, sender_id, beneficiary_id, cargo_mode, packed, created_by, created_date, status) => {
-    setSelectedOrder(tracking_no, sender_id, beneficiary_id, cargo_mode, packed, created_by, created_date, status);
+  const openEditModal = (row) => {
+    if (!row) return;
+
+    setSelectedOrder(row);
+    setBeneficiaryId(row.beneficiary_id || "");
+    setSenderId(row.sender_id || "");
+    setCargoMode(row.cargo_mode || "");
+    setCreatedBy(row.created_by || "");
+    setPacked(row.packed || "");
+    setCreatedBy(row.created_by || "");
+    setCreatedDate(row.created_date || "");
+    setEditStatus(row.status !== undefined ? String(row.status) : "");
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
@@ -193,15 +329,7 @@ const Order_detail = () => {
                   <TfiPencilAlt
                     className="cursor-pointer "
                     onClick={() => {
-                      openEditModal(
-                        row._id,
-                        row.customer_id,
-                        row.name,
-                        row.email,
-                        row.phone_no,
-                        row.address,
-                        row.status,
-                      );
+                      openEditModal(row);
                     }}
                   />
                   <MdOutlineDeleteOutline
@@ -229,38 +357,21 @@ const Order_detail = () => {
     },
   ];
 
-  const data = [
-    {
-      Sno: 1,
-      tracking_no: "c77884",
-      sender_id: "22_cargo",
-      beneficiary_id: "96F5741425",
-      cargo_mode: "Us mode",
-      packed: "5",
-      created_by: "Cargo",
-      created_date: "12-07-2025"
-    },
-    {
-      Sno: 2,
-      tracking_no: "c77884",
-      sender_id: "22_cargo",
-      beneficiary_id: "96F5741425",
-      cargo_mode: "Us mode",
-      packed: "5",
-      created_by: "Cargo",
-      created_date: "12-07-2025"
-    },
-    {
-      Sno: 3,
-      tracking_no: "c77884",
-      sender_id: "22_cargo",
-      beneficiary_id: "96F5741425",
-      cargo_mode: "Us mode",
-      packed: "5",
-      created_by: "Cargo",
-      created_date: "12-07-2025"
-    }
-  ]
+
+  const rawData = [
+    { Sno: 1, tracking_no: "c77884", sender_id: "22_cargo", beneficiary_id: "96F5741425", cargo_mode: "Us mode", packed: "5", created_by: "Cargo", created_date: "12-07-2025", status: 0, date: "2026-02-01" },
+    { Sno: 2, tracking_no: "c77884", sender_id: "22_cargo", beneficiary_id: "96F5741425", cargo_mode: "Us mode", packed: "5", created_by: "Cargo", created_date: "12-07-2025", status: 1, date: "2026-02-02" },
+    { Sno: 3, tracking_no: "c77884", sender_id: "22_cargo", beneficiary_id: "96F5741425", cargo_mode: "Us mode", packed: "5", created_by: "Cargo", created_date: "12-07-2025", status: 1, date: "2026-02-03" },
+  ];
+
+  const data = rawData.filter((item) => {
+    return (
+      (statusFilter ? String(item.status) === statusFilter : true) &&
+      (beneficiaryFilter ? String(item.beneficiary_id) === beneficiaryFilter : true) &&
+      (senderFilter ? String(item.sender_id) === senderFilter : true) &&
+      (dateFilter ? item.date === dateFilter : true)
+    );
+  });
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -276,19 +387,131 @@ const Order_detail = () => {
 
           <p className="text-sm md:text-md text-[#057fc4]">Order</p>
         </div>
-        {/* Add Button */}
-        <div className="flex justify-end mt-8">
-          <button
-            onClick={openAddModal}
-            className="bg-[#057fc4] px-3 py-2 text-white w-20 rounded-2xl"
-          >
-            Add
-          </button>
+
+        {/* filter */}
+        <div className=" rounded-xl p-3 mb-3 mt-3 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3 justify-between">
+
+            {/* Left Side Filters */}
+            <div className="flex flex-wrap gap-3">
+
+              {/* Beneficiary Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Beneficiary ID</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={beneficiaryFilter}
+                  onChange={(e) => setBeneficiaryFilter(e.target.value)}
+                >
+                  <option value="">Select Beneficiary ID</option>
+                  <option value="0">96F5741425</option>
+                  <option value="1">96F5741424</option>
+                </select>
+              </div>
+
+              {/* sender Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Sender ID</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={senderFilter}
+                  onChange={(e) => setSenderFilter(e.target.value)}
+                >
+                  <option value="">Select Sender ID</option>
+                  <option value="0">22_cargo</option>
+                  <option value="1">22_cargo</option>
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Status</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All Status</option>
+                  <option value="0">Active</option>
+                  <option value="1">Inactive</option>
+                </select>
+              </div>
+
+              {/* Date Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Date</label>
+                <input
+                  type="date"
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                />
+
+              </div>
+
+              {/* Reset */}
+              <div className="flex items-end">
+                <button
+                  onClick={resetFilters}
+                  className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
+                >
+                  Reset
+                </button>
+              </div>
+
+              {/* customize */}
+              <div className="flex justify-start items-center  ">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCustomize(!showCustomize)}
+                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                  >
+                    <BiCustomize className="text-[#046fac]" />Customize
+                  </button>
+
+                  {showCustomize && (
+                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-medium  text-sm">Customize Columns</p>
+                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                      </div>
+
+                      {Object.keys(visibleColumns).map((col) => (
+                        <label
+                          key={col}
+                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col]}
+                            onChange={() => toggleColumn(col)}
+                          />
+                          {col}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Right Side Add Button */}
+            <div>
+              <button
+                onClick={openAddModal}
+                className="bg-[#057fc4] hover:bg-[#2d93cf] px-4 py-2 text-white rounded-xl"
+              >
+                Add
+              </button>
+            </div>
+
+          </div>
         </div>
 
         <div className="datatable-container">
 
-          <div className="flex justify-start items-center ">
+          {/* <div className="flex justify-start items-center ">
             <div className="relative">
               <button
                 onClick={() => setShowCustomize(!showCustomize)}
@@ -320,7 +543,7 @@ const Order_detail = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
@@ -362,39 +585,7 @@ const Order_detail = () => {
                 <p className="text-2xl md:text-3xl font-medium">Add Order</p>
 
 
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Tracking Number <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="tracking_no"
-                      name="tracking_no"
-                      placeholder="Enter tracking number"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {/* {errors.name && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
-                      </p>
-                    )} */}
-                  </div>
-                </div>
-                {/* {error.rolename && <p className="error">{error.rolename}</p>} */}
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                {/* <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
                     <label
                       htmlFor="roleName"
@@ -407,24 +598,57 @@ const Order_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="sender_id"
-                      name="sender_id"
+                      value={senderId}
                       placeholder="Enter sender ID"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      onChange={(e) => {
+                        setSenderId(e.target.value);
+                        setFormErrors({ ...formErrors, senderId: "" });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.senderId && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.senderId}
                       </p>
-                    )} */}
+                    )}
+                  </div>
+                </div> */}
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center">
+                  <div>
+                    <label
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Sender ID <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+
+                  <div className="w-[60%] md:w-[50%]">
+                    <select
+                      value={senderId}
+                      onChange={(e) => {
+                        setSenderId(e.target.value);
+                        setFormErrors({ ...formErrors, senderId: "" });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
+      focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">Select Sender ID</option>
+                      <option value="S001">S001</option>
+                      <option value="S002">S002</option>
+                      <option value="S003">S003</option>
+                    </select>
+
+                    {formErrors.senderId && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.senderId}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+
+                {/* <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
                     <label
                       htmlFor="roleName"
@@ -437,22 +661,55 @@ const Order_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="number"
-                      id="beneficiary_id"
-                      name="beneficiary_id"
+                      value={beneficiaryId}
                       placeholder="Enter Beneficiary ID"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      onChange={(e) => {
+                        setBeneficiaryId(e.target.value);
+                        setFormErrors({ ...formErrors, beneficiaryId: "" });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.beneficiaryId && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.beneficiaryId}
                       </p>
-                    )} */}
+                    )}
+                  </div>
+                </div> */}
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center">
+                  <div>
+                    <label
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Beneficiary ID <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+
+                  <div className="w-[60%] md:w-[50%]">
+                    <select
+                      value={beneficiaryId}
+                      onChange={(e) => {
+                        setBeneficiaryId(e.target.value);
+                        setFormErrors({ ...formErrors, beneficiaryId: "" });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
+      focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">Select Beneficiary ID</option>
+                      <option value="101">101</option>
+                      <option value="102">102</option>
+                      <option value="103">103</option>
+                    </select>
+
+                    {formErrors.beneficiaryId && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.beneficiaryId}
+                      </p>
+                    )}
                   </div>
                 </div>
+
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
@@ -467,24 +724,24 @@ const Order_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
 
                     <select
-                      id="cargo_mode"
-                      name="cargo_mode"
+                      type="text"
+                      value={cargoMode}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       onChange={(e) => {
-                        setRoleName(e.target.value);
-                        validateRoleName(e.target.value);
+                        setCargoMode(e.target.value);
+                        setFormErrors({ ...formErrors, cargoMode: "" });
                       }}
                     >
-                      <option disabled>Select cargo mode</option>
-                      <option value="Admin">Air</option>
-                      <option value="Manager">Sea</option>
+                      <option>Select cargo mode</option>
+                      <option value="Air">Air</option>
+                      <option value="Sea">Sea</option>
                     </select>
-                    {/* {errors.name && (
+                    {formErrors.cargoMode && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.cargoMode}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -499,27 +756,47 @@ const Order_detail = () => {
 
                   </div>
                   <div className="w-[60%] md:w-[50%]">
-                    <select
-                      id="cargo_mode"
-                      name="cargo_mode"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                      onChange={(e) => {
-                        setRoleName(e.target.value);
-                        validateRoleName(e.target.value);
-                      }}
-                    >
-                      <option disabled>Select packed</option>
-                      <option value="Admin">Yes</option>
-                      <option value="Manager">No</option>
-                    </select>
-                    {/* {errors.name && (
+                    <div className="flex items-center gap-6">
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="packed"
+                          value="Yes"
+                          checked={packed === "Yes"}
+                          onChange={(e) => {
+                            setPacked(e.target.value);
+                            setFormErrors({ ...formErrors, packed: "" });
+                          }}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        Yes
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="packed"
+                          value="No"
+                          checked={packed === "No"}
+                          onChange={(e) => {
+                            setPacked(e.target.value);
+                            setFormErrors({ ...formErrors, packed: "" });
+                          }}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        No
+                      </label>
+
+                    </div>
+                    {formErrors.packed && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.packed}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
+
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
@@ -533,24 +810,23 @@ const Order_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <select
-                      id="cargo_mode"
-                      name="cargo_mode"
+                      type={createdBy}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       onChange={(e) => {
-                        setRoleName(e.target.value);
-                        validateRoleName(e.target.value);
+                        setCreatedBy(e.target.value);
+                        setFormErrors({ ...formErrors, createdBy: "" });
                       }}
                     >
-                      <option disabled>Select created by</option>
+                      <option>Select created by</option>
                       <option value="Admin">Admin</option>
                       <option value="Manager">Agent</option>
                     </select>
-                    {/* {errors.name && (
+                    {formErrors.createdBy && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.createdBy}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -567,20 +843,19 @@ const Order_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="date"
-                      id="created_date"
-                      name="created_date"
+                      value={createdDate}
                       placeholder="Enter created date"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      onChange={(e) => {
+                        setCreatedDate(e.target.value);
+                        setFormErrors({ ...formErrors, createdDate: "" });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.createdDate && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.createdDate}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -596,26 +871,24 @@ const Order_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <select
-                      name="status"
-                      id="status"
-                      // onChange={(e) => {
-                      //   setStatus(e.target.value);
-                      //   validateStatus(e.target.value); // Validate status dynamically
-                      // }}
+                      value={status}
+                      onChange={(e) => {
+                        setStatus(e.target.value);
+                        setFormErrors({ ...formErrors, status: "" });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select a status</option>
                       <option value="1">Active</option>
                       <option value="0">InActive</option>
                     </select>
-                    {/* {errors.status && (
+                    {formErrors.status && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.status}
+                        {formErrors.status}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
-                {/* {error.status && <p className="error">{error.status}</p>} */}
 
                 <div className="flex  justify-end gap-2 mt-5 md:mt-14">
                   <button
@@ -626,7 +899,7 @@ const Order_detail = () => {
                   </button>
                   <button
                     className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
-                  // onClick={handlesubmit}
+                    onClick={handleAddSubmit}
                   >
                     Submit
                   </button>
@@ -660,47 +933,72 @@ const Order_detail = () => {
                 <div className="mt-10  rounded-lg ">
                   <div className="bg-white  rounded-xl w-full">
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Tracking Number <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter tracking number"
-                          value={selectedOrder?.tracking_no}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
+                    <div className="mt-2 md:mt-8 flex justify-between items-center">
+                  <div>
+                    <label
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Sender ID <span className="text-red-500">*</span>
+                    </label>
+                  </div>
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Sender ID <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter sender ID"
-                          value={selectedOrder?.sender_id}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <select
+                      value={editSenderId}
+                      onChange={(e) => {
+                        setSenderId(e.target.value);
+                        setFormErrors({ ...formErrors, editSenderId: "" });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
+      focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">Select Sender ID</option>
+                      <option value="S001">S001</option>
+                      <option value="S002">S002</option>
+                      <option value="S003">S003</option>
+                    </select>
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Beneficiary ID <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="number"
-                          placeholder="Enter beneficiary ID"
-                          value={selectedOrder?.beneficiary_id}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
+                    {formErrors.editSenderId && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.editSenderId}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+
+                    <div className="mt-2 md:mt-8 flex justify-between items-center">
+                  <div>
+                    <label
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Beneficiary ID <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+
+                  <div className="w-[60%] md:w-[50%]">
+                    <select
+                      value={editBeneficiaryId}
+                      onChange={(e) => {
+                        setBeneficiaryId(e.target.value);
+                        setFormErrors({ ...formErrors, editBeneficiaryId: "" });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
+      focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">Select Beneficiary ID</option>
+                      <option value="101">101</option>
+                      <option value="102">102</option>
+                      <option value="103">103</option>
+                    </select>
+
+                    {formErrors.editBeneficiaryId && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.editBeneficiaryId}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -708,44 +1006,78 @@ const Order_detail = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <select
-                          id="cargo_mode"
-                          name="cargo_mode"
+                          value={editCargoMode}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                           onChange={(e) => {
-                            setRoleName(e.target.value);
-                            validateRoleName(e.target.value);
+                            setCargoMode(e.target.value);
+                            setFormErrors({ ...formErrors, editCargoMode: "" });
                           }}
                         >
-                          <option disabled>Select cargo mode</option>
+                          <option >Select cargo mode</option>
                           <option value="Admin">Air</option>
                           <option value="Manager">Sea</option>
                         </select>
+                        {formErrors.editCargoMode && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editCargoMode}
+                          </p>
+                        )}
                       </div>
                     </div>
 
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Packed <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <select
-                          id="cargo_mode"
-                          name="cargo_mode"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                     <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Packed <span className="text-red-500">*</span>
+                    </label>
+
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <div className="flex items-center gap-6">
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="packed"
+                          value="Yes"
+                          checked={editPacked === "Yes"}
                           onChange={(e) => {
-                            setRoleName(e.target.value);
-                            validateRoleName(e.target.value);
+                            setEditPacked(e.target.value);
+                            setFormErrors({ ...formErrors, editPacked: "" });
                           }}
-                        >
-                          <option disabled>Select packed</option>
-                          <option value="Admin">Yes</option>
-                          <option value="Manager">No</option>
-                        </select>
-                      </div>
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        Yes
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="packed"
+                          value="No"
+                          checked={editPacked === "No"}
+                          onChange={(e) => {
+                            setEditPacked(e.target.value);
+                            setFormErrors({ ...formErrors, editPacked: "" });
+                          }}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        No
+                      </label>
+
                     </div>
+                    {formErrors.editPacked && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.editPacked}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
 
                     <div className="mt-8 flex justify-between items-center">
@@ -754,19 +1086,23 @@ const Order_detail = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <select
-                          id="cargo_mode"
-                          name="cargo_mode"
+                          value={editCreatedBy}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                           onChange={(e) => {
-                            setRoleName(e.target.value);
-                            validateRoleName(e.target.value);
+                            setEditCreatedBy(e.target.value);
+                            setFormErrors({ ...formErrors, editCreatedBy: ""});
                           }}
                         >
-                          <option disabled>Select created by</option>
+                          <option >Select created by</option>
                           <option value="Admin">Admin</option>
                           <option value="Manager">Agent</option>
                         </select>
+                        {formErrors.editCreatedBy && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editCreatedBy}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -779,7 +1115,11 @@ const Order_detail = () => {
                         <input
                           type="date"
                           placeholder="Enter created date"
-                          value={selectedOrder?.created_date}
+                          value={editCreatedDate}
+                          onChange={(e) => {
+                            setEditCreatedDate(e.target.value);
+                            setFormErrors({ ...formErrors, editCargoMode: ""});
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -815,6 +1155,7 @@ const Order_detail = () => {
                       </button>
                       <button
                         //  onClick={() => handleSave(roleDetails.id)}
+                        onClick={handleUpdate}
                         className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
                       >
                         Update

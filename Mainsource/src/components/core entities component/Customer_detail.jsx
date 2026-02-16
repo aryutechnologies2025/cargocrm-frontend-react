@@ -201,7 +201,7 @@ const Customer_detail = () => {
     setEditEmail(row.email || "");
     setEditAddress(row.address || "");
     setEditPhone(row.phone || "");   // FIXED
-    setEditStatus(row.Status !== undefined ? row.Status.toString() : ""); 
+    setEditStatus(row.Status !== undefined ? row.Status.toString() : "");
 
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
@@ -346,7 +346,7 @@ const Customer_detail = () => {
         </div>
 
         {/* Filters */}
-        <div className=" rounded-xl p-3 mb-3 mt-3 shadow-sm">
+        <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
           <div className="flex flex-wrap items-end gap-3 justify-between">
 
             {/* Left Side Filters */}
@@ -387,6 +387,42 @@ const Customer_detail = () => {
                   Reset
                 </button>
               </div>
+
+              {/* customize */}
+              <div className="flex justify-start items-center  ">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCustomize(!showCustomize)}
+                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                  >
+                    <BiCustomize className="text-[#046fac]" />Customize
+                  </button>
+
+                  {showCustomize && (
+                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-medium  text-sm">Customize Columns</p>
+                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                      </div>
+
+                      {Object.keys(visibleColumns).map((col) => (
+                        <label
+                          key={col}
+                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col]}
+                            onChange={() => toggleColumn(col)}
+                          />
+                          {col}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
 
             {/* Right Side Add Button */}
@@ -401,41 +437,8 @@ const Customer_detail = () => {
 
           </div>
         </div>
-
         <div className="datatable-container">
-          <div className="flex justify-start items-center ">
-            <div className="relative">
-              <button
-                onClick={() => setShowCustomize(!showCustomize)}
-                className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-              >
-                <BiCustomize className="text-[#046fac]" />Customize
-              </button>
-
-              {showCustomize && (
-                <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium  text-sm">Customize Columns</p>
-                    <button onClick={() => setShowCustomize(false)}>✕</button>
-                  </div>
-
-                  {Object.keys(visibleColumns).map((col) => (
-                    <label
-                      key={col}
-                      className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns[col]}
-                        onChange={() => toggleColumn(col)}
-                      />
-                      {col}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+        
 
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
@@ -494,7 +497,7 @@ const Customer_detail = () => {
                       value={name}
                       onChange={(e) => {
                         setName(e.target.value);
-                        setFormErrors({ ...formErrors, name: ""});
+                        setFormErrors({ ...formErrors, name: "" });
                       }}
                       placeholder="Enter name"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -519,7 +522,7 @@ const Customer_detail = () => {
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value);
-                        setFormErrors({ ...formErrors, phone: ""});
+                        setFormErrors({ ...formErrors, phone: "" });
                       }}
                       placeholder="Enter phone number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -544,7 +547,7 @@ const Customer_detail = () => {
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
-                        setFormErrors({ ...formErrors, email: ""});
+                        setFormErrors({ ...formErrors, email: "" });
                       }}
                       placeholder="Enter email"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -569,7 +572,7 @@ const Customer_detail = () => {
                       value={address}
                       onChange={(e) => {
                         setAddress(e.target.value);
-                        setFormErrors({ ...formErrors, address: ""});
+                        setFormErrors({ ...formErrors, address: "" });
                       }}
                       placeholder="Enter address"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -597,7 +600,7 @@ const Customer_detail = () => {
                       value={status}
                       onChange={(e) => {
                         setStatus(e.target.value);
-                        setFormErrors({ ...formErrors, status : ""});
+                        setFormErrors({ ...formErrors, status: "" });
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
@@ -667,7 +670,7 @@ const Customer_detail = () => {
                           value={editName}
                           onChange={(e) => {
                             setEditName(e.target.value);
-                            setFormErrors({ ...formErrors, editName: ""});
+                            setFormErrors({ ...formErrors, editName: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -688,7 +691,7 @@ const Customer_detail = () => {
                           value={editPhone}
                           onChange={(e) => {
                             setEditPhone(e.target.value);
-                            setFormErrors({ ...formErrors, editPhone: ""});
+                            setFormErrors({ ...formErrors, editPhone: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -709,7 +712,7 @@ const Customer_detail = () => {
                           value={editEmail}
                           onChange={(e) => {
                             setEditEmail(e.target.value);
-                            setFormErrors({ ...formErrors, editEmail: ""});
+                            setFormErrors({ ...formErrors, editEmail: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -730,7 +733,7 @@ const Customer_detail = () => {
                           value={editAddress}
                           onChange={(e) => {
                             setEditAddress(e.target.value);
-                            setFormErrors({ ...formErrors, editAddress: ""});
+                            setFormErrors({ ...formErrors, editAddress: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -759,13 +762,13 @@ const Customer_detail = () => {
                           <option value="0">InActive</option>
                         </select>
                         {formErrors.editStatus && (
-                      <p className="text-red-500 text-sm mb-4">
-                        {formErrors.editStatus}
-                      </p>
-                    )}
+                          <p className="text-red-500 text-sm mb-4">
+                            {formErrors.editStatus}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    
+
 
                     <div className="flex justify-end gap-2 mt-14">
                       <button

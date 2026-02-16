@@ -374,7 +374,7 @@ const Beneficiary_detail = () => {
         </div>
 
         {/* Filters */}
-        <div className=" rounded-xl p-3 mb-3 mt-3 shadow-sm">
+        <div className="bg-white rounded-xl p-3 mb-3 mt-3 shadow-sm">
           <div className="flex flex-wrap items-end gap-3 justify-between">
 
             {/* Left Side Filters */}
