@@ -18,22 +18,23 @@ import { IoIosCloseCircle } from "react-icons/io"
 import { BiCustomize } from "react-icons/bi";
 DataTable.use(DT);
 
-const Customer_detail = () => {
+const Beneficiary_detail = () => {
   const navigate = useNavigate();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [errors, setErrors] = useState({});
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [viewCustomer, setViewCustomer] = useState(null);
+  const [viewBeneficiary, setViewBeneficiary] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
     Sno: true,
-    customer_id: true,
+    beneficiary_id: true,
     name: true,
     phone_no: true,
-    email: true,
+    city: true,
+    country: true,
     address: true,
     status: true,
   });
@@ -46,13 +47,16 @@ const Customer_detail = () => {
   const [formErrors, setFormErrors] = useState({});
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
   const [status, setStatus] = useState("");
+
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
-  const [editEmail, setEditEmail] = useState("");
   const [editAddress, setEditAddress] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [editCountry, setEditCountry] = useState("");
   const [editStatus, setEditStatus] = useState("");
 
   const validateAddForm = () => {
@@ -61,8 +65,11 @@ const Customer_detail = () => {
     if (!name.trim()) {
       errors.name = "Name is required";
     }
-    if (!email.trim()) {
-      errors.email = "Email is required";
+    if (!city.trim()) {
+      errors.city = "City is required";
+    }
+    if (!country.trim()) {
+      errors.country = "Country is required";
     }
     if (!phone.trim()) {
       errors.phone = "Phone Number is required";
@@ -84,8 +91,11 @@ const Customer_detail = () => {
     if (!editName.trim()) {
       errors.editName = "Name is required";
     }
-    if (!editEmail.trim()) {
-      errors.editEmail = "Email is required";
+    if (!editCity.trim()) {
+      errors.editCity = "City is required";
+    }
+    if (!editCountry.trim()) {
+      errors.editCountry = "Country is required";
     }
     if (!editPhone.trim()) {
       errors.editPhone = "Phone Number is required";
@@ -106,9 +116,10 @@ const Customer_detail = () => {
 
     const payload = {
       name: name,
-      email: email,
       phone_no: phone,
       address: address,
+      city: city,
+      country: country,
       status: status,
     };
 
@@ -123,17 +134,16 @@ const Customer_detail = () => {
     if (!validateEditForm()) return;
 
     const payload = {
-      id: selectedCustomer._id,
+      id: selectedBeneficiary._id,
       name: editName,
-      email: editEmail,
       phone_no: editPhone,
       address: editAddress,
+      city: editCity,
+      country: editCountry,
       status: editStatus,
     };
 
     console.log("Update Payload:", payload);
-
-    //  Call update API here
 
     closeEditModal();
   };
@@ -149,10 +159,11 @@ const Customer_detail = () => {
 
       const columnIndexMap = {
         Sno: 0,
-        customer_id: 1,
+        beneficiary_id: 1,
         name: 2,
         phone_no: 3,
-        email: 4,
+        city: 4,
+        country: 5,
         address: 6,
         status: 7,
       };
@@ -193,15 +204,28 @@ const Customer_detail = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
+  // const openEditModal = (row) => {
+  //   if (!row) return;
+  //   setSelectedBeneficiary(row);
+  //   setEditName(row.name || "");
+  //   setEditPhone(row.phone || "");
+  //   setEditCountry(row.country || "");
+  //   setEditCity(row.city || "");
+  //   setEditAddress(row.address || "");
+  //   setEditStatus(row.Status !== undefined ? row.Status.toString() : "");
+  //   setIsEditModalOpen(true);
+  //   setTimeout(() => setIsAnimating(true), 10);
+  // };
   const openEditModal = (row) => {
     if (!row) return;
 
-    setSelectedCustomer(row);
+    setSelectedBeneficiary(row);
     setEditName(row.name || "");
-    setEditEmail(row.email || "");
+    setEditPhone(row.phone_no || "");
+    setEditCountry(row.country || "");
+    setEditCity(row.city || "");
     setEditAddress(row.address || "");
-    setEditPhone(row.phone || "");   // FIXED
-    setEditStatus(row.Status !== undefined ? row.Status.toString() : ""); 
+    setEditStatus(row.status !== undefined ? String(row.status) : "");
 
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
@@ -219,8 +243,8 @@ const Customer_detail = () => {
       data: "Sno",
     },
     {
-      title: "Customer ID",
-      data: "customer_id",
+      title: "Beneficiary ID",
+      data: "beneficiary_id",
     },
     {
       title: "Name",
@@ -231,12 +255,16 @@ const Customer_detail = () => {
       data: "phone_no",
     },
     {
-      title: "Email",
-      data: "email",
-    },
-    {
       title: "Address",
       data: "address",
+    },
+    {
+      title: "City",
+      data: "city",
+    },
+    {
+      title: "Country",
+      data: "country",
     },
     {
       title: "Status",
@@ -278,7 +306,7 @@ const Customer_detail = () => {
                 >
                   <button
                     onClick={() => {
-                      setViewCustomer(row);
+                      setViewBeneficiary(row);
                       setViewModalOpen(true);
 
                     }}
@@ -318,9 +346,9 @@ const Customer_detail = () => {
   ];
 
   const rawData = [
-    { Sno: 1, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 0, date: "2026-02-01" },
-    { Sno: 2, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 1, date: "2026-02-02" },
-    { Sno: 3, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 1, date: "2026-02-03" },
+    { Sno: 1, beneficiary_id: "c77884", name: "cargo", phone_no: "9685741425", address: "Us colony", city: "chennai", country: "India", status: 0, date: "2026-02-01" },
+    { Sno: 2, beneficiary_id: "c77884", name: "cargo", phone_no: "9685741425", address: "Us colony", city: "chennai", country: "India", status: 1, date: "2026-02-02" },
+    { Sno: 3, beneficiary_id: "c77884", name: "cargo", phone_no: "9685741425", address: "Us colony", city: "chennai", country: "India", status: 1, date: "2026-02-03" },
   ];
 
   const data = rawData.filter((item) => {
@@ -342,51 +370,53 @@ const Customer_detail = () => {
           </p>
           <p>{">"}</p>
 
-          <p className="text-sm md:text-md text-[#057fc4]">Customer</p>
+          <p className="text-sm md:text-md text-[#057fc4]">Beneficiary</p>
+        </div>
+        {/* Add Button */}
+        <div className="flex justify-end mt-8">
+          <button
+            onClick={openAddModal}
+            className="bg-[#057fc4] px-3 py-2 text-white w-20 rounded-2xl"
+          >
+            Add
+          </button>
         </div>
 
-        {/* Filters */}
-        <div className=" rounded-xl p-3 mb-3 mt-3 shadow-sm">
-          <div className="flex flex-wrap items-end gap-3 justify-between">
+               {/* customize */}
+              <div className="flex justify-start items-center  ">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCustomize(!showCustomize)}
+                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                  >
+                    <BiCustomize className="text-[#046fac]" />Customize
+                  </button>
 
-            {/* Left Side Filters */}
-            <div className="flex flex-wrap gap-3">
+                  {showCustomize && (
+                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-medium  text-sm">Customize Columns</p>
+                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                      </div>
 
-              {/* Status Filter */}
-              <div className="gap-2">
-                <label className="text-sm font-medium text-gray-600 p-1">Status</label>
-                <select
-                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">All Status</option>
-                  <option value="0">Active</option>
-                  <option value="1">Inactive</option>
-                </select>
+                      {Object.keys(visibleColumns).map((col) => (
+                        <label
+                          key={col}
+                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col]}
+                            onChange={() => toggleColumn(col)}
+                          />
+                          {col}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Date Filter */}
-              <div className="gap-2">
-                <label className="text-sm font-medium text-gray-600 p-1">Date</label>
-                <input
-                  type="date"
-                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                />
-
-              </div>
-
-              {/* Reset */}
-              <div className="flex items-end">
-                <button
-                  onClick={resetFilters}
-                  className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
-                >
-                  Reset
-                </button>
-              </div>
             </div>
 
             {/* Right Side Add Button */}
@@ -402,43 +432,13 @@ const Customer_detail = () => {
           </div>
         </div>
 
+
         <div className="datatable-container">
-          <div className="flex justify-start items-center ">
-            <div className="relative">
-              <button
-                onClick={() => setShowCustomize(!showCustomize)}
-                className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-              >
-                <BiCustomize className="text-[#046fac]" />Customize
-              </button>
 
-              {showCustomize && (
-                <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium  text-sm">Customize Columns</p>
-                    <button onClick={() => setShowCustomize(false)}>✕</button>
-                  </div>
-
-                  {Object.keys(visibleColumns).map((col) => (
-                    <label
-                      key={col}
-                      className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns[col]}
-                        onChange={() => toggleColumn(col)}
-                      />
-                      {col}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
+            
             <DataTable
               data={data}
               columns={columns}
@@ -475,7 +475,8 @@ const Customer_detail = () => {
               </div>
 
               <div className="px-5 lg:px-14 py-2 md:py-10">
-                <p className="text-2xl md:text-3xl font-medium">Add customer</p>
+                <p className="text-2xl md:text-3xl font-medium">Add Beneficiary</p>
+
 
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
@@ -494,12 +495,16 @@ const Customer_detail = () => {
                       value={name}
                       onChange={(e) => {
                         setName(e.target.value);
-                        setFormErrors({ ...formErrors, name: ""});
+                        setFormErrors({ ...formErrors, name: "" });
                       }}
                       placeholder="Enter name"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.name && (<p className="text-red-500 text-sm">{formErrors.name}</p>)}
+                    {formErrors.name && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.name}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -519,37 +524,16 @@ const Customer_detail = () => {
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value);
-                        setFormErrors({ ...formErrors, phone: ""});
+                        setFormErrors({ ...formErrors, phone: "" });
                       }}
                       placeholder="Enter phone number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.phone && (<p className="text-red-500 text-sm">{formErrors.phone}</p>)}
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Email <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setFormErrors({ ...formErrors, email: ""});
-                      }}
-                      placeholder="Enter email"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.email && (<p className="text-red-500 text-sm">{formErrors.email}</p>)}
+                    {formErrors.phone && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.phone}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -569,7 +553,7 @@ const Customer_detail = () => {
                       value={address}
                       onChange={(e) => {
                         setAddress(e.target.value);
-                        setFormErrors({ ...formErrors, address: ""});
+                        setFormErrors({ ...formErrors, address: "" })
                       }}
                       placeholder="Enter address"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -577,6 +561,64 @@ const Customer_detail = () => {
                     {formErrors.address && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
                         {formErrors.address}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      City <span className="text-red-500">*</span>
+                    </label>
+
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        setFormErrors({ ...formErrors, city: "" });
+                      }}
+                      placeholder="Enter city"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.city && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.city}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Country <span className="text-red-500">*</span>
+                    </label>
+
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => {
+                        setCountry(e.target.value);
+                        setFormErrors({ ...formErrors, country: "" });
+                      }}
+                      placeholder="Enter country"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.country && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.country}
                       </p>
                     )}
                   </div>
@@ -597,11 +639,11 @@ const Customer_detail = () => {
                       value={status}
                       onChange={(e) => {
                         setStatus(e.target.value);
-                        setFormErrors({ ...formErrors, status : ""});
+                        setFormErrors({ ...formErrors, status: "" });
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Select status</option>
+                      <option value="">Select a status</option>
                       <option value="1">Active</option>
                       <option value="0">InActive</option>
                     </select>
@@ -651,7 +693,7 @@ const Customer_detail = () => {
               </div>
 
               <div className="px-5 lg:px-14 py-10">
-                <p className="text-2xl md:text-3xl font-medium">Edit Customer</p>
+                <p className="text-2xl md:text-3xl font-medium">Edit Beneficiary</p>
 
                 <div className="mt-10  rounded-lg ">
                   <div className="bg-white  rounded-xl w-full">
@@ -667,12 +709,14 @@ const Customer_detail = () => {
                           value={editName}
                           onChange={(e) => {
                             setEditName(e.target.value);
-                            setFormErrors({ ...formErrors, editName: ""});
+                            setFormErrors({ ...formErrors, editName: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editName && (
-                          <p className="text-red-500 text-sm">{formErrors.editName}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editName}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -688,33 +732,14 @@ const Customer_detail = () => {
                           value={editPhone}
                           onChange={(e) => {
                             setEditPhone(e.target.value);
-                            setFormErrors({ ...formErrors, editPhone: ""});
+                            setFormErrors({ ...formErrors, editPhone: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editPhone && (
-                          <p className="text-red-500 text-sm">{formErrors.editPhone}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Email <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="email"
-                          placeholder="Enter email"
-                          value={editEmail}
-                          onChange={(e) => {
-                            setEditEmail(e.target.value);
-                            setFormErrors({ ...formErrors, editEmail: ""});
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editEmail && (
-                          <p className="text-red-500 text-sm">{formErrors.editEmail}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editPhone}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -730,12 +755,62 @@ const Customer_detail = () => {
                           value={editAddress}
                           onChange={(e) => {
                             setEditAddress(e.target.value);
-                            setFormErrors({ ...formErrors, editAddress: ""});
+                            setFormErrors({ ...formErrors, editAddress: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editAddress && (
-                          <p className="text-red-500 text-sm">{formErrors.editAddress}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editAddress}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        City <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="text"
+                          placeholder="Enter city"
+                          value={editCity}
+                          onChange={(e) => {
+                            setEditCity(e.target.value);
+                            setFormErrors({ ...formErrors, editCity: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editCity && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editCity}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Country <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="text"
+                          placeholder="Enter country"
+                          value={editCountry}
+                          onChange={(e) => {
+                            setEditCountry(e.target.value);
+                            setFormErrors({ ...formErrors, editCountry: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editCountry && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editCountry}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -750,22 +825,23 @@ const Customer_detail = () => {
                           value={editStatus}
                           onChange={(e) => {
                             setEditStatus(e.target.value);
-                            setFormErrors({ ...formErrors, editStatus: "" });
+                            setFormErrors({ ...formErrors, editStatus: "" })
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="">Select Status</option>
+                          <option value="">Select status</option>
                           <option value="1">Active</option>
                           <option value="0">InActive</option>
                         </select>
                         {formErrors.editStatus && (
-                      <p className="text-red-500 text-sm mb-4">
-                        {formErrors.editStatus}
-                      </p>
-                    )}
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editStatus}
+                          </p>
+                        )}
+
                       </div>
                     </div>
-                    
+
 
                     <div className="flex justify-end gap-2 mt-14">
                       <button
@@ -790,7 +866,7 @@ const Customer_detail = () => {
         )}
 
         {/* view */}
-        {viewModalOpen && viewCustomer && (
+        {viewModalOpen && viewBeneficiary && (
           <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
             <div className="relative bg-white w-[95%] md:w-[500px] rounded-xl shadow-lg p-6">
 
@@ -803,45 +879,45 @@ const Customer_detail = () => {
               </button>
 
               <h2 className="text-xl font-semibold mb-6 text-[#057fc4]">
-                Customer Details
+                Beneficiary Details
               </h2>
 
               <div className="space-y-4 text-sm text-gray-700">
 
-                {/* First Name */}
+                {/* beneficiary ID */}
                 <div className="flex justify-between ">
-                  <span className="font-medium">Customer ID</span>
-                  <span>{viewCustomer.customer_id}</span>
+                  <span className="font-medium">Beneficiary ID</span>
+                  <span>{viewBeneficiary.beneficiary_id}</span>
                 </div>
 
-                {/* Last Name */}
+                {/* Name */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Name</span>
-                  <span>{viewCustomer.name}</span>
-                </div>
-
-                {/* email */}
-                <div className="flex justify-between ">
-                  <span className="font-medium">Email</span>
-                  <span>{viewCustomer.email}</span>
+                  <span>{viewBeneficiary.name}</span>
                 </div>
 
                 {/* phone number */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Phone Number</span>
-                  <span>{viewCustomer.phone_no}</span>
+                  <span>{viewBeneficiary.phone_no}</span>
                 </div>
 
-                {/* role */}
-                <div className="flex justify-between ">
-                  <span className="font-medium">Email</span>
-                  <span>{viewCustomer.email}</span>
-                </div>
-
-                {/* role */}
+                {/* address */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Address</span>
-                  <span>{viewCustomer.address}</span>
+                  <span>{viewBeneficiary.address}</span>
+                </div>
+
+                {/* city */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">City</span>
+                  <span>{viewBeneficiary.city}</span>
+                </div>
+
+                {/* country */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Country</span>
+                  <span>{viewBeneficiary.country}</span>
                 </div>
 
 
@@ -850,12 +926,12 @@ const Customer_detail = () => {
                   <span className="font-medium">Status</span>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium
-                                              ${viewCustomer.status === 1 || viewCustomer.status === "1"
+                                              ${viewBeneficiary.status === 1 || viewBeneficiary.status === "1"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-600"
                       }`}
                   >
-                    {viewCustomer.status === 1 || viewCustomer.status === "1"
+                    {viewBeneficiary.status === 1 || viewBeneficiary.status === "1"
                       ? "Active"
                       : "Inactive"}
                   </span>
@@ -874,5 +950,5 @@ const Customer_detail = () => {
   );
 };
 
-export default Customer_detail;
+export default Beneficiary_detail;
 

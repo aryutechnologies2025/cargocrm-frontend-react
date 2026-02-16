@@ -18,23 +18,22 @@ import { IoIosCloseCircle } from "react-icons/io"
 import { BiCustomize } from "react-icons/bi";
 DataTable.use(DT);
 
-const Beneficiary_detail = () => {
+const Customer_detail = () => {
   const navigate = useNavigate();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [errors, setErrors] = useState({});
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [viewBeneficiary, setViewBeneficiary] = useState(null);
+  const [viewCustomer, setViewCustomer] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
     Sno: true,
-    beneficiary_id: true,
+    customer_id: true,
     name: true,
     phone_no: true,
-    city: true,
-    country: true,
+    email: true,
     address: true,
     status: true,
   });
@@ -47,16 +46,13 @@ const Beneficiary_detail = () => {
   const [formErrors, setFormErrors] = useState({});
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
   const [status, setStatus] = useState("");
-
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [editAddress, setEditAddress] = useState("");
-  const [editCity, setEditCity] = useState("");
-  const [editCountry, setEditCountry] = useState("");
   const [editStatus, setEditStatus] = useState("");
 
   const validateAddForm = () => {
@@ -65,11 +61,8 @@ const Beneficiary_detail = () => {
     if (!name.trim()) {
       errors.name = "Name is required";
     }
-    if (!city.trim()) {
-      errors.city = "City is required";
-    }
-    if (!country.trim()) {
-      errors.country = "Country is required";
+    if (!email.trim()) {
+      errors.email = "Email is required";
     }
     if (!phone.trim()) {
       errors.phone = "Phone Number is required";
@@ -91,11 +84,8 @@ const Beneficiary_detail = () => {
     if (!editName.trim()) {
       errors.editName = "Name is required";
     }
-    if (!editCity.trim()) {
-      errors.editCity = "City is required";
-    }
-    if (!editCountry.trim()) {
-      errors.editCountry = "Country is required";
+    if (!editEmail.trim()) {
+      errors.editEmail = "Email is required";
     }
     if (!editPhone.trim()) {
       errors.editPhone = "Phone Number is required";
@@ -116,10 +106,9 @@ const Beneficiary_detail = () => {
 
     const payload = {
       name: name,
+      email: email,
       phone_no: phone,
       address: address,
-      city: city,
-      country: country,
       status: status,
     };
 
@@ -134,16 +123,17 @@ const Beneficiary_detail = () => {
     if (!validateEditForm()) return;
 
     const payload = {
-      id: selectedBeneficiary._id,
+      id: selectedCustomer._id,
       name: editName,
+      email: editEmail,
       phone_no: editPhone,
       address: editAddress,
-      city: editCity,
-      country: editCountry,
       status: editStatus,
     };
 
     console.log("Update Payload:", payload);
+
+    //  Call update API here
 
     closeEditModal();
   };
@@ -159,11 +149,10 @@ const Beneficiary_detail = () => {
 
       const columnIndexMap = {
         Sno: 0,
-        beneficiary_id: 1,
+        customer_id: 1,
         name: 2,
         phone_no: 3,
-        city: 4,
-        country: 5,
+        email: 4,
         address: 6,
         status: 7,
       };
@@ -204,28 +193,15 @@ const Beneficiary_detail = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  // const openEditModal = (row) => {
-  //   if (!row) return;
-  //   setSelectedBeneficiary(row);
-  //   setEditName(row.name || "");
-  //   setEditPhone(row.phone || "");
-  //   setEditCountry(row.country || "");
-  //   setEditCity(row.city || "");
-  //   setEditAddress(row.address || "");
-  //   setEditStatus(row.Status !== undefined ? row.Status.toString() : "");
-  //   setIsEditModalOpen(true);
-  //   setTimeout(() => setIsAnimating(true), 10);
-  // };
   const openEditModal = (row) => {
     if (!row) return;
 
-    setSelectedBeneficiary(row);
+    setSelectedCustomer(row);
     setEditName(row.name || "");
-    setEditPhone(row.phone_no || "");
-    setEditCountry(row.country || "");
-    setEditCity(row.city || "");
+    setEditEmail(row.email || "");
     setEditAddress(row.address || "");
-    setEditStatus(row.status !== undefined ? String(row.status) : "");
+    setEditPhone(row.phone || "");   // FIXED
+    setEditStatus(row.Status !== undefined ? row.Status.toString() : "");
 
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
@@ -243,8 +219,8 @@ const Beneficiary_detail = () => {
       data: "Sno",
     },
     {
-      title: "Beneficiary ID",
-      data: "beneficiary_id",
+      title: "Customer ID",
+      data: "customer_id",
     },
     {
       title: "Name",
@@ -255,16 +231,12 @@ const Beneficiary_detail = () => {
       data: "phone_no",
     },
     {
+      title: "Email",
+      data: "email",
+    },
+    {
       title: "Address",
       data: "address",
-    },
-    {
-      title: "City",
-      data: "city",
-    },
-    {
-      title: "Country",
-      data: "country",
     },
     {
       title: "Status",
@@ -306,7 +278,7 @@ const Beneficiary_detail = () => {
                 >
                   <button
                     onClick={() => {
-                      setViewBeneficiary(row);
+                      setViewCustomer(row);
                       setViewModalOpen(true);
 
                     }}
@@ -346,9 +318,9 @@ const Beneficiary_detail = () => {
   ];
 
   const rawData = [
-    { Sno: 1, beneficiary_id: "c77884", name: "cargo", phone_no: "9685741425", address: "Us colony", city: "chennai", country: "India", status: 0, date: "2026-02-01" },
-    { Sno: 2, beneficiary_id: "c77884", name: "cargo", phone_no: "9685741425", address: "Us colony", city: "chennai", country: "India", status: 1, date: "2026-02-02" },
-    { Sno: 3, beneficiary_id: "c77884", name: "cargo", phone_no: "9685741425", address: "Us colony", city: "chennai", country: "India", status: 1, date: "2026-02-03" },
+    { Sno: 1, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 0, date: "2026-02-01" },
+    { Sno: 2, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 1, date: "2026-02-02" },
+    { Sno: 3, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 1, date: "2026-02-03" },
   ];
 
   const data = rawData.filter((item) => {
@@ -370,11 +342,11 @@ const Beneficiary_detail = () => {
           </p>
           <p>{">"}</p>
 
-          <p className="text-sm md:text-md text-[#057fc4]">Beneficiary</p>
+          <p className="text-sm md:text-md text-[#057fc4]">Customer</p>
         </div>
 
         {/* Filters */}
-        <div className=" rounded-xl p-3 mb-3 mt-3 shadow-sm">
+        <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
           <div className="flex flex-wrap items-end gap-3 justify-between">
 
             {/* Left Side Filters */}
@@ -416,7 +388,7 @@ const Beneficiary_detail = () => {
                 </button>
               </div>
 
-               {/* customize */}
+              {/* customize */}
               <div className="flex justify-start items-center  ">
                 <div className="relative">
                   <button
@@ -465,14 +437,11 @@ const Beneficiary_detail = () => {
 
           </div>
         </div>
-
-
         <div className="datatable-container">
-
+        
 
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
-            
             <DataTable
               data={data}
               columns={columns}
@@ -509,8 +478,7 @@ const Beneficiary_detail = () => {
               </div>
 
               <div className="px-5 lg:px-14 py-2 md:py-10">
-                <p className="text-2xl md:text-3xl font-medium">Add Beneficiary</p>
-
+                <p className="text-2xl md:text-3xl font-medium">Add customer</p>
 
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
@@ -534,11 +502,7 @@ const Beneficiary_detail = () => {
                       placeholder="Enter name"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.name && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.name}
-                      </p>
-                    )}
+                    {formErrors.name && (<p className="text-red-500 text-sm">{formErrors.name}</p>)}
                   </div>
                 </div>
 
@@ -563,11 +527,32 @@ const Beneficiary_detail = () => {
                       placeholder="Enter phone number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.phone && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.phone}
-                      </p>
-                    )}
+                    {formErrors.phone && (<p className="text-red-500 text-sm">{formErrors.phone}</p>)}
+                  </div>
+                </div>
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Email <span className="text-red-500">*</span>
+                    </label>
+
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setFormErrors({ ...formErrors, email: "" });
+                      }}
+                      placeholder="Enter email"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.email && (<p className="text-red-500 text-sm">{formErrors.email}</p>)}
                   </div>
                 </div>
 
@@ -587,7 +572,7 @@ const Beneficiary_detail = () => {
                       value={address}
                       onChange={(e) => {
                         setAddress(e.target.value);
-                        setFormErrors({ ...formErrors, address: "" })
+                        setFormErrors({ ...formErrors, address: "" });
                       }}
                       placeholder="Enter address"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -595,64 +580,6 @@ const Beneficiary_detail = () => {
                     {formErrors.address && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
                         {formErrors.address}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      City <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => {
-                        setCity(e.target.value);
-                        setFormErrors({ ...formErrors, city: "" });
-                      }}
-                      placeholder="Enter city"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.city && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.city}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Country <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      value={country}
-                      onChange={(e) => {
-                        setCountry(e.target.value);
-                        setFormErrors({ ...formErrors, country: "" });
-                      }}
-                      placeholder="Enter country"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.country && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.country}
                       </p>
                     )}
                   </div>
@@ -677,7 +604,7 @@ const Beneficiary_detail = () => {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Select a status</option>
+                      <option value="">Select status</option>
                       <option value="1">Active</option>
                       <option value="0">InActive</option>
                     </select>
@@ -727,7 +654,7 @@ const Beneficiary_detail = () => {
               </div>
 
               <div className="px-5 lg:px-14 py-10">
-                <p className="text-2xl md:text-3xl font-medium">Edit Beneficiary</p>
+                <p className="text-2xl md:text-3xl font-medium">Edit Customer</p>
 
                 <div className="mt-10  rounded-lg ">
                   <div className="bg-white  rounded-xl w-full">
@@ -748,9 +675,7 @@ const Beneficiary_detail = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editName && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editName}
-                          </p>
+                          <p className="text-red-500 text-sm">{formErrors.editName}</p>
                         )}
                       </div>
                     </div>
@@ -771,9 +696,28 @@ const Beneficiary_detail = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editPhone && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editPhone}
-                          </p>
+                          <p className="text-red-500 text-sm">{formErrors.editPhone}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="email"
+                          placeholder="Enter email"
+                          value={editEmail}
+                          onChange={(e) => {
+                            setEditEmail(e.target.value);
+                            setFormErrors({ ...formErrors, editEmail: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editEmail && (
+                          <p className="text-red-500 text-sm">{formErrors.editEmail}</p>
                         )}
                       </div>
                     </div>
@@ -794,57 +738,7 @@ const Beneficiary_detail = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editAddress && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editAddress}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        City <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter city"
-                          value={editCity}
-                          onChange={(e) => {
-                            setEditCity(e.target.value);
-                            setFormErrors({ ...formErrors, editCity: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editCity && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editCity}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Country <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter country"
-                          value={editCountry}
-                          onChange={(e) => {
-                            setEditCountry(e.target.value);
-                            setFormErrors({ ...formErrors, editCountry: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editCountry && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editCountry}
-                          </p>
+                          <p className="text-red-500 text-sm">{formErrors.editAddress}</p>
                         )}
                       </div>
                     </div>
@@ -859,20 +753,19 @@ const Beneficiary_detail = () => {
                           value={editStatus}
                           onChange={(e) => {
                             setEditStatus(e.target.value);
-                            setFormErrors({ ...formErrors, editStatus: "" })
+                            setFormErrors({ ...formErrors, editStatus: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="">Select status</option>
+                          <option value="">Select Status</option>
                           <option value="1">Active</option>
                           <option value="0">InActive</option>
                         </select>
                         {formErrors.editStatus && (
-                          <p className="text-red-500 text-sm mt-1">
+                          <p className="text-red-500 text-sm mb-4">
                             {formErrors.editStatus}
                           </p>
                         )}
-
                       </div>
                     </div>
 
@@ -900,7 +793,7 @@ const Beneficiary_detail = () => {
         )}
 
         {/* view */}
-        {viewModalOpen && viewBeneficiary && (
+        {viewModalOpen && viewCustomer && (
           <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
             <div className="relative bg-white w-[95%] md:w-[500px] rounded-xl shadow-lg p-6">
 
@@ -913,45 +806,45 @@ const Beneficiary_detail = () => {
               </button>
 
               <h2 className="text-xl font-semibold mb-6 text-[#057fc4]">
-                Beneficiary Details
+                Customer Details
               </h2>
 
               <div className="space-y-4 text-sm text-gray-700">
 
-                {/* beneficiary ID */}
+                {/* First Name */}
                 <div className="flex justify-between ">
-                  <span className="font-medium">Beneficiary ID</span>
-                  <span>{viewBeneficiary.beneficiary_id}</span>
+                  <span className="font-medium">Customer ID</span>
+                  <span>{viewCustomer.customer_id}</span>
                 </div>
 
-                {/* Name */}
+                {/* Last Name */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Name</span>
-                  <span>{viewBeneficiary.name}</span>
+                  <span>{viewCustomer.name}</span>
+                </div>
+
+                {/* email */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Email</span>
+                  <span>{viewCustomer.email}</span>
                 </div>
 
                 {/* phone number */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Phone Number</span>
-                  <span>{viewBeneficiary.phone_no}</span>
+                  <span>{viewCustomer.phone_no}</span>
                 </div>
 
-                {/* address */}
+                {/* role */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Email</span>
+                  <span>{viewCustomer.email}</span>
+                </div>
+
+                {/* role */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Address</span>
-                  <span>{viewBeneficiary.address}</span>
-                </div>
-
-                {/* city */}
-                <div className="flex justify-between ">
-                  <span className="font-medium">City</span>
-                  <span>{viewBeneficiary.city}</span>
-                </div>
-
-                {/* country */}
-                <div className="flex justify-between ">
-                  <span className="font-medium">Country</span>
-                  <span>{viewBeneficiary.country}</span>
+                  <span>{viewCustomer.address}</span>
                 </div>
 
 
@@ -960,12 +853,12 @@ const Beneficiary_detail = () => {
                   <span className="font-medium">Status</span>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium
-                                              ${viewBeneficiary.status === 1 || viewBeneficiary.status === "1"
+                                              ${viewCustomer.status === 1 || viewCustomer.status === "1"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-600"
                       }`}
                   >
-                    {viewBeneficiary.status === 1 || viewBeneficiary.status === "1"
+                    {viewCustomer.status === 1 || viewCustomer.status === "1"
                       ? "Active"
                       : "Inactive"}
                   </span>
@@ -984,5 +877,5 @@ const Beneficiary_detail = () => {
   );
 };
 
-export default Beneficiary_detail;
+export default Customer_detail;
 
