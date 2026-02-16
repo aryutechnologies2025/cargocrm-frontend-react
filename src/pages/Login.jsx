@@ -1,6 +1,6 @@
 import login_image from "../assets/login_image.svg";
 import aero from "../assets/aero.jpg";
-import cargo from "../assets/cargos.svg"
+import cargo from "../assets/Cargos.svg"
 import { LuUser } from "react-icons/lu";
 import { SlLock } from "react-icons/sl";
 import { useNavigate } from "react-router-dom";

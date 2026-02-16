@@ -51,7 +51,6 @@ const Order_detail = () => {
         beneficiary_id: 3,
         cargo_mode: 4,
         packed: 5,
-        created_by: 6,
         created_by: 7,
         status: 8,
       };
