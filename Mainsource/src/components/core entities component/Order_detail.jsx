@@ -392,13 +392,14 @@ const Order_detail = () => {
 
         {/* filter */}
         <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
-          <div className="flex flex-wrap items-end gap-5 justify-between">
 
-            {/* Left Side Filters */}
-            <div className="flex flex-wrap gap-3">
+          <div className="flex items-end">
+
+            {/* LEFT SIDE FILTERS */}
+            <div className="flex flex-wrap gap-3 flex-1">
 
               {/* Beneficiary Filter */}
-              <div className="gap-2">
+              <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Beneficiary ID</label>
                 <select
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
@@ -411,8 +412,8 @@ const Order_detail = () => {
                 </select>
               </div>
 
-              {/* sender Filter */}
-              <div className="gap-2">
+              {/* Sender Filter */}
+              <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Sender ID</label>
                 <select
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
@@ -425,8 +426,8 @@ const Order_detail = () => {
                 </select>
               </div>
 
-              {/* created by Filter */}
-              <div className="gap-2">
+              {/* Created By */}
+              <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Created By</label>
                 <select
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
@@ -439,9 +440,9 @@ const Order_detail = () => {
                 </select>
               </div>
 
-              {/* sender Filter */}
-              <div className="gap-2">
-                <label className="text-sm font-medium text-gray-600 p-1">created Date</label>
+              {/* Created Date */}
+              <div>
+                <label className="text-sm font-medium text-gray-600 p-1">Created Date</label>
                 <input
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
                   type="date"
@@ -450,8 +451,8 @@ const Order_detail = () => {
                 />
               </div>
 
-              {/* Status Filter */}
-              <div className="gap-2">
+              {/* Status */}
+              <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Status</label>
                 <select
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
@@ -464,8 +465,8 @@ const Order_detail = () => {
                 </select>
               </div>
 
-              {/* Date Filter */}
-              <div className="gap-2">
+              {/* Date */}
+              <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Date</label>
                 <input
                   type="date"
@@ -473,7 +474,6 @@ const Order_detail = () => {
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                 />
-
               </div>
 
               {/* Reset */}
@@ -486,20 +486,21 @@ const Order_detail = () => {
                 </button>
               </div>
 
-              {/* customize */}
-              <div className="flex justify-start items-center  ">
+              {/* Customize */}
+              <div className="flex items-end">
                 <div className="relative">
                   <button
                     onClick={() => setShowCustomize(!showCustomize)}
                     className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
                   >
-                    <BiCustomize className="text-[#046fac]" />Customize
+                    <BiCustomize className="text-[#046fac]" />
+                    Customize
                   </button>
 
                   {showCustomize && (
-                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                    <div className="absolute mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
                       <div className="flex justify-between items-center mb-2">
-                        <p className="font-medium  text-sm">Customize Columns</p>
+                        <p className="font-medium text-sm">Customize Columns</p>
                         <button onClick={() => setShowCustomize(false)}>✕</button>
                       </div>
 
@@ -523,8 +524,8 @@ const Order_detail = () => {
 
             </div>
 
-            {/* Right Side Add Button */}
-            <div>
+            {/* RIGHT SIDE ADD BUTTON */}
+            <div className="ml-4">
               <button
                 onClick={openAddModal}
                 className="bg-[#057fc4] hover:bg-[#2d93cf] px-4 py-2 text-white rounded-xl"
@@ -536,41 +537,8 @@ const Order_detail = () => {
           </div>
         </div>
 
+
         <div className=" bg-white datatable-container">
-
-          {/* <div className="flex justify-start items-center ">
-            <div className="relative">
-              <button
-                onClick={() => setShowCustomize(!showCustomize)}
-                className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-              >
-                <BiCustomize className="text-[#046fac]" />Customize
-              </button>
-
-              {showCustomize && (
-                <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium  text-sm">Customize Columns</p>
-                    <button onClick={() => setShowCustomize(false)}>✕</button>
-                  </div>
-
-                  {Object.keys(visibleColumns).map((col) => (
-                    <label
-                      key={col}
-                      className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns[col]}
-                        onChange={() => toggleColumn(col)}
-                      />
-                      {col}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div> */}
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
@@ -589,7 +557,6 @@ const Order_detail = () => {
             />
           </div>
         </div>
-
 
         {isAddModalOpen && (
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm bg-opacity-50 z-50">

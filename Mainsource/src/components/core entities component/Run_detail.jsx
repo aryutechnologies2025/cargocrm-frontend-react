@@ -27,7 +27,7 @@ const Run_detail = () => {
   const [selectedRun, setSelectedRun] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewRun, setViewRun] = useState(null);
-const [showCustomize, setShowCustomize] = useState(false);
+  const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
     Sno: true,
     run_id: true,
@@ -36,6 +36,105 @@ const [showCustomize, setShowCustomize] = useState(false);
     created_date: true,
     status: true,
   });
+  const [statusFilter, setStatusFilter] = useState([]);
+  const [cargoModeFilter, setCargoModeFilter] = useState([]);
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // YYYY-MM-DD
+  };
+  const [dateFilter, setDateFilter] = useState(getToday());
+  const [formErrors, setFormErrors] = useState({});
+  const [runNo, setRunNo] = useState({});
+  const [mode, setMode] = useState({});
+  const [createdDate, setCreatedDate] = useState({});
+  const [status, setStatus] = useState({});
+
+  const [editRunNo, setEditRunNo] = useState({});
+  const [editMode, setEditMode] = useState({});
+  const [editCreatedDate, setEditCreatedDate] = useState({});
+  const [editStatus, setEditStatus] = useState({});
+
+  const validateAddForm = () => {
+    let errors = {};
+
+    if (!runNo.trim()) {
+      errors.runNo = "Run Number is required";
+    }
+    if (!mode.trim()) {
+      errors.mode = "Mode is required";
+    }
+    if (!createdDate.trim()) {
+      errors.createdDate = "Created Date is required";
+    }
+    if (status === "") {
+      errors.status = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateEditForm = () => {
+    let errors = {};
+
+    if (!editRunNo.trim()) {
+      errors.editRunNo = "Run number is required";
+    }
+    if (!editMode.trim()) {
+      errors.editMode = "Mode is required";
+    }
+    if (!editCreatedDate.trim()) {
+      errors.editCreatedDate = "Created Date is required";
+    }
+    if (editStatus === "") {
+      errors.editStatus = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleAddSubmit = () => {
+    if (!validateAddForm()) return;
+
+    const payload = {
+      name: name,
+      email: email,
+      phone_no: phone,
+      address: address,
+      status: status,
+    };
+
+    console.log("Add Payload:", payload);
+
+    //  Call your API here
+
+    closeAddModal();
+  };
+
+  const handleUpdate = () => {
+    if (!validateEditForm()) return;
+
+    const payload = {
+      id: selectedCustomer._id,
+      name: editName,
+      email: editEmail,
+      phone_no: editPhone,
+      address: editAddress,
+      status: editStatus,
+    };
+
+    console.log("Update Payload:", payload);
+
+    //  Call update API here
+
+    closeEditModal();
+  };
+
+  const resetFilters = () => {
+    setStatusFilter("");
+    setDateFilter(""); // reset to today
+  };
 
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
@@ -65,7 +164,6 @@ const [showCustomize, setShowCustomize] = useState(false);
     setTimeout(() => setIsAnimating(true), 10);
   };
 
-
   useEffect(() => {
     const table = document.querySelector(".datatable-container");
 
@@ -81,20 +179,17 @@ const [showCustomize, setShowCustomize] = useState(false);
     return () => table?.removeEventListener("click", handleClick);
   }, []);
 
-
-
   const closeAddModal = () => {
     setIsAnimating(false);
     setErrors({});
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (run_id, run_no, mode, created_date, status) => {
-    setSelectedRun(run_id, run_no, mode, created_date, status);
+  const openEditModal = (row) => {
+    setSelectedRun(row);
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
-
 
   const closeEditModal = () => {
     setIsAnimating(false);
@@ -207,32 +302,18 @@ const [showCustomize, setShowCustomize] = useState(false);
     },
   ];
 
-  const data = [
-    {
-      Sno: 1,
-      run_id: "c77884",
-      run_no: "96F5741425",
-      mode: "Us mode",
-      created_date: "5-4-2025",
-      status: "1"
-    },
-    {
-      Sno: 2,
-      run_id: "c77884",
-      run_no: "96F5741425",
-      mode: "Us mode",
-      created_date: "5-4-2025",
-      status: "1"
-    },
-    {
-      Sno: 3,
-      run_id: "c77884",
-      run_no: "96F5741425",
-      mode: "Us mode",
-      created_date: "5-4-2025",
-      status: "1"
-    }
-  ]
+  const rawData = [
+    { Sno: 1, run_id: "c77884", run_no: "96F5741425", mode: "Air", created_date: "5-4-2025", status: 0, date: "2026-02-01" },
+    { Sno: 2, run_id: "c77884", run_no: "96F5741425", mode: "Air", created_date: "5-4-2025", status: 1, date: "2026-02-02" },
+    { Sno: 3, run_id: "c77884", run_no: "96F5741425", mode: "Air", created_date: "5-4-2025", status: 1, date: "2026-02-03" },
+  ];
+
+  const data = rawData.filter((item) => {
+    return (
+      (statusFilter ? String(item.status) === statusFilter : true) &&
+      (dateFilter ? item.date === dateFilter : true)
+    );
+  });
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -248,51 +329,114 @@ const [showCustomize, setShowCustomize] = useState(false);
 
           <p className="text-sm md:text-md text-[#057fc4]">Run</p>
         </div>
-        {/* Add Button */}
-        <div className="flex justify-end mt-8">
-          <button
-            onClick={openAddModal}
-            className="bg-[#057fc4] px-3 py-2 text-white w-20 rounded-2xl"
-          >
-            Add
-          </button>
+        {/* Filters */}
+        <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3 justify-between">
+
+            {/* Left Side Filters */}
+            <div className="flex flex-wrap gap-3">
+
+              {/* Status Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Status</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All Status</option>
+                  <option value="0">Active</option>
+                  <option value="1">Inactive</option>
+                </select>
+              </div>
+
+              {/* cargo mode Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Mode</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={cargoModeFilter}
+                  onChange={(e) => setCargoModeFilter(e.target.value)}
+                >
+                  <option value="">Select cargo mode</option>
+                  <option value="0">Air</option>
+                  <option value="1">Sea</option>
+                </select>
+              </div>
+
+              {/* Date Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Date</label>
+                <input
+                  type="date"
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                />
+
+              </div>
+
+              {/* Reset */}
+              <div className="flex items-end">
+                <button
+                  onClick={resetFilters}
+                  className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
+                >
+                  Reset
+                </button>
+              </div>
+
+              {/* customize */}
+              <div className="flex justify-start items-center  ">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCustomize(!showCustomize)}
+                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                  >
+                    <BiCustomize className="text-[#046fac]" />Customize
+                  </button>
+
+                  {showCustomize && (
+                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-medium  text-sm">Customize Columns</p>
+                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                      </div>
+
+                      {Object.keys(visibleColumns).map((col) => (
+                        <label
+                          key={col}
+                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col]}
+                            onChange={() => toggleColumn(col)}
+                          />
+                          {col}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Right Side Add Button */}
+            <div>
+              <button
+                onClick={openAddModal}
+                className="bg-[#057fc4] hover:bg-[#2d93cf] px-4 py-2 text-white rounded-xl"
+              >
+                Add
+              </button>
+            </div>
+
+          </div>
         </div>
 
-        <div className="datatable-container">
-
-           <div className="flex justify-start items-center ">
-                      <div className="relative">
-                        <button
-                          onClick={() => setShowCustomize(!showCustomize)}
-                          className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-                        >
-                          <BiCustomize className="text-[#046fac]" />Customize
-                        </button>
-          
-                        {showCustomize && (
-                          <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                            <div className="flex justify-between items-center mb-2">
-                              <p className="font-medium  text-sm">Customize Columns</p>
-                              <button onClick={() => setShowCustomize(false)}>✕</button>
-                            </div>
-          
-                            {Object.keys(visibleColumns).map((col) => (
-                              <label
-                                key={col}
-                                className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={visibleColumns[col]}
-                                  onChange={() => toggleColumn(col)}
-                                />
-                                {col}
-                              </label>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+        <div className="bg-white datatable-container">
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
@@ -307,7 +451,7 @@ const [showCustomize, setShowCustomize] = useState(false);
                 autoWidth: false, // Disable auto width for proper column adjustments
               }}
               className="display nowrap bg-white"
-               ref={(el) => (window.contactTable = el?.dt())}
+              ref={(el) => (window.contactTable = el?.dt())}
             />
           </div>
         </div>
@@ -334,37 +478,6 @@ const [showCustomize, setShowCustomize] = useState(false);
                 <p className="text-2xl md:text-3xl font-medium">Add Run</p>
 
 
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Run ID <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="run_id"
-                      name="run_id"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {/* {errors.name && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
-                      </p>
-                    )} */}
-                  </div>
-                </div>
-                {/* {error.rolename && <p className="error">{error.rolename}</p>} */}
-
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
                     <label
@@ -378,19 +491,18 @@ const [showCustomize, setShowCustomize] = useState(false);
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="number"
-                      id="run_no"
-                      name="run_no"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      value={runNo}
+                      onChange={(e) => {
+                        setRunNo(e.target.value);
+                        setFormErrors({ ...formErrors, runNo: ""}); 
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.runNo && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.runNo}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -495,7 +607,7 @@ const [showCustomize, setShowCustomize] = useState(false);
                   </button>
                   <button
                     className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
-                  // onClick={handlesubmit}
+                  onClick={handleAddSubmit}
                   >
                     Submit
                   </button>
@@ -528,20 +640,6 @@ const [showCustomize, setShowCustomize] = useState(false);
 
                 <div className="mt-10  rounded-lg ">
                   <div className="bg-white  rounded-xl w-full">
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Run ID <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter Run ID"
-                          value={selectedRun?.run_id}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -614,6 +712,7 @@ const [showCustomize, setShowCustomize] = useState(false);
                       </button>
                       <button
                         //  onClick={() => handleSave(roleDetails.id)}
+                        onClick={handleUpdate}
                         className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
                       >
                         Update
