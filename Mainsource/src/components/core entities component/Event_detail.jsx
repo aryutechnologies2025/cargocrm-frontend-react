@@ -41,7 +41,153 @@ const Event_detail = () => {
     created_by: true,
     status: true,
   });
+  const [statusFilter, setStatusFilter] = useState([]);
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // YYYY-MM-DD
+  };
+  const [dateFilter, setDateFilter] = useState(getToday());
+  const [formErrors, setFormErrors] = useState({});
+  const [eventName, setEventName] = useState("");
+  const [runNo, setRunNo] = useState("");
+  const [trackingNo, setTrackingNo] = useState("");
+  const [quality, setQuality] = useState("");
+  const [weight, setWeight] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("");
+  const [eventCreatedby, setEventCreatedby] = useState("");
+  const [status, setStatus] = useState("");
 
+  const [editEventName, setEditEventName] = useState("");
+  const [editRunNo, setEditRunNo] = useState("");
+  const [editTrackingNo, setEditTrackingNo] = useState("");
+  const [editQuality, setEditQuality] = useState("");
+  const [editWeight, setEditWeight] = useState("");
+  const [editEventDate, setEditEventDate] = useState("");
+  const [editEventTime, setEditEventTime] = useState("");
+  const [editEventCreatedby, setEditEventCreatedby] = useState("");
+  const [editStatus, setEditStatus] = useState("");
+
+
+  const validateAddForm = () => {
+    let errors = {};
+
+    if (!eventName.trim()) {
+      errors.eventName = "Event Name is required";
+    }
+    if (!runNo.trim()) {
+      errors.runNo = "Run Number is required";
+    }
+    if (!trackingNo.trim()) {
+      errors.trackingNo = "Tracking Number is required";
+    }
+    if (quality.trim() === "") {
+      errors.quality = "Quality is required";
+    }
+    if (weight.trim() === "") {
+      errors.weight = "Weight is required";
+    }
+    if (eventDate.trim() === "") {
+      errors.eventDate = "Event Date is required";
+    }
+    if (eventTime.trim() === "") {
+      errors.eventTime = "Event Time is required";
+    }
+    if (eventCreatedby.trim() === "") {
+      errors.eventCreatedby = "Created By is required";
+    }
+    if (status === "") {
+      errors.status = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateEditForm = () => {
+    let errors = {};
+
+    if (!editEventName.trim()) {
+      errors.editEventName = "Event Name is required";
+    }
+    if (!editRunNo.trim()) {
+      errors.editRunNo = "Run Number is required";
+    }
+    if (!editTrackingNo.trim()) {
+      errors.editTrackingNo = "Tracking Number is required";
+    }
+    if (editQuality.trim() === "") {
+      errors.editQuality = "Quality is required";
+    }
+    if (editWeight.trim() === "") {
+      errors.editWeight = "Weight is required";
+    }
+    if (editEventDate.trim() === "") {
+      errors.editEventDate = "Event Date is required";
+    }
+    if (editEventTime.trim() === "") {
+      errors.editEventTime = "Event Time is required";
+    }
+    if (editEventCreatedby.trim() === "") {
+      errors.editEventCreatedby = "Created by is required";
+    }
+    if (editStatus === "") {
+      errors.editStatus = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleAddSubmit = () => {
+    if (!validateAddForm()) return;
+
+    const payload = {
+      event_name: eventName,
+      run_no: runNo,
+      tracking_no: trackingNo,
+      quantity: quality,
+      weight: weight,
+      event_date: eventDate,
+      event_time: eventTime,
+      created_by: eventCreatedby,
+      status: status,
+    };
+
+    console.log("Add Payload:", payload);
+
+    //  Call your API here
+
+    closeAddModal();
+  };
+
+  const handleUpdate = () => {
+    if (!validateEditForm()) return;
+
+    const payload = {
+      id: selectedEvent._id,
+      event_name: editEventName,
+      run_no: editRunNo,
+      tracking_no: editTrackingNo,
+      quantity: editQuality,
+      weight: editWeight,
+      event_date: editEventDate,
+      event_time: editEventTime,
+      created_by: editEventCreatedby,
+      status: editStatus,
+    };
+
+    console.log("Update Payload:", payload);
+
+    //  Call update API here
+
+    closeEditModal();
+  };
+
+  const resetFilters = () => {
+    setStatusFilter("");
+    setDateFilter(""); // reset to today
+  };
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
       const newState = { ...prev, [key]: !prev[key] };
@@ -70,12 +216,10 @@ const Event_detail = () => {
     });
   };
 
-
   const openAddModal = () => {
     setIsAddModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
-
 
   useEffect(() => {
     const table = document.querySelector(".datatable-container");
@@ -92,20 +236,17 @@ const Event_detail = () => {
     return () => table?.removeEventListener("click", handleClick);
   }, []);
 
-
-
   const closeAddModal = () => {
     setIsAnimating(false);
     setErrors({});
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (event_id, event_name, run_no, tracking_no, quantity, weight, event_date, event_time, created_by, status) => {
-    setSelectedEvent(event_id, event_name, run_no, tracking_no, quantity, weight, event_date, event_time, created_by, status);
+  const openEditModal = (row) => {
+    setSelectedEvent(row);
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
-
 
   const closeEditModal = () => {
     setIsAnimating(false);
@@ -244,47 +385,19 @@ const Event_detail = () => {
     },
   ];
 
-  const data = [
-    {
-      Sno: 1,
-      event_id: "R78009",
-      event_name: "test",
-      run_no: "JU900",
-      tracking_no: "HJK9000",
-      quantity: "9",
-      weight: "17kg",
-      event_date: "9-12-2025",
-      event_time: "3:00:10",
-      created_by: "Cargo",
-      status: "1"
-    },
-    {
-      Sno: 2,
-      event_id: "R78009",
-      event_name: "test",
-      run_no: "JU900",
-      tracking_no: "HJK9000",
-      quantity: "9",
-      weight: "17kg",
-      event_date: "9-12-2025",
-      event_time: "3:00:10",
-      created_by: "Cargo",
-      status: "1"
-    },
-    {
-      Sno: 3,
-      event_id: "R78009",
-      event_name: "test",
-      run_no: "JU900",
-      tracking_no: "HJK9000",
-      quantity: "9",
-      weight: "17kg",
-      event_date: "9-12-2025",
-      event_time: "3:00:10",
-      created_by: "Cargo",
-      status: "1"
-    }
-  ]
+
+  const rawData = [
+    { Sno: 1, event_id: "R78009", event_name: "test", run_no: "JU900", tracking_no: "HJK9000", quantity: "9", weight: "17kg", event_date: "9-12-2025", event_time: "3:00:10", created_by: "Cargo", status: 0, date: "2026-02-01" },
+    { Sno: 2, event_id: "R78009", event_name: "test", run_no: "JU900", tracking_no: "HJK9000", quantity: "9", weight: "17kg", event_date: "9-12-2025", event_time: "3:00:10", created_by: "Cargo", status: 1, date: "2026-02-02" },
+    { Sno: 3, event_id: "R78009", event_name: "test", run_no: "JU900", tracking_no: "HJK9000", quantity: "9", weight: "17kg", event_date: "9-12-2025", event_time: "3:00:10", created_by: "Cargo", status: 1, date: "2026-02-03" },
+  ];
+
+  const data = rawData.filter((item) => {
+    return (
+      (statusFilter ? String(item.status) === statusFilter : true) &&
+      (dateFilter ? item.date === dateFilter : true)
+    );
+  });
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -300,51 +413,102 @@ const Event_detail = () => {
 
           <p className="text-sm md:text-md text-[#057fc4]">Event</p>
         </div>
-        {/* Add Button */}
-        <div className="flex justify-end mt-8">
-          <button
-            onClick={openAddModal}
-            className="bg-[#057fc4] px-3 py-2 text-white w-20 rounded-2xl"
-          >
-            Add
-          </button>
+
+        {/* Filters */}
+        <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3 justify-between">
+
+            {/* Left Side Filters */}
+            <div className="flex flex-wrap gap-3">
+
+              {/* Status Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Status</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All Status</option>
+                  <option value="0">Active</option>
+                  <option value="1">Inactive</option>
+                </select>
+              </div>
+
+              {/* Date Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Date</label>
+                <input
+                  type="date"
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                />
+
+              </div>
+
+              {/* Reset */}
+              <div className="flex items-end">
+                <button
+                  onClick={resetFilters}
+                  className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
+                >
+                  Reset
+                </button>
+              </div>
+
+              {/* customize */}
+              <div className="flex justify-start items-center  ">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCustomize(!showCustomize)}
+                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                  >
+                    <BiCustomize className="text-[#046fac]" />Customize
+                  </button>
+
+                  {showCustomize && (
+                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-medium  text-sm">Customize Columns</p>
+                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                      </div>
+
+                      {Object.keys(visibleColumns).map((col) => (
+                        <label
+                          key={col}
+                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col]}
+                            onChange={() => toggleColumn(col)}
+                          />
+                          {col}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Right Side Add Button */}
+            <div>
+              <button
+                onClick={openAddModal}
+                className="bg-[#057fc4] hover:bg-[#2d93cf] px-4 py-2 text-white rounded-xl"
+              >
+                Add
+              </button>
+            </div>
+
+          </div>
         </div>
 
-        <div className="datatable-container">
+        <div className="bg-white datatable-container">
 
-           <div className="flex justify-start items-center ">
-            <div className="relative">
-              <button
-                onClick={() => setShowCustomize(!showCustomize)}
-                className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-              >
-                <BiCustomize className="text-[#046fac]" />Customize
-              </button>
-
-              {showCustomize && (
-                <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium  text-sm">Customize Columns</p>
-                    <button onClick={() => setShowCustomize(false)}>✕</button>
-                  </div>
-
-                  {Object.keys(visibleColumns).map((col) => (
-                    <label
-                      key={col}
-                      className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns[col]}
-                        onChange={() => toggleColumn(col)}
-                      />
-                      {col}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
@@ -359,7 +523,7 @@ const Event_detail = () => {
                 autoWidth: false, // Disable auto width for proper column adjustments
               }}
               className="display nowrap bg-white"
-               ref={(el) => (window.contactTable = el?.dt())}
+              ref={(el) => (window.contactTable = el?.dt())}
             />
           </div>
         </div>
@@ -385,38 +549,6 @@ const Event_detail = () => {
               <div className="px-5 lg:px-14 py-2 md:py-10">
                 <p className="text-2xl md:text-3xl font-medium">Add Event</p>
 
-
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Event ID <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="event_id"
-                      name="event_id"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {/* {errors.name && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
-                      </p>
-                    )} */}
-                  </div>
-                </div>
-                {/* {error.rolename && <p className="error">{error.rolename}</p>} */}
-
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
                     <label
@@ -430,19 +562,19 @@ const Event_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="event_name"
-                      name="event_name"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      value={eventName}
+                      onChange={(e) => {
+                        setEventName(e.target.value);
+                        setFormErrors({ ...formErrors, eventName: ""}); 
+                      }}
+                      placeholder="Enter event name"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.eventName && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.eventName}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -459,19 +591,19 @@ const Event_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="number"
-                      id="run_no"
-                      name="run_no"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      value={runNo}
+                      onChange={(e) => {
+                        setRunNo(e.target.value);
+                        setFormErrors({ ...formErrors, runNo: ""}); 
+                      }}
+                      placeholder="Enter run number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.runNo && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.runNo}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -488,19 +620,19 @@ const Event_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="tracking_no"
-                      name="tracking_no"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      value={trackingNo}
+                      onChange={(e) => {
+                        setTrackingNo(e.target.value);
+                        setFormErrors({ ...formErrors, trackingNo: ""}); 
+                      }}
+                      placeholder="Enter tracking number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.trackingNo && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.trackingNo}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -516,20 +648,20 @@ const Event_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <input
-                      type="text"
-                      id="quantity"
-                      name="quantity"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      type="number"
+                      value={quality}
+                      onChange={(e) => {
+                        setQuality(e.target.value);
+                        setFormErrors({ ...formErrors, quality: ""});
+                      }}
+                      placeholder="Enter Quality"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.quality && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.quality}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -546,19 +678,19 @@ const Event_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="weight"
-                      name="weight"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      value={weight}
+                      onChange={(e) => {
+                        setWeight(e.target.value);
+                        setFormErrors({ ...formErrors, weight: ""});
+                      }}
+                      placeholder="Enter weight"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.weight && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.weight}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -574,20 +706,20 @@ const Event_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <input
-                      type="text"
-                      id="event_date"
-                      name="event_date"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      type="date"
+                      value={eventDate}
+                      onChange={(e) => {
+                        setEventDate(e.target.value);
+                        setFormErrors({ ...formErrors, eventDate: ""});
+                      }}
+                      placeholder="Enter event"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.eventDate && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.eventDate}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -603,20 +735,19 @@ const Event_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <input
-                      type="text"
-                      id="event_time"
-                      name="event_time"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      type="time"
+                      value={eventTime}
+                      onChange={(e) => {
+                        setEventTime(e.target.value);
+                        setFormErrors({ ...formErrors, eventTime: ""});
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.eventTime && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.eventTime}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -633,19 +764,19 @@ const Event_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="created_by"
-                      name="created_by"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      value={eventCreatedby}
+                      onChange={(e) => {
+                        setEventCreatedby(e.target.value);
+                        setFormErrors({ ...formErrors, eventCreatedby: ""});
+                      }}
+                      placeholder="Enter created by"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.eventCreatedby && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.eventCreatedby}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -661,26 +792,24 @@ const Event_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <select
-                      name="status"
-                      id="status"
-                      // onChange={(e) => {
-                      //   setStatus(e.target.value);
-                      //   validateStatus(e.target.value); // Validate status dynamically
-                      // }}
+                      value={status}
+                      onChange={(e) => {
+                        setStatus(e.target.value);
+                        setFormErrors({ ...formErrors, status: ""}); 
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select a status</option>
                       <option value="1">Active</option>
                       <option value="0">InActive</option>
                     </select>
-                    {/* {errors.status && (
+                    {formErrors.status && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.status}
+                        {formErrors.status}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
-                {/* {error.status && <p className="error">{error.status}</p>} */}
 
                 <div className="flex  justify-end gap-2 mt-5 md:mt-14">
                   <button
@@ -691,7 +820,7 @@ const Event_detail = () => {
                   </button>
                   <button
                     className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
-                  // onClick={handlesubmit}
+                  onClick={handleAddSubmit}
                   >
                     Submit
                   </button>
@@ -727,27 +856,22 @@ const Event_detail = () => {
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Event ID <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          value={selectedEvent?.event_id}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
                         Event Name<span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
                           type="text"
-                          value={selectedEvent?.event_name}
+                          value={editEventName}
+                          onChange={(e) => {
+                            setEditEventName(e.target.value);
+                            setFormErrors({ ...formErrors, editEventName: "" });
+                          }}
+                          placeholder="Enter event name"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editEventName && (
+                          <p className="text-red-500 text-sm">{formErrors.editEventName}</p>
+                        )}
                       </div>
                     </div>
 
@@ -758,9 +882,17 @@ const Event_detail = () => {
                       <div className="w-[60%] md:w-[50%]">
                         <input
                           type="number"
-                          value={selectedEvent?.run_no}
+                          value={editRunNo}
+                          onChange={(e) => {
+                            setEditRunNo(e.target.value);
+                            setFormErrors({ ...formErrors, editRunNo: "" });
+                          }}
+                          placeholder="Enter run number"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editRunNo && (
+                          <p className="text-red-500 text-sm">{formErrors.editRunNo}</p>
+                        )}
                       </div>
                     </div>
 
@@ -772,9 +904,17 @@ const Event_detail = () => {
                       <div className="w-[60%] md:w-[50%]">
                         <input
                           type="text"
-                          value={selectedEvent?.tracking_no}
+                          value={editTrackingNo}
+                          onChange={(e) => {
+                            setEditTrackingNo(e.target.value);
+                            setFormErrors({ ...formErrors, editTrackingNo: "" });
+                          }}
+                          placeholder="Enter tracking number"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editTrackingNo && (
+                          <p className="text-red-500 text-sm">{formErrors.editTrackingNo}</p>
+                        )}
                       </div>
                     </div>
 
@@ -785,10 +925,18 @@ const Event_detail = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
-                          type="text"
-                          value={selectedEvent?.quantity}
+                          type="number"
+                          value={editQuality}
+                          onChange={(e) => {
+                            setEditQuality(e.target.value);
+                            setFormErrors({ ...formErrors, editQuality: "" });
+                          }}
+                          placeholder="Enter quality"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editQuality && (
+                          <p className="text-red-500 text-sm">{formErrors.editQuality}</p>
+                        )}
                       </div>
                     </div>
 
@@ -799,9 +947,17 @@ const Event_detail = () => {
                       <div className="w-[60%] md:w-[50%]">
                         <input
                           type="text"
-                          value={selectedEvent?.weight}
+                          value={editWeight}
+                          onChange={(e) => {
+                            setEditWeight(e.target.value);
+                            setFormErrors({ ...formErrors, editWeight: "" });
+                          }}
+                          placeholder="Enter weight"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editWeight && (
+                          <p className="text-red-500 text-sm">{formErrors.editWeight}</p>
+                        )}
                       </div>
                     </div>
 
@@ -811,10 +967,18 @@ const Event_detail = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
-                          type="text"
-                          value={selectedEvent?.event_date}
+                          type="date"
+                          value={editEventDate}
+                          onChange={(e) => {
+                            setEditEventDate(e.target.value);
+                            setFormErrors({ ...formErrors, editEventDate: "" });
+                          }}
+                          placeholder="Enter event date"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editEventDate && (
+                          <p className="text-red-500 text-sm">{formErrors.editEventDate}</p>
+                        )}
                       </div>
                     </div>
 
@@ -824,10 +988,18 @@ const Event_detail = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
-                          type="text"
-                          value={selectedEvent?.event_time}
+                          type="time"
+                          value={editEventTime}
+                          onChange={(e) => {
+                            setEditEventTime(e.target.value);
+                            setFormErrors({ ...formErrors, editEventTime: "" });
+                          }}
+                          placeholder="Enter event time"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editEventTime && (
+                          <p className="text-red-500 text-sm">{formErrors.editEventTime}</p>
+                        )}
                       </div>
                     </div>
 
@@ -838,9 +1010,17 @@ const Event_detail = () => {
                       <div className="w-[60%] md:w-[50%]">
                         <input
                           type="text"
-                          value={selectedEvent?.created_by}
+                          value={editEventCreatedby}
+                          onChange={(e) => {
+                            setEditEventCreatedby(e.target.value);
+                            setFormErrors({ ...formErrors, editEventCreatedby: "" });
+                          }}
+                          placeholder="Enter created by"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editEventCreatedby && (
+                          <p className="text-red-500 text-sm">{formErrors.editEventCreatedby}</p>
+                        )}
                       </div>
                     </div>
 
@@ -850,19 +1030,25 @@ const Event_detail = () => {
                         <select
                           name="status"
                           id="status"
-                          value={selectedEvent?.status}
+                          value={editStatus}
+                          onChange={(e) => {
+                            setEditStatus(e.target.value);
+                            setFormErrors({ ...formErrors, editStatus: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
+                          <option>Select status</option>
                           <option value="1">Active</option>
                           <option value="0">InActive</option>
                         </select>
-                      </div>
-                    </div>
-                    {errors.status && (
+                        {formErrors.editStatus && (
                       <p className="text-red-500 text-sm mb-4">
-                        {errors.status[0]}
+                        {formErrors.editStatus}
                       </p>
                     )}
+                      </div>
+                    </div>
+                    
 
                     <div className="flex justify-end gap-2 mt-14">
                       <button
@@ -873,6 +1059,7 @@ const Event_detail = () => {
                       </button>
                       <button
                         //  onClick={() => handleSave(roleDetails.id)}
+                        onClick={handleUpdate}
                         className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
                       >
                         Update

@@ -44,15 +44,15 @@ const Run_detail = () => {
   };
   const [dateFilter, setDateFilter] = useState(getToday());
   const [formErrors, setFormErrors] = useState({});
-  const [runNo, setRunNo] = useState({});
-  const [mode, setMode] = useState({});
-  const [createdDate, setCreatedDate] = useState({});
-  const [status, setStatus] = useState({});
+  const [runNo, setRunNo] = useState("");
+  const [mode, setMode] = useState("");
+  const [createdDate, setCreatedDate] = useState("");
+  const [status, setStatus] = useState("");
 
-  const [editRunNo, setEditRunNo] = useState({});
-  const [editMode, setEditMode] = useState({});
-  const [editCreatedDate, setEditCreatedDate] = useState({});
-  const [editStatus, setEditStatus] = useState({});
+  const [editRunNo, setEditRunNo] = useState("");
+  const [editMode, setEditMode] = useState("");
+  const [editCreatedDate, setEditCreatedDate] = useState("");
+  const [editStatus, setEditStatus] = useState("");
 
   const validateAddForm = () => {
     let errors = {};
@@ -98,10 +98,9 @@ const Run_detail = () => {
     if (!validateAddForm()) return;
 
     const payload = {
-      name: name,
-      email: email,
-      phone_no: phone,
-      address: address,
+      run_no: runNo,
+      mode: mode,
+      created_date: createdDate,
       status: status,
     };
 
@@ -116,11 +115,10 @@ const Run_detail = () => {
     if (!validateEditForm()) return;
 
     const payload = {
-      id: selectedCustomer._id,
-      name: editName,
-      email: editEmail,
-      phone_no: editPhone,
-      address: editAddress,
+      id: selectedRun._id,
+      run_no: editRunNo,
+      mode: editMode,
+      created_date: editCreatedDate,
       status: editStatus,
     };
 
@@ -133,7 +131,9 @@ const Run_detail = () => {
 
   const resetFilters = () => {
     setStatusFilter("");
+    setCargoModeFilter("");
     setDateFilter(""); // reset to today
+    // setDateFilter(getToday());
   };
 
   const toggleColumn = (key) => {
@@ -219,10 +219,11 @@ const Run_detail = () => {
     },
     {
       title: "Status",
-      data: "Status",
+      data: "status",
       render: (data) => {
         const textColor = data === 1 ? "red" : "green";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; border: 1px solid ${textColor}; border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
+        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
+        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
                   ${data === 1 ? "Inactive" : "Active"}
                 </div>`;
       },
@@ -267,14 +268,7 @@ const Run_detail = () => {
                   <TfiPencilAlt
                     className="cursor-pointer "
                     onClick={() => {
-                      openEditModal(
-                        row._id,
-                        row.run_id,
-                        row.run_no,
-                        row.mode,
-                        row.created_date,
-                        row.status,
-                      );
+                      openEditModal(row);
                     }}
                   />
                   <MdOutlineDeleteOutline
@@ -494,8 +488,9 @@ const Run_detail = () => {
                       value={runNo}
                       onChange={(e) => {
                         setRunNo(e.target.value);
-                        setFormErrors({ ...formErrors, runNo: ""}); 
+                        setFormErrors({ ...formErrors, runNo: "" });
                       }}
+                      placeholder="Enter run number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {formErrors.runNo && (
@@ -518,21 +513,23 @@ const Run_detail = () => {
 
                   </div>
                   <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="mode"
-                      name="mode"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                    <select
+                      value={mode}
+                      onChange={(e) => {
+                        setMode(e.target.value);
+                        setFormErrors({ ...formErrors, mode: "" }); // Validate status dynamically
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {/* {errors.name && (
+                    >
+                      <option value="">Select cargo mode</option>
+                      <option value="1">Air</option>
+                      <option value="0">Sea</option>
+                    </select>
+                    {formErrors.mode && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.mode}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -549,19 +546,18 @@ const Run_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="date"
-                      id="created_date"
-                      name="created_date"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      value={createdDate}
+                      onChange={(e) => {
+                        setCreatedDate(e.target.value);
+                        setFormErrors({ ...formErrors, createdDate: "" }); // Validate role name dynamically
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.createdDate && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.createdDate}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -577,26 +573,25 @@ const Run_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <select
-                      name="status"
-                      id="status"
-                      // onChange={(e) => {
-                      //   setStatus(e.target.value);
-                      //   validateStatus(e.target.value); // Validate status dynamically
-                      // }}
+                      value={status}
+                      onChange={(e) => {
+                        setStatus(e.target.value);
+                        setFormErrors({ ...formErrors, status: "" });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select a status</option>
                       <option value="1">Active</option>
                       <option value="0">InActive</option>
                     </select>
-                    {/* {errors.status && (
+                    {formErrors.status && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.status}
+                        {formErrors.status}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
-                {/* {error.status && <p className="error">{error.status}</p>} */}
+
 
                 <div className="flex  justify-end gap-2 mt-5 md:mt-14">
                   <button
@@ -607,7 +602,7 @@ const Run_detail = () => {
                   </button>
                   <button
                     className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
-                  onClick={handleAddSubmit}
+                    onClick={handleAddSubmit}
                   >
                     Submit
                   </button>
@@ -649,9 +644,16 @@ const Run_detail = () => {
                         <input
                           type="number"
                           placeholder="Enter number"
-                          value={selectedRun?.run_no}
+                          value={editRunNo}
+                          onChange={(e) => {
+                            setEditRunNo(e.target.value);
+                            setFormErrors({ ...formErrors, editRunNo: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editRunNo && (
+                          <p className="text-red-500 text-sm">{formErrors.editRunNo}</p>
+                        )}
                       </div>
                     </div>
 
@@ -660,12 +662,21 @@ const Run_detail = () => {
                         Mode<span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter mode"
-                          value={selectedRun?.mode}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <select
+                      value={editMode}
+                      onChange={(e) => {
+                        setEditMode(e.target.value);
+                        setFormErrors({ ...formErrors, editMode: "" }); // Validate status dynamically
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select cargo mode</option>
+                      <option value="1">Air</option>
+                      <option value="0">Sea</option>
+                    </select>
+                        {formErrors.editMode && (
+                          <p className="text-red-500 text-sm">{formErrors.editMode}</p>
+                        )}
                       </div>
                     </div>
 
@@ -677,9 +688,16 @@ const Run_detail = () => {
                         <input
                           type="date"
                           placeholder="Enter created date"
-                          value={selectedRun?.created_date}
+                          value={editCreatedDate}
+                          onChange={(e) => {
+                            setEditCreatedDate(e.target.value);
+                            setFormErrors({ ...formErrors, editCreatedDate: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editCreatedDate && (
+                          <p className="text-red-500 text-sm">{formErrors.editCreatedDate}</p>
+                        )}
                       </div>
                     </div>
 
@@ -689,19 +707,24 @@ const Run_detail = () => {
                         <select
                           name="status"
                           id="status"
-                          value={selectedRun?.status}
+                          value={editStatus}
+                          onChange={(e) => {
+                            setEditStatus(e.target.value);
+                            setFormErrors({ ...formErrors, editStatus: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
+                          <option>Select status</option>
                           <option value="1">Active</option>
                           <option value="0">InActive</option>
                         </select>
+                        {formErrors.editStatus && (
+                          <p className="text-red-500 text-sm mb-4">
+                            {formErrors.editStatus}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    {errors.status && (
-                      <p className="text-red-500 text-sm mb-4">
-                        {errors.status[0]}
-                      </p>
-                    )}
 
                     <div className="flex justify-end gap-2 mt-14">
                       <button
