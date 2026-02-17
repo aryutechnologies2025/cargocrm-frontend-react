@@ -22,13 +22,45 @@ const SystemSetting_detail = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [errors, setErrors] = useState({});
   const [selectedSystem, setSelectedSystem] = useState(null);
-    const [faviconPreview, setFaviconPreview] = useState("");
-      const [logoPreview, setLogoPreview] = useState("");
-        const [settings, setSettings] = useState({
-    admin_email: "",
-    gst_number: "",
-    address: "",
+  const [faviconPreview, setFaviconPreview] = useState("");
+  const [logoPreview, setLogoPreview] = useState("");
+  const [settings, setSettings] = useState({
+    company: "",
+    name: "",
+    email: "",
+    phone_no: "",
+    website_url: "",
+    logo: null,
+    facebook: "",
+    instagram: "",
+    youtube: "",
+    linkedin: "",
+    terms_condition: "",
+    dateFormat: "dd/MM/yyyy"
   });
+
+  const handleChange = (e) => {
+  const { name, value, type, files } = e.target;
+
+  if (type === "file") {
+    setSettings((prev) => ({
+      ...prev,
+      [name]: files[0],
+    }));
+  } else {
+    setSettings((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+};
+
+  const handleSaveSettings = () => {
+  console.log("Saved Settings:", settings);
+  alert("Settings Saved Successfully");
+};
+
+
 
   // const roles = [
   //   { id: 1, name: "Writer" },
@@ -185,53 +217,7 @@ const SystemSetting_detail = () => {
     },
   ];
 
-  const data = [
-    {
-      Sno: 1,
-      company: "Aryu",
-      name: "Barbie",
-      email: "barbie@email.com",
-      phone_no: "8596253614",
-      website_url: "barbie.com",
-      logo: "BARBIE",
-      instagram: "barbie_21",
-      youtube: "barbie page",
-      facebook: "barbie_021",
-      linkedin: "barbie_123",
-      terms_condition: "condition",
-      status: 0,
-    },
-    {
-      Sno: 2,
-      company: "Aryu",
-      name: "Barbie",
-      email: "barbie@email.com",
-      phone_no: "8596253614",
-      website_url: "barbie.com",
-      logo: "BARBIE",
-      instagram: "barbie_21",
-      youtube: "barbie page",
-      facebook: "barbie_021",
-      linkedin: "barbie_123",
-      terms_condition: "condition",
-      status: 1,
-    },
-    {
-      Sno: 3,
-      company: "Aryu",
-      name: "Barbie",
-      email: "barbie@email.com",
-      phone_no: "8596253614",
-      website_url: "barbie.com",
-      logo: "BARBIE",
-      instagram: "barbie_21",
-      youtube: "barbie page",
-      facebook: "barbie_021",
-      linkedin: "barbie_123",
-      terms_condition: "condition",
-      status: 1,
-    },
-  ];
+
 
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
@@ -250,10 +236,10 @@ const SystemSetting_detail = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow p-3 md:p-6 mt-2 md:mt-4">
-          <h2 className="text-2xl font-medium mb-6">General Setting</h2>
+          <h2 className="text-2xl font-medium mb-6">System Setting</h2>
 
-          <div className="flex flex-wrap gap-y-5 gap-x-14 md:mt-5">  
-            
+          <div className="flex flex-wrap gap-y-5 gap-x-14 md:mt-5">
+
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
               <label
                 htmlFor="adminemail"
@@ -264,7 +250,7 @@ const SystemSetting_detail = () => {
               <input
                 type="text"
                 name="company"
-                value={settings.admin_email}
+                value={settings.company}
                 // onChange={handleChange}
                 placeholder="Enter Email"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -280,7 +266,7 @@ const SystemSetting_detail = () => {
               <input
                 type="text"
                 name="name"
-                value={settings.gst_number}
+                value={settings.name}
                 // onChange={handleChange}
                 placeholder="Enter GST Number"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -296,7 +282,7 @@ const SystemSetting_detail = () => {
               <input
                 type="email"
                 name="email"
-                value={settings.address}
+                value={settings.email}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -312,7 +298,7 @@ const SystemSetting_detail = () => {
               <input
                 type="number"
                 name="number"
-                value={settings.address}
+                value={settings.phone_no}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -328,7 +314,7 @@ const SystemSetting_detail = () => {
               <input
                 type="url"
                 name="website"
-                value={settings.address}
+                value={settings.website_url}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -344,7 +330,7 @@ const SystemSetting_detail = () => {
               <input
                 type="file"
                 name="logo"
-                value={settings.address}
+                value={settings.logo}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -360,7 +346,7 @@ const SystemSetting_detail = () => {
               <input
                 type="text"
                 name="facebook"
-                value={settings.address}
+                value={settings.facebook}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -376,7 +362,7 @@ const SystemSetting_detail = () => {
               <input
                 type="text"
                 name="instagram"
-                value={settings.address}
+                value={settings.instagram}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -392,7 +378,7 @@ const SystemSetting_detail = () => {
               <input
                 type="text"
                 name="youtube"
-                value={settings.address}
+                value={settings.youtube}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -408,7 +394,7 @@ const SystemSetting_detail = () => {
               <input
                 type="text"
                 name="linkedIn"
-                value={settings.address}
+                value={settings.linkedin}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -424,7 +410,7 @@ const SystemSetting_detail = () => {
               <textarea
                 type="text"
                 name="terms"
-                value={settings.address}
+                value={settings.terms_condition}
                 // onChange={handleChange}
                 placeholder="Enter Address"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
@@ -438,31 +424,31 @@ const SystemSetting_detail = () => {
 
 
             <h3 className="text-lg font-medium mb-2 mt-5">Date Format</h3>
-            {["dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "MM/dd/yy"].map(
-              (format) => (
-                <div key={format} className="flex gap-2 mb-2">
-                  <input
-                    type="radio"
-                    // value={format}
-                    // checked={dateFormat === format}
-                    // onChange={(e) => setDateFormat(e.target.value)}
-                  />
-                  {/* <label>{format.toUpperCase()}</label> */}
-                </div>
-              )
-            )}
+            {["dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "MM/dd/yy"].map((format) => (
+  <div key={format} className="flex gap-2 mb-2">
+    <input
+      type="radio"
+      value={format}
+      checked={settings.dateFormat === format}
+      onChange={handleChange}
+      name="dateFormat"
+    />
+    <label>{format}</label>
+  </div>
+))}
+
           </div>
 
           {/* SAVE BUTTON */}
-          {/* <div className="flex justify-end mt-6">
-            <button
-              onClick={handleSaveSettings}
-              disabled={saveLoading}
-              className="bg-[#1ea600] text-white px-6 py-2 rounded-lg"
-            >
-              {saveLoading ? "Saving..." : "Save"}
-            </button>
-          </div> */}
+          <div className="flex justify-end mt-6">
+  <button
+    onClick={handleSaveSettings}
+    className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-6 py-2 rounded-lg"
+  >
+    Save
+  </button>
+</div>
+
         </div>
 
 
