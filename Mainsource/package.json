@@ -33,6 +33,7 @@
     "react-router-dom": "^7.0.1",
     "react-select": "^5.10.0",
     "react-table": "^7.8.0",
+    "sweetalert2": "^11.26.18",
     "swiper": "^11.1.15"
   },
   "devDependencies": {
