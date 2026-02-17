@@ -1,53 +1,39 @@
 pipeline {
     agent any
 
-    environment {
-        APP_DIR = "/var/www/cargocrm/cargocrm-frontend-react"
-    }
-
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/aryutechnologies2025/cargocrm-frontend-react.git'
+                checkout scm
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install') {
             steps {
-                sh '''
-                cd $APP_DIR
-                npm ci --legacy-peer-deps
-                '''
+                sh 'npm ci --legacy-peer-deps'
             }
         }
 
-        stage('Build Frontend') {
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Deploy') {
             steps {
                 sh '''
-                cd $APP_DIR
-                npm run build
+                    rm -rf /var/www/cargocrm/cargocrm-frontend-react/dist/*
+                    cp -r dist/* /var/www/cargocrm/cargocrm-frontend-react/dist/
                 '''
             }
         }
 
         stage('Reload Nginx') {
             steps {
-                sh '''
-                sudo systemctl reload nginx
-                '''
+                sh 'sudo systemctl reload nginx'
             }
         }
     }
-
-    post {
-        success {
-            echo 'Frontend Deployment Successful'
-        }
-        failure {
-            echo 'Frontend Deployment Failed'
-        }
-    }
 }
-
