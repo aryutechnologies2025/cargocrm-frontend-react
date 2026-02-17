@@ -78,80 +78,132 @@ const Roles_Mainbar = () => {
   };
 
   // create
-  const handleAddSubmit = async () => {
-    console.log("submit",handleAddSubmit);
-    if (!validateAddForm()) return;
 
-    try {
-      const res = await fetch(`${API_URL}/api/roles/create-roles`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: roleName,
-          status: status,
-          createdBy: 1,
-        }),
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        fetchRoles(); // refresh list
-        closeAddModal();
-        setRoleName("");
-        setStatus("");
+    const handleAddSubmit = async (e) => {
+      e.preventDefault();
+  
+      if (!validateCreateForm()) {
+        return;
       }
-    } catch (error) {
-      console.error("Error creating role:", error);
-    }
-  };
+  
+      if (submitting) return;
+      setSubmitting(true);
+  
+      try {
+        const formdata = {
+          company_id: pssCompany,
+          role_name,
+          status,
+          department_id: department,
+          created_by: userid,
+        };
+  
+        const response = await axiosInstance.post(
+          `${API_URL}api/roles/create-roles`,
+          formdata
+        );
+  
+        if (response.data.status === true || response.data.success === true) {
+          toast.success("Role created successfully");
+          fetchRoles();
+          setDepartment("");
+          closeAddModal();
+        } else {
+          toast.error("Failed to create role");
+        }
+      } catch (err) {
+        toast.error("Error creating role");
+      } finally {
+        setSubmitting(false);
+      }
+    };
 
   // edit
-  const handleUpdate = async () => {
-    if (!validateEditForm()) return;
 
-    try {
-      const res = await fetch(`${API_URL}/api/roles/edit-roles/${selectedRole._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: editRoleName,
-          status: editStatus,
-        }),
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        fetchRoles();
-        closeEditModal();
+    const handleUpdate = async () => {
+      if (!validateEditForm()) {
+        return;
       }
-    } catch (error) {
-      console.error("Error updating role:", error);
+  
+      try {
+        const response = await axiosInstance.post(
+          `${API_URL}api/roles/edit-roles/${editingRoleId}`,
+          { 
+            role_name: roleDetails.role_name,
+            department_id: roleDetails.department_id,
+            company_id: roleDetails.company_id,
+            status: roleDetails.status,
+            updated_by: userid,
+          }
+        );
+  
+        if (response.data.status || response.data.success) {
+          toast.success("Role updated successfully");
+          closeEditModal();
+          fetchRoles();
+        } else {
+          toast.error("Failed to update role");
+        }
+      } catch (err) {
+        toast.error("Error updating role");
+      }
+    };
+  const openViewModal = async (row) => {
+    const response = await axiosInstance.get(
+      `${API_URL}api/role/edit/${row.id}`
+    );
+
+    if (response.data?.status) {
+      setViewContact(response.data.data);
+      setViewModalOpen(true);
     }
   };
-
   // delete
-  const deleteRoles = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this role?")) return;
+  const deleteRoles = (roleId) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this role?",
+      icon: "warning",
+      showCancelButton: true,
 
-    try {
-      const res = await fetch(`${API_URL}/api/roles/delete-roles/${id}`, {
-        method: "DELETE",
-      });
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, delete it!",
 
-      const result = await res.json();
+      //    confirmButtonColor: "#DF3A3A", 
+      // cancelButtonColor: "#ffffff", 
 
-      if (result.success) {
-        fetchRoles();
+      // customClass: {
+      //   popup: "custom-swal-popup",
+      //   title: "custom-swal-title",
+      //   htmlContainer: "custom-swal-text",
+      //   confirmButton: "custom-swal-confirm",
+      //   cancelButton: "custom-swal-cancel",
+      //   icon: "custom-swal-icon"
+      // }
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        axiosInstance.delete(`${API_URL}api/roles/delete-roles`, {
+          data: { 
+            record_id: roleId
+          }
+        })
+          .then((response) => {
+            console.log("Delete response:", response.data);
+            if (response.data.status === true || response.data.success === true) {
+              toast.success("Role has been deleted.");
+              fetchRoles(); // Refresh the roles list
+
+            } else {
+              Swal.fire("Error!", response.data.message || "Failed to delete role.", "error");
+            }
+          })
+          .catch((error) => {
+            console.error("Error deleting role:", error);
+            Swal.fire("Error!", "Failed to delete role.", "error");
+          });
       }
-    } catch (error) {
-      console.error("Error deleting role:", error);
-    }
+    });
   };
 
   useEffect(() => {
@@ -161,29 +213,42 @@ const Roles_Mainbar = () => {
   // list
   const fetchRoles = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/roles/view-roles`);
-      const result = await res.json();
+      const response = await axiosInstance.get(`${API_URL}api/roles/view-roles`);
 
-      console.log("Role list response:", result);
+      console.log("...RoleFetching All.... : ", response.data);
 
-      if (result.status === true && Array.isArray(result.data)) {
-        const formatted = result.data.map((item, index) => ({
-          Sno: index + 1,
-          _id: item.id, // adjust if backend sends _id
-          role_name: item.role_name,
-          status: Number(item.status), // ✅ keep lowercase
-          date: item.created_at
-            ? item.created_at.split(" ")[0]
-            : "",
+      if (response.data.status === true) {
+        // roles
+        setRoles(response.data.data || []);
+        setTotalRecords(response.data.data.length || 0);
+
+        // departments (from SAME API)
+        const activeDepartments = (response.data.departments || []).filter(
+          (dept) => dept.status === "1" || dept.status === 1
+        );
+
+        setDepartments(activeDepartments);
+        //  set pss company options
+        const pssCompanyOptions = response.data.psscompany.map((company) => ({
+          label: company.name,
+          value: company.id,
         }));
 
-        setRoles(formatted);
+        setPssCompanyOptions(pssCompanyOptions);
       } else {
         setRoles([]);
+        setPssCompanyOptions([]);
+        setDepartments([]);
+        setTotalRecords(0);
       }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
+    } catch (err) {
+      console.error("Failed to fetch roles", err);
       setRoles([]);
+      setDepartments([]);
+      setPssCompanyOptions([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -214,14 +279,49 @@ const Roles_Mainbar = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (row) => {
-    if (!row) return;
+  const openEditModal = async (row) => {
 
-    setSelectedRole(row);
-    setEditRoleName(row.role_name || "");
-    setEditStatus(row.Status !== undefined ? row.Status.toString() : "");
-    setIsEditModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
+
+    try {
+      setEditingRoleId(row.id);
+      setIsEditModalOpen(true);
+      setIsAnimating(true);
+
+      const response = await axiosInstance.get(
+        `${API_URL}api/role/edit/${row.id}`
+      );
+
+      console.log("openEditModal response", response.data);
+
+      if (response.data?.status === true) {
+        const data = response.data.data;
+
+        console.log(
+          "Edit dept value:",
+          roleDetails.department_id,
+          typeof roleDetails.department_id
+        );
+
+        //    setRoleDetails({
+        //   role_name: row.role_name,
+        // department_id: row.department_id?.toString(),
+        // company_id: row.company_id, 
+        // status: row.status?.toString(),
+        // });
+        setRoleDetails({
+          role_name: data.role_name,
+          department_id: Number(data.department_id), // ✅ force number
+          company_id: data.company_id,
+          status: Number(data.status),
+        });
+      }
+      else {
+        toast.error("Failed to load role details");
+      }
+    } catch (err) {
+      console.error("Edit fetch error:", err);
+      toast.error("Unable to fetch role details");
+    }
   };
 
   const closeEditModal = () => {
@@ -231,16 +331,16 @@ const Roles_Mainbar = () => {
 
   const columns = [
     {
-      title: "Sno",
-      data: "Sno",
+      header: "Sno",
+      field: "Sno",
     },
     {
-      title: "Name",
-      data: "name",
+      header: "Name",
+      field: "name",
     },
     {
-      title: "Status",
-      data: "status",
+      header: "Status",
+      field: "status",
       render: (data) => {
         const isActive = Number(data) === 1;
 
@@ -260,8 +360,8 @@ const Roles_Mainbar = () => {
       },
     },
     {
-      title: "Action",
-      data: null,
+      header: "Action",
+      field: null,
       render: (data, type, row) => {
         const id = `actions-${row.Sno}`;
 
@@ -415,25 +515,44 @@ const Roles_Mainbar = () => {
           </div>
         </div>
 
+        {/* new */}
+        <div className="bg-white datatable-container md:mt-4">
 
-        <div className="bg-white datatable-container">
-          {/* Responsive wrapper for the table */}
-          <div className="table-scroll-container">
+          <div className="table-scroll-container" id="datatable">
             <DataTable
-              data={data}
-              columns={columns}
-              options={{
-                paging: true,
-                searching: true,
-                ordering: true,
-                scrollX: true, // Horizontal scrolling
-                responsive: true, // Enable responsiveness
-                autoWidth: false, // Disable auto width for proper column adjustments
-              }}
-              className="display nowrap bg-white"
-            />
+              className="mt-2 md:mt-8"
+              value={data}
+              paginator
+              // rows={rows}
+              // first={(page - 1) * rows}
+              // onPage={onPageChange}
+              // totalRecords={totalRecords}
+              rowsPerPageOptions={[10, 25, 50, 100]}
+              // globalFilter={globalFilter}
+              showGridlines
+              resizableColumns
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+              paginatorClassName="custom-paginator"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            // loading={loading}
+            >
+
+              {/* Render only selected columns */}
+              {columns.map((col, index) => (
+                <Column
+                  key={index}
+                  field={col.field}
+                  header={col.header}
+                  body={col.body}
+                  style={col.style}
+                />
+              ))}
+            </DataTable>
           </div>
         </div>
+
+
+
 
         {/* Add Modal */}
         {isAddModalOpen && (

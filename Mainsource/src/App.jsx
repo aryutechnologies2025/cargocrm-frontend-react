@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import PageNotFound from "./pages/PageNotFound";
@@ -18,7 +20,12 @@ import LoginLog_main from "./components/Login logs component/LoginLog_main";
 function App() {
   return (
     <>
-      <BrowserRouter> 
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        style={{ zIndex: 999999 }} />
+        
+      <BrowserRouter>
         <Routes>
           <Route path="*" element={<PageNotFound />} />
           <Route path="sitemap" element={<Sitemap />} />
@@ -27,11 +34,11 @@ function App() {
           <Route path="/roles" element={<Roles />} />
           <Route path="/users" element={<User_main />} />
           <Route path="/customer" element={<Customer_main />} />
-          <Route path="/beneficiary" element={<Beneficiary_main />}/>
-          <Route path="/order" element={<Order_main />}/>
-          <Route path="/parcel" element={<Parcel_main />}/>
-          <Route path="/run" element={<Run_main />}/>
-          <Route path="/event" element={<Event_main />}/>
+          <Route path="/beneficiary" element={<Beneficiary_main />} />
+          <Route path="/order" element={<Order_main />} />
+          <Route path="/parcel" element={<Parcel_main />} />
+          <Route path="/run" element={<Run_main />} />
+          <Route path="/event" element={<Event_main />} />
           <Route path="/contact-us" element={<ContactUs_main />} />
           <Route path="/login-logs" element={<LoginLog_main />} />
           <Route path="/system-setting" element={<SystemSetting_Main />} />

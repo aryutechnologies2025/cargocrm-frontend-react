@@ -51,8 +51,9 @@ html {
 }
 
 /*  */
+
 .datatable-container{
-  padding: 5px;
+  padding: 1px;
 }
 .dt-length{
   text-transform: capitalize;
