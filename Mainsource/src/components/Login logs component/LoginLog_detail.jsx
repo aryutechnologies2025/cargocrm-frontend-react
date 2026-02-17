@@ -119,7 +119,7 @@ const LoginLog_detail = () => {
                                     >
                                         <FaEye />
                                     </button>
-                                    <TfiPencilAlt
+                                    {/* <TfiPencilAlt
                                         className="cursor-pointer "
                                         onClick={() => {
                                             openEditModal(
@@ -131,13 +131,13 @@ const LoginLog_detail = () => {
                                                 row.status,
                                             );
                                         }}
-                                    />
-                                    <MdOutlineDeleteOutline
+                                    /> */}
+                                    {/* <MdOutlineDeleteOutline
                                         className="text-red-600 text-xl cursor-pointer"
                                         onClick={() => {
                                             deleteRoles(row._id);
                                         }}
-                                    />
+                                    /> */}
                                 </div>
 
                                 {/* <div className="modula-icon-del" style={{

@@ -6,16 +6,19 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import aryu_logo from "../../assets/aryu_logo.svg";
 import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
-import DataTable from "datatables.net-react";
-import DT from "datatables.net-dt";
-import "datatables.net-responsive-dt/css/responsive.dataTables.css";
+
+// import DT from "datatables.net-dt";
+// import "datatables.net-responsive-dt/css/responsive.dataTables.css";
 import Footer from "../Footer";
 import Mobile_Sidebar from "../Mobile_Sidebar";
 import { IoIosArrowForward } from "react-icons/io";
 import { createRoot } from "react-dom/client";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineDeleteOutline } from "react-icons/md";
-DataTable.use(DT);
+import { API_URL } from "../../Config";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+
 
 const Roles_Mainbar = () => {
   const navigate = useNavigate();
@@ -26,6 +29,7 @@ const Roles_Mainbar = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewRole, setViewRole] = useState(null);
+  const [roles, setRoles] = useState([]);
   const [roleFilter, setRoleFilter] = useState([]);
   const [statusFilter, setStatusFilter] = useState([]);
   const getToday = () => {
@@ -73,35 +77,114 @@ const Roles_Mainbar = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddSubmit = () => {
+  // create
+  const handleAddSubmit = async () => {
+    console.log("submit",handleAddSubmit);
     if (!validateAddForm()) return;
 
-    const payload = {
-      role_name: roleName,
-      status: status,
-    };
+    try {
+      const res = await fetch(`${API_URL}/api/roles/create-roles`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: roleName,
+          status: status,
+          createdBy: 1,
+        }),
+      });
 
-    console.log("Add Payload:", payload);
+      const result = await res.json();
 
-    //  Call your API here
-
-    closeAddModal();
+      if (result.success) {
+        fetchRoles(); // refresh list
+        closeAddModal();
+        setRoleName("");
+        setStatus("");
+      }
+    } catch (error) {
+      console.error("Error creating role:", error);
+    }
   };
 
-  const handleUpdate = () => {
+  // edit
+  const handleUpdate = async () => {
     if (!validateEditForm()) return;
 
-    const payload = {
-      id: selectedRole._id,
-      role_name: editRoleName,
-      status: editStatus,
-    };
+    try {
+      const res = await fetch(`${API_URL}/api/roles/edit-roles/${selectedRole._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: editRoleName,
+          status: editStatus,
+        }),
+      });
 
-    console.log("Update Payload:", payload);
+      const result = await res.json();
 
-    //  Call update API here
+      if (result.success) {
+        fetchRoles();
+        closeEditModal();
+      }
+    } catch (error) {
+      console.error("Error updating role:", error);
+    }
+  };
 
-    closeEditModal();
+  // delete
+  const deleteRoles = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this role?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/roles/delete-roles/${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        fetchRoles();
+      }
+    } catch (error) {
+      console.error("Error deleting role:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  // list
+  const fetchRoles = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/roles/view-roles`);
+      const result = await res.json();
+
+      console.log("Role list response:", result);
+
+      if (result.status === true && Array.isArray(result.data)) {
+        const formatted = result.data.map((item, index) => ({
+          Sno: index + 1,
+          _id: item.id, // adjust if backend sends _id
+          role_name: item.role_name,
+          status: Number(item.status), // ✅ keep lowercase
+          date: item.created_at
+            ? item.created_at.split(" ")[0]
+            : "",
+        }));
+
+        setRoles(formatted);
+      } else {
+        setRoles([]);
+      }
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      setRoles([]);
+    }
   };
 
   // Open and close modals
@@ -153,82 +236,69 @@ const Roles_Mainbar = () => {
     },
     {
       title: "Name",
-      data: "role_name",
+      data: "name",
     },
     {
       title: "Status",
-      data: "Status",
+      data: "status",
       render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
+        const isActive = Number(data) === 1;
+
+        return `
+        <div style="
+          display:inline-block;
+          padding:4px 10px;
+          border-radius:50px;
+          font-size:12px;
+          font-weight:600;
+          background:${isActive ? "#e6fffa" : "#ffe5e5"};
+          color:${isActive ? "green" : "red"};
+        ">
+          ${isActive ? "Active" : "Inactive"}
+        </div>
+      `;
       },
     },
     {
       title: "Action",
       data: null,
       render: (data, type, row) => {
-        const id = `actions-${row.sno || Math.random()}`;
+        const id = `actions-${row.Sno}`;
+
         setTimeout(() => {
           const container = document.getElementById(id);
           if (container) {
             if (!container._root) {
               container._root = createRoot(container);
             }
+
             container._root.render(
-              <div
-                className="action-container"
-                style={{
-                  display: "flex",
-                  gap: "15px",
-                  alignItems: "flex-end",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  className="modula-icon-edit flex gap-2"
-                  style={{
-                    color: "#000",
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    setViewRole(row);
+                    setViewModalOpen(true);
                   }}
+                  className="p-1 bg-blue-50 text-blue-600 rounded-md"
                 >
-                  <button
-                    onClick={() => {
-                      setViewRole(row);
-                      setViewModalOpen(true);
+                  <FaEye />
+                </button>
 
-                    }}
-                    className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
-                  >
-                    <FaEye />
-                  </button>
-                  <TfiPencilAlt
-                    className="cursor-pointer "
-                    onClick={() => {
-                      openEditModal(row);
-                    }}
-                  />
-                  <MdOutlineDeleteOutline
-                    className="text-red-600 text-xl cursor-pointer"
-                    onClick={() => {
-                      deleteRoles(row._id);
-                    }}
-                  />
-                </div>
+                <TfiPencilAlt
+                  className="cursor-pointer"
+                  onClick={() => openEditModal(row)}
+                />
 
-                {/* <div className="modula-icon-del" style={{
-                  color: "red"
-                }}>
-                  <RiDeleteBin6Line
-                    onClick={() => handleDelete(row.id)}
-                  />
-                </div> */}
+                <MdOutlineDeleteOutline
+                  className="text-red-600 cursor-pointer"
+                  onClick={() => deleteRoles(row._id)}
+                />
               </div>,
               container
             );
           }
         }, 0);
+
         return `<div id="${id}"></div>`;
       },
     },
@@ -246,13 +316,15 @@ const Roles_Mainbar = () => {
     { Sno: 3, role_name: "Editor", Status: 1, date: "2026-02-03" },
   ];
 
-  const data = rawData.filter((item) => {
+  const data = roles.filter((item) => {
     return (
       (roleFilter ? item.role_name === roleFilter : true) &&
-      (statusFilter ? String(item.Status) === statusFilter : true) &&
+      (statusFilter ? String(item.status) === statusFilter : true) &&
       (dateFilter ? item.date === dateFilter : true)
     );
   });
+
+
 
 
   return (

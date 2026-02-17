@@ -96,6 +96,10 @@ const ContactUs_detail = () => {
       data: "name",
     },
     {
+      title: "Message",
+      data: "message",
+    },
+    {
       title: "Email",
       data: "email",
     },
@@ -103,10 +107,7 @@ const ContactUs_detail = () => {
       title: "Date",
       data: "date",
     },
-    {
-      title: "Message",
-      data: "message",
-    },
+    
     {
       title: "Status",
       data: "status",
@@ -155,7 +156,7 @@ const ContactUs_detail = () => {
                   >
                     <FaEye />
                   </button>
-                  <TfiPencilAlt
+                  {/* <TfiPencilAlt
                     className="cursor-pointer "
                     onClick={() => {
                       openEditModal(
@@ -168,7 +169,7 @@ const ContactUs_detail = () => {
                         row.status,
                       );
                     }}
-                  />
+                  /> */}
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
@@ -249,7 +250,7 @@ const ContactUs_detail = () => {
           </button> */}
         </div>
 
-        <div className="datatable-container mt-5">
+        <div className="bg-white datatable-container mt-5">
 
           <div className="flex justify-start items-center mb-3">
             <div className="relative">

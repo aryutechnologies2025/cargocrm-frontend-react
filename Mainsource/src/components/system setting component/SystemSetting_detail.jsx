@@ -22,6 +22,13 @@ const SystemSetting_detail = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [errors, setErrors] = useState({});
   const [selectedSystem, setSelectedSystem] = useState(null);
+    const [faviconPreview, setFaviconPreview] = useState("");
+      const [logoPreview, setLogoPreview] = useState("");
+        const [settings, setSettings] = useState({
+    admin_email: "",
+    gst_number: "",
+    address: "",
+  });
 
   // const roles = [
   //   { id: 1, name: "Writer" },
@@ -241,443 +248,226 @@ const SystemSetting_detail = () => {
 
           <p className="text-sm md:text-md text-[#057fc4]">System Setting</p>
         </div>
-        {/* Add Button */}
-        <div className="flex justify-end mt-8">
-          <button
-            onClick={openAddModal}
-            className="bg-[#057fc4] px-3 py-2 text-white w-20 rounded-2xl"
-          >
-            Add
-          </button>
-        </div>
 
-        <div className="datatable-container">
-          {/* Responsive wrapper for the table */}
-          <div className="table-scroll-container">
-            <DataTable
-              data={data}
-              columns={columns}
-              options={{
-                paging: true,
-                searching: true,
-                ordering: true,
-                scrollX: true, // Horizontal scrolling
-                responsive: true, // Enable responsiveness
-                autoWidth: false, // Disable auto width for proper column adjustments
-              }}
-              className="display nowrap bg-white"
-            />
-          </div>
-        </div>
+        <div className="bg-white rounded-2xl shadow p-3 md:p-6 mt-2 md:mt-4">
+          <h2 className="text-2xl font-medium mb-6">General Setting</h2>
 
-        {isAddModalOpen && (
-          <div className="fixed inset-0 bg-black/10 backdrop-blur-sm bg-opacity-50 z-50">
-            {/* Overlay */}
-            <div className="absolute inset-0 " onClick={closeAddModal}></div>
-
-            <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
-            >
-              <div
-                className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
-                title="Toggle Sidebar"
-                onClick={closeAddModal}
+          <div className="flex flex-wrap gap-y-5 gap-x-14 md:mt-5">  
+            
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="adminemail"
+                className="block text-sm font-medium text-gray-700"
               >
-                <IoIosArrowForward className="w-3 h-3" />
-              </div>
-
-              <div className="px-5 lg:px-14 py-2 md:py-10">
-                <p className="text-2xl md:text-3xl font-medium">Add System Setting</p>
-
-
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Company <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Name <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Email <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Phone Number <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="number"
-                      id="phone_no"
-                      name="phone_no"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Website URL <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="website_url"
-                      name="website_url"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Logo <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="logo"
-                      name="logo"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Facebook <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="facebook"
-                      name="facebook"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Instagram <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="instagram"
-                      name="instagram"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Youtube <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="youtube"
-                      name="youtube"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      LinkedIn <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="linkedin"
-                      name="linkedin"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Terms Condition <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <textarea
-                      type="text"
-                      id="terms_condition"
-                      name="terms_condition"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div className="">
-                    <label
-                      htmlFor="status"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Status <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <select
-                      name="status"
-                      id="status"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select a status</option>
-                      <option value="1">Active</option>
-                      <option value="0">InActive</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex  justify-end gap-2 mt-5 md:mt-14">
-                  <button
-                    onClick={closeAddModal}
-                    className="bg-red-100  hover:bg-red-200 text-sm md:text-base text-red-600 px-5 md:px-5 py-1 md:py-2 font-semibold rounded-full"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
-                  // onClick={handlesubmit}
-                  >
-                    Submit
-                  </button>
-                </div>
-              </div>
+                Company
+              </label>
+              <input
+                type="text"
+                name="company"
+                value={settings.admin_email}
+                // onChange={handleChange}
+                placeholder="Enter Email"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="GST"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={settings.gst_number}
+                // onChange={handleChange}
+                placeholder="Enter GST Number"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone Number
+              </label>
+              <input
+                type="number"
+                name="number"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Website URL
+              </label>
+              <input
+                type="url"
+                name="website"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Logo
+              </label>
+              <input
+                type="file"
+                name="logo"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Facebook
+              </label>
+              <input
+                type="text"
+                name="facebook"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Instagram
+              </label>
+              <input
+                type="text"
+                name="instagram"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Youtube
+              </label>
+              <input
+                type="text"
+                name="youtube"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                LinkedIn
+              </label>
+              <input
+                type="text"
+                name="linkedIn"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-[40%]">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Terms and condition
+              </label>
+              <textarea
+                type="text"
+                name="terms"
+                value={settings.address}
+                // onChange={handleChange}
+                placeholder="Enter Address"
+                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
+              />
             </div>
           </div>
-        )}
+          {/* DATE FORMAT */}
+          <div>
 
-        {/* Edit Modal */}
-        {isEditModalOpen && (
-          <div className="fixed inset-0 bg-black/10 backdrop-blur-sm bg-opacity-50 z-50">
-            {/* Overlay */}
-            <div className="absolute inset-0 " onClick={closeEditModal}></div>
-
-            <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
-            >
-              <div
-                className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
-                title="Toggle Sidebar"
-                onClick={closeEditModal}
-              >
-                <IoIosArrowForward className="w-3 h-3" />
-              </div>
-
-              <div className="px-5 lg:px-14 py-10">
-                <p className="text-2xl md:text-3xl font-medium">Edit System Setting </p>
-
-                <div className="mt-10  rounded-lg ">
-                  <div className="bg-white  rounded-xl w-full">
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        First Name <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          value={selectedSystem?.first_name}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Last Name <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          value={selectedSystem?.last_name}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Email <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="email"
-                          value={selectedSystem?.email}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="number"
-                          value={selectedSystem?.phone_no}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Role <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          value={selectedSystem?.role}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
+            <hr className="border-t-2 border-gray mt-5  w-full"></hr>
 
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">Status <span className="text-red-500">*</span></label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <select
-                          name="status"
-                          id="status"
-                          value={selectedSystem?.status}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="1">Active</option>
-                          <option value="0">InActive</option>
-                        </select>
-                      </div>
-                    </div>
-                    {errors.status && (
-                      <p className="text-red-500 text-sm mb-4">
-                        {errors.status[0]}
-                      </p>
-                    )}
-
-                    <div className="flex justify-end gap-2 mt-14">
-                      <button
-                        onClick={closeEditModal}
-                        className=" bg-red-100  hover:bg-red-200 text-sm md:text-base text-red-600 px-5 md:px-5 py-1 md:py-2 font-semibold rounded-full"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        //  onClick={() => handleSave(roleDetails.id)}
-                        className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
-                      >
-                        Update
-                      </button>
-                    </div>
-                  </div>
+            <h3 className="text-lg font-medium mb-2 mt-5">Date Format</h3>
+            {["dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "MM/dd/yy"].map(
+              (format) => (
+                <div key={format} className="flex gap-2 mb-2">
+                  <input
+                    type="radio"
+                    // value={format}
+                    // checked={dateFormat === format}
+                    // onChange={(e) => setDateFormat(e.target.value)}
+                  />
+                  {/* <label>{format.toUpperCase()}</label> */}
                 </div>
-              </div>
-            </div>
+              )
+            )}
           </div>
-        )}
+
+          {/* SAVE BUTTON */}
+          {/* <div className="flex justify-end mt-6">
+            <button
+              onClick={handleSaveSettings}
+              disabled={saveLoading}
+              className="bg-[#1ea600] text-white px-6 py-2 rounded-lg"
+            >
+              {saveLoading ? "Saving..." : "Save"}
+            </button>
+          </div> */}
+        </div>
+
+
+
+
       </div>
 
       <div>
