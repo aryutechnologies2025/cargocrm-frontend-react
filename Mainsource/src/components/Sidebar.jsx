@@ -117,7 +117,7 @@ const Sidebar = () => {
                   }`}
               >
                 <CiBoxList />
-                {!arrowClicked && <p className="text-sm">Dashboar</p>}
+                {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
 
 
