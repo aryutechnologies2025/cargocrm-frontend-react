@@ -207,7 +207,6 @@ const Customer_detail = () => {
     setTimeout(() => setIsAnimating(true), 10);
   };
 
-
   const closeEditModal = () => {
     setIsAnimating(false);
     setTimeout(() => setIsEditModalOpen(false), 250);

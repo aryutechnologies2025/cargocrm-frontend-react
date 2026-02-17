@@ -38,6 +38,122 @@ const Parcel_detail = () => {
     description: true,
     status: true,
   });
+  const [statusFilter, setStatusFilter] = useState([]);
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // YYYY-MM-DD
+  };
+  const [dateFilter, setDateFilter] = useState(getToday());
+  const [formErrors, setFormErrors] = useState({});
+  const [orderId, setOrderId] = useState("");
+  const [pieceNo, setPieceNo] = useState("");
+  const [weight, setWeight] = useState("");
+  const [dimension, setDimension] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("");
+
+  const [editOrderId, setEditOrderId] = useState("");
+  const [editPieceNo, setEditPieceNo] = useState("");
+  const [editWeight, setEditWeight] = useState("");
+  const [editDimension, setEditDimension] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editStatus, setEditStatus] = useState("");
+
+  const validateAddForm = () => {
+    let errors = {};
+
+    if (!orderId.trim()) {
+      errors.orderId = "Order ID is required";
+    }
+    if (!pieceNo.trim()) {
+      errors.pieceNo = "Piece Number is required";
+    }
+    if (!weight.trim()) {
+      errors.weight = "Weight is required";
+    }
+    if (!dimension.trim()) {
+      errors.dimension = "Dimension is required";
+    }
+    if (description.trim() === "") {
+      errors.description = "Description is required";
+    }
+    if (status === "") {
+      errors.status = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateEditForm = () => {
+    let errors = {};
+
+    if (!editOrderId.trim()) {
+      errors.editOrderId = "Order ID is required";
+    }
+    if (!editPieceNo.trim()) {
+      errors.editPieceNo = "Piece Number is required";
+    }
+    if (!editWeight.trim()) {
+      errors.editWeight = "Weight is required";
+    }
+    if (!editDimension.trim()) {
+      errors.editDimension = "Dimension is required";
+    }
+    if (editDescription.trim() === "") {
+      errors.editDescription = "Description is required";
+    }
+    if (editStatus === "") {
+      errors.editStatus = "Status is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleAddSubmit = () => {
+    if (!validateAddForm()) return;
+
+    const payload = {
+      order_id: orderId,
+      piece_no: pieceNo,
+      weight: weight,
+      dimensions: dimension,
+      description: description,
+      status: status,
+    };
+
+    console.log("Add Payload:", payload);
+
+    //  Call your API here
+
+    closeAddModal();
+  };
+
+  const handleUpdate = () => {
+    if (!validateEditForm()) return;
+
+    const payload = {
+      id: selectedParcel._id,
+      order_id: editOrderId,
+      piece_no: editPieceNo,
+      weight: editWeight,
+      dimensions: editDimension,
+      description: editDescription,
+      status: editStatus,
+    };
+
+    console.log("Update Payload:", payload);
+
+    //  Call update API here
+
+    closeEditModal();
+  };
+
+  const resetFilters = () => {
+    setStatusFilter("");
+    setDateFilter("");
+  };
 
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
@@ -69,7 +185,6 @@ const Parcel_detail = () => {
     setTimeout(() => setIsAnimating(true), 10);
   };
 
-
   useEffect(() => {
     const table = document.querySelector(".datatable-container");
 
@@ -85,20 +200,31 @@ const Parcel_detail = () => {
     return () => table?.removeEventListener("click", handleClick);
   }, []);
 
-
-
   const closeAddModal = () => {
     setIsAnimating(false);
     setErrors({});
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (parcel_id, order_id, piece_no, weight, dimensions, description, status) => {
-    setSelectedParcel(parcel_id, order_id, piece_no, weight, dimensions, description, status);
+  const openEditModal = (row) => {
+    setSelectedParcel(row);
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
+  //   const openEditModal = (row) => {
+  //   if (!row) return;
 
+  //   setSelectedParcel(row);
+  //   setEditOrderId(row.orderId || "");
+  //   setEditPieceNo(row.pieceNo || "");
+  //   setEditWeight(row.weight || "");
+  //   setEditDimension(row.dimension || "");
+  //   setEditDescription(row.description || "");
+  //   setEditStatus(row.status !== undefined ? row.status.toString() : "");
+
+  //   setIsEditModalOpen(true);
+  //   setTimeout(() => setIsAnimating(true), 10);
+  // };
 
   const closeEditModal = () => {
     setIsAnimating(false);
@@ -136,7 +262,7 @@ const Parcel_detail = () => {
     },
     {
       title: "Status",
-      data: "Status",
+      data: "status",
       render: (data) => {
         const textColor = data === 1 ? "red" : "green";
         const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
@@ -222,38 +348,19 @@ const Parcel_detail = () => {
     },
   ];
 
-  const data = [
-    {
-      Sno: 1,
-      parcel_id: "c77884",
-      order_id: "22_cargo",
-      piece_no: "43",
-      weight: "15kg",
-      dimensions: "5",
-      description: "Cargo",
-      status: "1"
-    },
-    {
-      Sno: 2,
-      parcel_id: "c77884",
-      order_id: "22_cargo",
-      piece_no: "32",
-      weight: "20kg",
-      dimensions: "5",
-      description: "Cargo",
-      status: "1"
-    },
-    {
-      Sno: 3,
-      parcel_id: "c77884",
-      order_id: "22_cargo",
-      piece_no: "23",
-      weight: "10kg",
-      dimensions: "5",
-      description: "Cargo",
-      status: "1"
-    }
-  ]
+  const rawData = [
+    { Sno: 1, parcel_id: "c77884", order_id: "22_cargo", piece_no: "23", weight: "10kg", dimensions: "5", description: "Cargo", status: 0, date: "2026-02-01" },
+    { Sno: 2, parcel_id: "c77884", order_id: "22_cargo", piece_no: "23", weight: "10kg", dimensions: "5", description: "Cargo", status: 1, date: "2026-02-02" },
+    { Sno: 3, parcel_id: "c77884", order_id: "22_cargo", piece_no: "23", weight: "10kg", dimensions: "5", description: "Cargo", status: 1, date: "2026-02-03" },
+  ];
+
+  const data = rawData.filter((item) => {
+    return (
+      (statusFilter ? String(item.status) === statusFilter : true) &&
+      (dateFilter ? item.date === dateFilter : true)
+    );
+  });
+
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -269,51 +376,101 @@ const Parcel_detail = () => {
 
           <p className="text-sm md:text-md text-[#057fc4]">Parcel</p>
         </div>
-        {/* Add Button */}
-        <div className="flex justify-end mt-8">
-          <button
-            onClick={openAddModal}
-            className="bg-[#057fc4] px-3 py-2 text-white w-20 rounded-2xl"
-          >
-            Add
-          </button>
+
+        {/* Filters */}
+        <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3 justify-between">
+
+            {/* Left Side Filters */}
+            <div className="flex flex-wrap gap-3">
+
+              {/* Status Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Status</label>
+                <select
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All Status</option>
+                  <option value="0">Active</option>
+                  <option value="1">Inactive</option>
+                </select>
+              </div>
+
+              {/* Date Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">Date</label>
+                <input
+                  type="date"
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                />
+
+              </div>
+
+              {/* Reset */}
+              <div className="flex items-end">
+                <button
+                  onClick={resetFilters}
+                  className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
+                >
+                  Reset
+                </button>
+              </div>
+
+              {/* customize */}
+              <div className="flex justify-start items-center  ">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCustomize(!showCustomize)}
+                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                  >
+                    <BiCustomize className="text-[#046fac]" />Customize
+                  </button>
+
+                  {showCustomize && (
+                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-medium  text-sm">Customize Columns</p>
+                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                      </div>
+
+                      {Object.keys(visibleColumns).map((col) => (
+                        <label
+                          key={col}
+                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col]}
+                            onChange={() => toggleColumn(col)}
+                          />
+                          {col}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Right Side Add Button */}
+            <div>
+              <button
+                onClick={openAddModal}
+                className="bg-[#057fc4] hover:bg-[#2d93cf] px-4 py-2 text-white rounded-xl"
+              >
+                Add
+              </button>
+            </div>
+
+          </div>
         </div>
 
-        <div className="datatable-container">
-
-          <div className="flex justify-start items-center ">
-            <div className="relative">
-              <button
-                onClick={() => setShowCustomize(!showCustomize)}
-                className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-              >
-                <BiCustomize className="text-[#046fac]" />Customize
-              </button>
-
-              {showCustomize && (
-                <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium  text-sm">Customize Columns</p>
-                    <button onClick={() => setShowCustomize(false)}>✕</button>
-                  </div>
-
-                  {Object.keys(visibleColumns).map((col) => (
-                    <label
-                      key={col}
-                      className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns[col]}
-                        onChange={() => toggleColumn(col)}
-                      />
-                      {col}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="bg-white datatable-container">
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
@@ -362,37 +519,6 @@ const Parcel_detail = () => {
                       htmlFor="roleName"
                       className="block text-[15px] md:text-md font-medium mb-2 mt-3"
                     >
-                      Parcel ID <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="parcel_id"
-                      name="parcel_id"
-                      placeholder="Enter parcel ID"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {/* {errors.name && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
-                      </p>
-                    )} */}
-                  </div>
-                </div>
-                {/* {error.rolename && <p className="error">{error.rolename}</p>} */}
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
                       Order ID <span className="text-red-500">*</span>
                     </label>
 
@@ -400,20 +526,19 @@ const Parcel_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="order_id"
-                      name="order_id"
+                      value={orderId}
                       placeholder="Enter order ID"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      onChange={(e) => {
+                        setOrderId(e.target.value);
+                        setFormErrors({ ...formErrors, orderId: ""}); // Validate role name dynamically
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.orderId && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.orderId}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -430,22 +555,51 @@ const Parcel_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="number"
-                      id="piece_no"
-                      name="piece_no"
+                      value={pieceNo}
                       placeholder="Enter piece number"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      onChange={(e) => {
+                        setPieceNo(e.target.value);
+                        setFormErrors({ ...formErrors, pieceNo: ""}); // Validate role name dynamically
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.pieceNo && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.pieceNo}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Weight <span className="text-red-500">*</span>
+                    </label>
+
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="number"
+                      value={weight}
+                      placeholder="Enter Weight"
+                      onChange={(e) => {
+                        setWeight(e.target.value);
+                        setFormErrors({ ...formErrors, weight: ""}); // Validate role name dynamically
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.weight && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.weight}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
@@ -460,20 +614,19 @@ const Parcel_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="dimensions"
-                      name="dimensions"
+                      value={dimension}
                       placeholder="Enter dimensions"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      onChange={(e) => {
+                        setDimension(e.target.value);
+                        setFormErrors({ ...formErrors, dimension: ""}); // Validate role name dynamically
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.weight && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.weight}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -488,22 +641,21 @@ const Parcel_detail = () => {
 
                   </div>
                   <div className="w-[60%] md:w-[50%]">
-                    <input
+                    <textarea
                       type="text"
-                      id="description"
-                      name="description"
+                      value={description}
                       placeholder="Enter description"
-                      // onChange={(e) => {
-                      //   setRoleName(e.target.value);
-                      //   validateRoleName(e.target.value); // Validate role name dynamically
-                      // }}
+                      onChange={(e) => {
+                        setDescription(e.target.value);
+                        setFormErrors({ ...formErrors, description: ""}); // Validate role name dynamically
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {/* {errors.name && (
+                    {formErrors.description && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.name}
+                        {formErrors.description}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
 
@@ -519,26 +671,25 @@ const Parcel_detail = () => {
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <select
-                      name="status"
-                      id="status"
-                      // onChange={(e) => {
-                      //   setStatus(e.target.value);
-                      //   validateStatus(e.target.value); // Validate status dynamically
-                      // }}
+                      value={status}
+                      onChange={(e) => {
+                        setStatus(e.target.value);
+                        setFormErrors({ ...formErrors, status: ""}); // Validate status dynamically
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select a status</option>
                       <option value="1">Active</option>
                       <option value="0">InActive</option>
                     </select>
-                    {/* {errors.status && (
+                    {formErrors.status && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {errors.status}
+                        {formErrors.status}
                       </p>
-                    )} */}
+                    )}
                   </div>
                 </div>
-                {/* {error.status && <p className="error">{error.status}</p>} */}
+                
 
                 <div className="flex  justify-end gap-2 mt-5 md:mt-14">
                   <button
@@ -549,7 +700,7 @@ const Parcel_detail = () => {
                   </button>
                   <button
                     className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
-                  // onClick={handlesubmit}
+                    onClick={handleAddSubmit}
                   >
                     Submit
                   </button>
@@ -583,19 +734,6 @@ const Parcel_detail = () => {
                 <div className="mt-10  rounded-lg ">
                   <div className="bg-white  rounded-xl w-full">
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Parcel ID <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter parcel ID"
-                          value={selectedParcel?.parcel_id}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -605,9 +743,16 @@ const Parcel_detail = () => {
                         <input
                           type="text"
                           placeholder="Enter order ID"
-                          value={selectedParcel?.order_id}
+                          value={editOrderId}
+                           onChange={(e) => {
+                            setEditOrderId(e.target.value);
+                            setFormErrors({ ...formErrors, editOrderId: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editOrderId && (
+                          <p className="text-red-500 text-sm">{formErrors.editOrderId}</p>
+                        )}
                       </div>
                     </div>
 
@@ -619,9 +764,16 @@ const Parcel_detail = () => {
                         <input
                           type="number"
                           placeholder="Enter piece number"
-                          value={selectedParcel?.piece_no}
+                          value={editPieceNo}
+                           onChange={(e) => {
+                            setEditPieceNo(e.target.value);
+                            setFormErrors({ ...formErrors, editPieceNo: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editPieceNo && (
+                          <p className="text-red-500 text-sm">{formErrors.editPieceNo}</p>
+                        )}
                       </div>
                     </div>
 
@@ -633,9 +785,16 @@ const Parcel_detail = () => {
                         <input
                           type="text"
                           placeholder="Enter weight"
-                          value={selectedParcel?.weight}
+                          value={editWeight}
+                          onChange={(e) => {
+                            setEditWeight(e.target.value);
+                            setFormErrors({ ...formErrors, editWeight: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editWeight && (
+                          <p className="text-red-500 text-sm">{formErrors.editWeight}</p>
+                        )}
                       </div>
                     </div>
 
@@ -648,9 +807,16 @@ const Parcel_detail = () => {
                         <input
                           type="text"
                           placeholder="Enter dimensions"
-                          value={selectedParcel?.dimensions}
+                          value={editDimension}
+                          onChange={(e) => {
+                            setEditDimension(e.target.value);
+                            setFormErrors({ ...formErrors, editDimension: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editDimension && (
+                          <p className="text-red-500 text-sm">{formErrors.editDimension}</p>
+                        )}
                       </div>
                     </div>
 
@@ -660,12 +826,19 @@ const Parcel_detail = () => {
                         Description <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
-                        <input
+                        <textarea
                           type="text"
                           placeholder="Enter description"
-                          value={selectedParcel?.description}
+                          value={description}
+                          onChange={(e) => {
+                            setEditDescription(e.target.value);
+                            setFormErrors({ ...formErrors, editDescription: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
+                        {formErrors.editDescription && (
+                          <p className="text-red-500 text-sm">{formErrors.editDescription}</p>
+                        )}
                       </div>
                     </div>
 
@@ -675,19 +848,25 @@ const Parcel_detail = () => {
                         <select
                           name="status"
                           id="status"
-                          value={selectedParcel?.status}
+                          value={status}
+                          onChange={(e) => {
+                            setStatus(e.target.value);
+                            setFormErrors({ ...formErrors, editStatus: "" });
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
+                          <option>Select status</option>
                           <option value="1">Active</option>
                           <option value="0">InActive</option>
                         </select>
-                      </div>
-                    </div>
-                    {errors.status && (
+                        {formErrors.editStatus && (
                       <p className="text-red-500 text-sm mb-4">
-                        {errors.status[0]}
+                        {formErrors.editStatus}
                       </p>
                     )}
+                      </div>
+                    </div>
+                    
 
                     <div className="flex justify-end gap-2 mt-14">
                       <button
@@ -698,6 +877,7 @@ const Parcel_detail = () => {
                       </button>
                       <button
                         //  onClick={() => handleSave(roleDetails.id)}
+                        onClick={handleUpdate}
                         className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
                       >
                         Update
