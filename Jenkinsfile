@@ -9,23 +9,27 @@ pipeline {
             }
         }
 
-        stage('Install') {
+        stage('Install Dependencies') {
             steps {
-                sh 'npm ci --legacy-peer-deps'
+                dir('Mainsource') {
+                    sh 'npm ci --legacy-peer-deps'
+                }
             }
         }
 
-        stage('Build') {
+        stage('Build Frontend') {
             steps {
-                sh 'npm run build'
+                dir('Mainsource') {
+                    sh 'npm run build'
+                }
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Production') {
             steps {
                 sh '''
                     rm -rf /var/www/cargocrm/cargocrm-frontend-react/dist/*
-                    cp -r dist/* /var/www/cargocrm/cargocrm-frontend-react/dist/
+                    cp -r Mainsource/dist/* /var/www/cargocrm/cargocrm-frontend-react/dist/
                 '''
             }
         }
