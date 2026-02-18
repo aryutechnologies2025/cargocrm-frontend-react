@@ -16,7 +16,10 @@ import { createRoot } from "react-dom/client";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { API_URL } from "../../Config";
-import { DataTable } from "primereact/datatable";
+import DataTable from "datatables.net-react";
+import DT from "datatables.net-dt";
+import "datatables.net-responsive-dt/css/responsive.dataTables.css";
+DataTable.use(DT);
 import { Column } from "primereact/column";
 import axiosInstance from "../../api/axiosInstance";
 
@@ -144,8 +147,8 @@ const Roles_Mainbar = () => {
         `api/roles/edit-roles/${editingRoleId}`,
         {
           name: editRoleName.trim(),
-          status: editStatus,   
-          updatedBy: userid    
+          status: editStatus,
+          updatedBy: userid
         }
       );
 
@@ -231,7 +234,6 @@ const Roles_Mainbar = () => {
     }
   };
 
-  // Open and close modals
   const openAddModal = () => {
     setIsAddModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
@@ -258,38 +260,38 @@ const Roles_Mainbar = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-// edit
+  // edit
   const openEditModal = async (row) => {
-  const roleId = row._id || row.id;
+    const roleId = row._id || row.id;
 
-  if (!roleId) {
-    toast.error("Invalid Role ID");
-    return;
-  }
-
-  try {
-    setEditingRoleId(roleId);
-    setIsEditModalOpen(true);
-    setIsAnimating(true);
-
-    const response = await axiosInstance.get(
-      `api/roles/view-roles/${roleId}`
-    );
-
-    console.log("openEditModal response", response.data);
-
-    if (response.data?.status === true || response.data?.success === true) {
-      const data = response.data.data;
-
-      setEditRoleName(data.name);
-      setEditStatus(String(data.status));
+    if (!roleId) {
+      toast.error("Invalid Role ID");
+      return;
     }
 
-  } catch (err) {
-    console.error("Edit fetch error:", err);
-    toast.error("Unable to fetch role details");
-  }
-};
+    try {
+      setEditingRoleId(roleId);
+      setIsEditModalOpen(true);
+      setIsAnimating(true);
+
+      const response = await axiosInstance.get(
+        `api/roles/view-roles/${roleId}`
+      );
+
+      console.log("openEditModal response", response.data);
+
+      if (response.data?.status === true || response.data?.success === true) {
+        const data = response.data.data;
+
+        setEditRoleName(data.name);
+        setEditStatus(String(data.status));
+      }
+
+    } catch (err) {
+      console.error("Edit fetch error:", err);
+      toast.error("Unable to fetch role details");
+    }
+  };
 
   const closeEditModal = () => {
     setIsAnimating(false);
@@ -298,84 +300,129 @@ const Roles_Mainbar = () => {
 
   const columns = [
     {
-      header: "Sno",
-      field: "Sno",
-      body: (rowData, options) => options.rowIndex + 1,
-    },
-    {
-      header: "Name",
-      field: "name", 
-    },
-    {
-      header: "Status",
-      field: "status",
-      body: (rowData) => {
-        const isActive = Number(rowData.status) === 1;
-
-        return (
-          <div
-            style={{
-              display: "inline-block",
-              padding: "4px 10px",
-              borderRadius: "50px",
-              fontSize: "12px",
-              fontWeight: 600,
-              background: isActive ? "#e6fffa" : "#ffe5e5",
-              color: isActive ? "green" : "red",
-            }}
-          >
-            {isActive ? "Active" : "Inactive"}
-          </div>
-        );
+      title: "Sno",
+      data: null,
+      render: (data, type, row, meta) => {
+        return meta.row + 1;
       },
     },
     {
-      header: "Action",
-      field: "action",
-      body: (row) => {
-        const roleId = row._id || row.id; // ✅ get id properly
-
-        return (
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => {
-                setViewRole(row);
-                setViewModalOpen(true);
-              }}
-              className="p-1 bg-blue-50 text-[#057fc4] rounded-md"
-            >
-              <FaEye />
-            </button>
-
-            <TfiPencilAlt
-              className="cursor-pointer"
-              onClick={() => openEditModal(row)}
-            />
-
-            <MdOutlineDeleteOutline
-              className="text-red-600 cursor-pointer"
-              onClick={() => deleteRoles(roleId)} // ✅ now correct
-            />
-          </div>
-        );
+      title: "Name",
+      data: "name",
+    },
+    {
+      title: "Status",
+      data: "status",
+      render: (data) => {
+        const textColor = data === 1 ? "red" : "green";
+        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
+        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
+                  ${data === 1 ? "Inactive" : "Active"}
+                </div>`;
       },
-    }
+    },
+    {
+      title: "Action",
+      data: null,
+      orderable: false,
+      render: (data, type, row) => {
+        const roleId = row._id || row.id;
+        const id = `actions-${row.sno || Math.random()}`;
+        setTimeout(() => {
+          const container = document.getElementById(id);
+          if (container) {
+            if (!container._root) {
+              container._root = createRoot(container);
+            }
+            container._root.render(
+              <div
+                className="action-container"
+                style={{
+                  display: "flex",
+                  gap: "15px",
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  className="modula-icon-edit flex gap-2"
+                  style={{
+                    color: "#000",
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setViewRole(row);
+                      setViewModalOpen(true);
 
+                    }}
+                    className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
+                  >
+                    <FaEye />
+                  </button>
+                  <TfiPencilAlt
+                    className="cursor-pointer "
+                    onClick={() => {
+                      openEditModal(row);
+                    }}
+                  />
+                  <MdOutlineDeleteOutline
+                    className="text-red-600 text-xl cursor-pointer"
+                    onClick={() => {
+                      deleteRoles(roleId);
+                    }}
+                  />
+                </div>
+              </div>,
+              container
+            );
+          }
+        }, 0);
+        return `<div id="${id}"></div>`;
+      },
+    },
   ];
 
   const resetFilters = () => {
     setRoleFilter("");
     setStatusFilter("");
-    setDateFilter(getToday());
+    setDateFilter("");
   };
 
+// const data = roles.filter((item) => {
+//   return (
+//     (roleFilter ? item.name === roleFilter : true) &&
+//     (statusFilter ? String(item.status) === statusFilter : true) &&
+//     (dateFilter ? item.created_at?.split("T")[0] === dateFilter : true)
+//   );
+// });
 
-  const data = roles.filter((item) => {
-    return (
-      (roleFilter ? item.name === roleFilter : true) &&
-      (statusFilter ? String(item.status) === statusFilter : true)
-    );
-  });
+// const data = roles.filter((item) => {
+//   const itemDate = item.created_at
+//     ? new Date(item.created_at).toISOString().split("T")[0]
+//     : "";
+
+//   return (
+//     (roleFilter ? item.name === roleFilter : true) &&
+//     (statusFilter ? String(item.status) === statusFilter : true) &&
+//     (dateFilter ? itemDate === dateFilter : true)
+//   );
+// });
+
+const data = roles.filter((item) => {
+  const itemDate = item.created_at
+    ? new Date(item.created_at).toISOString().split("T")[0]
+    : "";
+
+  return (
+    (!roleFilter || item.name === roleFilter) &&
+    (!statusFilter || String(item.status) === statusFilter) &&
+    (!dateFilter || itemDate === dateFilter)
+  );
+});
+
+
+
   console.log("data", data);
 
 
@@ -411,7 +458,7 @@ const Roles_Mainbar = () => {
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >
-                  <option value="">All Roles</option>
+                  <option value="">Select Roles</option>
                   {roles.map((role) => (
                     <option key={role.id} value={role.name}>
                       {role.name}
@@ -429,7 +476,7 @@ const Roles_Mainbar = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <option value="">All Status</option>
+                  <option value="">Select Status</option>
                   <option value="1">Active</option>
                   <option value="0">Inactive</option>
                 </select>
@@ -471,11 +518,10 @@ const Roles_Mainbar = () => {
           </div>
         </div>
 
-        {/* new */}
-        <div className="bg-white datatable-container md:mt-4">
 
+        <div className="bg-white datatable-container md:mt-4">
           <div className="table-scroll-container" id="datatable">
-            <DataTable
+            {/* <DataTable
               className="mt-2 md:mt-8"
               value={data}
               paginator
@@ -483,6 +529,7 @@ const Roles_Mainbar = () => {
               rowsPerPageOptions={[10, 25, 50, 100]}
               showGridlines
               resizableColumns
+              tableStyle={{ minWidth: '50rem' }}
               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
               paginatorClassName="custom-paginator"
               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -496,7 +543,21 @@ const Roles_Mainbar = () => {
                   style={col.style}
                 />
               ))}
-            </DataTable>
+            </DataTable> */}
+
+            <DataTable
+              data={data}
+              columns={columns}
+              options={{
+                paging: true,
+                searching: true,
+                ordering: true,
+                scrollX: true, // Horizontal scrolling
+                responsive: true, // Enable responsiveness
+                autoWidth: false, // Disable auto width for proper column adjustments
+              }}
+              className="display nowrap bg-white"
+            />
 
           </div>
         </div>
