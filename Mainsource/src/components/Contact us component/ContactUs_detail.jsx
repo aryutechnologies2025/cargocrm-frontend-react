@@ -31,11 +31,11 @@ const ContactUs_detail = () => {
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
     Sno: true,
-    name: true,
-    email: true,
+    username: true,
     date: true,
-    message: true,
-    status: true,
+    action: true,
+    ip_address: true,
+    // status: true,
   });
 
   const toggleColumn = (key) => {
@@ -44,11 +44,11 @@ const ContactUs_detail = () => {
 
       const columnIndexMap = {
         Sno: 0,
-        name: 1,
-        email: 2,
-        date: 3,
-        message: 4,
-        status: 5,
+        username: 1,
+        date: 2,
+        action: 3,
+        ip_address: 4,
+        // status: 5,
       };
 
       const index = columnIndexMap[key];
@@ -92,136 +92,133 @@ const ContactUs_detail = () => {
       data: "Sno",
     },
     {
-      title: "Name",
-      data: "name",
+      title: "Username",
+      data: "username",
     },
     {
-      title: "Message",
-      data: "message",
-    },
-    {
-      title: "Email",
-      data: "email",
+      title: "Action",
+      data: "action",
     },
     {
       title: "Date",
       data: "date",
     },
+    {
+      title: "IP Address",
+      data: "ip_address",
+    },
     
-    {
-      title: "Status",
-      data: "status",
-      render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
-      },
-    },
-    {
-      title: "Action",
-      data: null,
-      render: (data, type, row) => {
-        const id = `actions-${row.sno || Math.random()}`;
-        setTimeout(() => {
-          const container = document.getElementById(id);
-          if (container) {
-            if (!container._root) {
-              container._root = createRoot(container);
-            }
-            container._root.render(
-              <div
-                className="action-container"
-                style={{
-                  display: "flex",
-                  gap: "15px",
-                  alignItems: "flex-end",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  className="modula-icon-edit flex gap-2"
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      setViewContact(row);
-                      setViewModalOpen(true);
+    // {
+    //   title: "Status",
+    //   data: "status",
+    //   render: (data) => {
+    //     const textColor = data === 1 ? "red" : "green";
+    //     const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
+    //     return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
+    //               ${data === 1 ? "Inactive" : "Active"}
+    //             </div>`;
+    //   },
+    // },
+    // {
+    //   title: "Action",
+    //   data: null,
+    //   render: (data, type, row) => {
+    //     const id = `actions-${row.sno || Math.random()}`;
+    //     setTimeout(() => {
+    //       const container = document.getElementById(id);
+    //       if (container) {
+    //         if (!container._root) {
+    //           container._root = createRoot(container);
+    //         }
+    //         container._root.render(
+    //           <div
+    //             className="action-container"
+    //             style={{
+    //               display: "flex",
+    //               gap: "15px",
+    //               alignItems: "flex-end",
+    //               justifyContent: "center",
+    //             }}
+    //           >
+    //             <div
+    //               className="modula-icon-edit flex gap-2"
+    //               style={{
+    //                 color: "#000",
+    //               }}
+    //             >
+    //               <button
+    //                 onClick={() => {
+    //                   setViewContact(row);
+    //                   setViewModalOpen(true);
 
-                    }}
-                    className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
-                  >
-                    <FaEye />
-                  </button>
-                  {/* <TfiPencilAlt
-                    className="cursor-pointer "
-                    onClick={() => {
-                      openEditModal(
-                        row._id,
-                        row.name,
-                        row.date,
-                        row.email,
-                        row.phone_no,
-                        row.message,
-                        row.status,
-                      );
-                    }}
-                  /> */}
-                  <MdOutlineDeleteOutline
-                    className="text-red-600 text-xl cursor-pointer"
-                    onClick={() => {
-                      deleteRoles(row._id);
-                    }}
-                  />
-                </div>
+    //                 }}
+    //                 className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
+    //               >
+    //                 <FaEye />
+    //               </button>
+    //               {/* <TfiPencilAlt
+    //                 className="cursor-pointer "
+    //                 onClick={() => {
+    //                   openEditModal(
+    //                     row._id,
+    //                     row.name,
+    //                     row.date,
+    //                     row.email,
+    //                     row.phone_no,
+    //                     row.message,
+    //                     row.status,
+    //                   );
+    //                 }}
+    //               /> */}
+    //               <MdOutlineDeleteOutline
+    //                 className="text-red-600 text-xl cursor-pointer"
+    //                 onClick={() => {
+    //                   deleteRoles(row._id);
+    //                 }}
+    //               />
+    //             </div>
 
-                {/* <div className="modula-icon-del" style={{
-                      color: "red"
-                    }}>
-                      <RiDeleteBin6Line
-                        onClick={() => handleDelete(row.id)}
-                      />
-                    </div> */}
-              </div>,
-              container
-            );
-          }
-        }, 0);
-        return `<div id="${id}"></div>`;
-      },
-    },
+    //             {/* <div className="modula-icon-del" style={{
+    //                   color: "red"
+    //                 }}>
+    //                   <RiDeleteBin6Line
+    //                     onClick={() => handleDelete(row.id)}
+    //                   />
+    //                 </div> */}
+    //           </div>,
+    //           container
+    //         );
+    //       }
+    //     }, 0);
+    //     return `<div id="${id}"></div>`;
+    //   },
+    // },
   ];
 
   const data = [
     {
       Sno: 1,
-      name: "Jas",
-      date: "12-1-2026",
-      email: "writer@gmail.com",
-      phone_no: "9685748596",
-      message: "Hello",
-      Status: 0,
+      username: "Jas",
+      date: "12-1-2026 10:32AM",
+      action: "Login",
+      ip_address: "191.168.1.1",
+      // Status: 0,
     },
     {
       Sno: 2,
-      name: "Jas",
-      date: "12-1-2026",
-      email: "writer@gmail.com",
-      phone_no: "9685748596",
-      message: "Hello",
-      Status: 1,
+      username: "Jas",
+      date: "12-1-2026 10:10AM",
+      action: "Logout",
+      ip_address: "192.168.1.2",
+      // Status: 1,
     },
     {
       Sno: 3,
-      name: "Jas",
-      date: "12-1-2026",
-      email: "writer@gmail.com",
-      phone_no: "9685748596",
-      message: "Hello",
-      status: 1,
+      username: "Jas",
+      date: "12-1-2026 10:05AM",
+      action: "Login",
+      ip_address: "193.168.1.3",
+      // status: 1,
     },
   ];
 
