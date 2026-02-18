@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Swal from "sweetalert2";
 import { TfiPencilAlt } from "react-icons/tfi";
 import ReactDOMServer from "react-dom/server";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import aryu_logo from "../../assets/aryu_logo.svg";
 import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
-
-// import DT from "datatables.net-dt";
-// import "datatables.net-responsive-dt/css/responsive.dataTables.css";
 import Footer from "../Footer";
 import Mobile_Sidebar from "../Mobile_Sidebar";
 import { IoIosArrowForward } from "react-icons/io";
@@ -18,10 +18,14 @@ import { MdOutlineDeleteOutline } from "react-icons/md";
 import { API_URL } from "../../Config";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import axiosInstance from "../../api/axiosInstance";
 
 
 const Roles_Mainbar = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [totalRecords, setTotalRecords] = useState("")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -30,8 +34,9 @@ const Roles_Mainbar = () => {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewRole, setViewRole] = useState(null);
   const [roles, setRoles] = useState([]);
-  const [roleFilter, setRoleFilter] = useState([]);
-  const [statusFilter, setStatusFilter] = useState([]);
+  console.log("role", roles);
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const getToday = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
@@ -42,6 +47,21 @@ const Roles_Mainbar = () => {
   const [editRoleName, setEditRoleName] = useState("");
   const [editStatus, setEditStatus] = useState("");
   const [formErrors, setFormErrors] = useState({});
+  const [editingRoleId, setEditingRoleId] = useState(null);
+  console.log("editing role ID", editingRoleId);
+  const [roleDetails, setRoleDetails] = useState({
+    name: "",
+    status: "",
+  });
+
+  //local storage 
+  const storedDetatis = localStorage.getItem("cargouser");
+  console.log("storedDetatis.... : ", storedDetatis);
+  const parsedDetails = JSON.parse(storedDetatis);
+  console.log("....parsedDetails.... : ", parsedDetails);
+  const userid = parsedDetails ? parsedDetails.id : null;
+  console.log("userid.... : ", userid);
+
 
   const validateAddForm = () => {
     let errors = {};
@@ -78,132 +98,105 @@ const Roles_Mainbar = () => {
   };
 
   // create
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
 
-    const handleAddSubmit = async (e) => {
-      e.preventDefault();
-  
-      if (!validateCreateForm()) {
-        return;
-      }
-  
-      if (submitting) return;
-      setSubmitting(true);
-  
-      try {
-        const formdata = {
-          company_id: pssCompany,
-          role_name,
-          status,
-          department_id: department,
-          created_by: userid,
-        };
-  
-        const response = await axiosInstance.post(
-          `${API_URL}api/roles/create-roles`,
-          formdata
-        );
-  
-        if (response.data.status === true || response.data.success === true) {
-          toast.success("Role created successfully");
-          fetchRoles();
-          setDepartment("");
-          closeAddModal();
-        } else {
-          toast.error("Failed to create role");
-        }
-      } catch (err) {
-        toast.error("Error creating role");
-      } finally {
-        setSubmitting(false);
-      }
-    };
+    if (!validateAddForm()) {
+      return;
+    }
 
-  // edit
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const formdata = {
+        name: roleName.trim(),
+        status: status,
+        created_by: userid,
+      };
 
-    const handleUpdate = async () => {
-      if (!validateEditForm()) {
-        return;
-      }
-  
-      try {
-        const response = await axiosInstance.post(
-          `${API_URL}api/roles/edit-roles/${editingRoleId}`,
-          { 
-            role_name: roleDetails.role_name,
-            department_id: roleDetails.department_id,
-            company_id: roleDetails.company_id,
-            status: roleDetails.status,
-            updated_by: userid,
-          }
-        );
-  
-        if (response.data.status || response.data.success) {
-          toast.success("Role updated successfully");
-          closeEditModal();
-          fetchRoles();
-        } else {
-          toast.error("Failed to update role");
-        }
-      } catch (err) {
-        toast.error("Error updating role");
-      }
-    };
-  const openViewModal = async (row) => {
-    const response = await axiosInstance.get(
-      `${API_URL}api/role/edit/${row.id}`
-    );
+      const response = await axiosInstance.post(
+        `api/roles/create-roles`,
+        formdata
+      );
 
-    if (response.data?.status) {
-      setViewContact(response.data.data);
-      setViewModalOpen(true);
+      if (response.data.status === true || response.data.success === true) {
+        toast.success("Role created successfully");
+        fetchRoles();
+        closeAddModal();
+      } else {
+        toast.error("Failed to create role");
+      }
+    } catch (err) {
+      console.error("Create role error:", err.response?.data || err);
+      toast.error(err.response?.data?.message || "Error creating role");
+    }
+    finally {
+      setSubmitting(false);
     }
   };
+
+  // edit
+  const handleUpdate = async () => {
+    if (!validateEditForm()) return;
+
+    try {
+      const response = await axiosInstance.put(
+        `api/roles/edit-roles/${editingRoleId}`,
+        {
+          name: editRoleName.trim(),
+          status: editStatus,   
+          updatedBy: userid    
+        }
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Role updated successfully");
+        fetchRoles();
+        closeEditModal();
+      } else {
+        toast.error("Failed to update role");
+      }
+    } catch (error) {
+      console.error("Update error:", error.response?.data || error);
+      toast.error(error.response?.data?.message || "Error updating role");
+    }
+
+  };
+
   // delete
-  const deleteRoles = (roleId) => {
-    Swal.fire({
+  const deleteRoles = async (roleId) => {
+    if (!roleId) {
+      toast.error("Invalid Role ID");
+      return;
+    }
+
+    const result = await Swal.fire({
       title: "Are you sure?",
       text: "Do you want to delete this role?",
       icon: "warning",
       showCancelButton: true,
-
       cancelButtonText: "Cancel",
       confirmButtonText: "Yes, delete it!",
-
-      //    confirmButtonColor: "#DF3A3A", 
-      // cancelButtonColor: "#ffffff", 
-
-      // customClass: {
-      //   popup: "custom-swal-popup",
-      //   title: "custom-swal-title",
-      //   htmlContainer: "custom-swal-text",
-      //   confirmButton: "custom-swal-confirm",
-      //   cancelButton: "custom-swal-cancel",
-      //   icon: "custom-swal-icon"
-      // }
-    }).then((result) => {
-      if (result.isConfirmed) {
-
-        axiosInstance.delete(`${API_URL}api/roles/delete-roles`, {
-          data: { 
-            record_id: roleId
-          }
-        })
-          .then((response) => {
-            console.log("Delete response:", response.data);
-            if (response.data.status === true || response.data.success === true) {
-              toast.success("Role has been deleted.");
-              fetchRoles(); // Refresh the roles list
-
-            } else {
-              Swal.fire("Error!", response.data.message || "Failed to delete role.", "error");
-            }
-          })
-          .catch((error) => {
-            console.error("Error deleting role:", error);
-            Swal.fire("Error!", "Failed to delete role.", "error");
-          });
-      }
     });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await axiosInstance.delete(
+        `api/roles/delete-roles/${roleId}`
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Role deleted successfully");
+        fetchRoles(); // refresh table
+
+      } else {
+        toast.error(response.data?.message || "Failed to delete role");
+      }
+    } catch (error) {
+      console.error("Delete error:", error.response?.data || error);
+      toast.error("Error deleting role");
+    }
   };
 
   useEffect(() => {
@@ -212,40 +205,26 @@ const Roles_Mainbar = () => {
 
   // list
   const fetchRoles = async () => {
+    console.log("fetchRoles called");
+    setLoading(true);
     try {
-      const response = await axiosInstance.get(`${API_URL}api/roles/view-roles`);
+      const response = await axiosInstance.get(
+        `api/roles/view-roles`
+      );
 
-      console.log("...RoleFetching All.... : ", response.data);
+      console.log("Role API Response:", response.data);
 
-      if (response.data.status === true) {
-        // roles
-        setRoles(response.data.data || []);
-        setTotalRecords(response.data.data.length || 0);
-
-        // departments (from SAME API)
-        const activeDepartments = (response.data.departments || []).filter(
-          (dept) => dept.status === "1" || dept.status === 1
-        );
-
-        setDepartments(activeDepartments);
-        //  set pss company options
-        const pssCompanyOptions = response.data.psscompany.map((company) => ({
-          label: company.name,
-          value: company.id,
-        }));
-
-        setPssCompanyOptions(pssCompanyOptions);
+      if (response.data?.status === true || response.data?.success === true) {
+        const roleData = response.data.data || [];
+        setRoles(roleData);
+        setTotalRecords(roleData.length);
       } else {
         setRoles([]);
-        setPssCompanyOptions([]);
-        setDepartments([]);
         setTotalRecords(0);
       }
-    } catch (err) {
-      console.error("Failed to fetch roles", err);
+    } catch (error) {
+      console.error("Fetch roles error:", error);
       setRoles([]);
-      setDepartments([]);
-      setPssCompanyOptions([]);
       setTotalRecords(0);
     } finally {
       setLoading(false);
@@ -279,50 +258,38 @@ const Roles_Mainbar = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
+// edit
   const openEditModal = async (row) => {
+  const roleId = row._id || row.id;
 
+  if (!roleId) {
+    toast.error("Invalid Role ID");
+    return;
+  }
 
-    try {
-      setEditingRoleId(row.id);
-      setIsEditModalOpen(true);
-      setIsAnimating(true);
+  try {
+    setEditingRoleId(roleId);
+    setIsEditModalOpen(true);
+    setIsAnimating(true);
 
-      const response = await axiosInstance.get(
-        `${API_URL}api/role/edit/${row.id}`
-      );
+    const response = await axiosInstance.get(
+      `api/roles/view-roles/${roleId}`
+    );
 
-      console.log("openEditModal response", response.data);
+    console.log("openEditModal response", response.data);
 
-      if (response.data?.status === true) {
-        const data = response.data.data;
+    if (response.data?.status === true || response.data?.success === true) {
+      const data = response.data.data;
 
-        console.log(
-          "Edit dept value:",
-          roleDetails.department_id,
-          typeof roleDetails.department_id
-        );
-
-        //    setRoleDetails({
-        //   role_name: row.role_name,
-        // department_id: row.department_id?.toString(),
-        // company_id: row.company_id, 
-        // status: row.status?.toString(),
-        // });
-        setRoleDetails({
-          role_name: data.role_name,
-          department_id: Number(data.department_id), // ✅ force number
-          company_id: data.company_id,
-          status: Number(data.status),
-        });
-      }
-      else {
-        toast.error("Failed to load role details");
-      }
-    } catch (err) {
-      console.error("Edit fetch error:", err);
-      toast.error("Unable to fetch role details");
+      setEditRoleName(data.name);
+      setEditStatus(String(data.status));
     }
-  };
+
+  } catch (err) {
+    console.error("Edit fetch error:", err);
+    toast.error("Unable to fetch role details");
+  }
+};
 
   const closeEditModal = () => {
     setIsAnimating(false);
@@ -333,98 +300,83 @@ const Roles_Mainbar = () => {
     {
       header: "Sno",
       field: "Sno",
+      body: (rowData, options) => options.rowIndex + 1,
     },
     {
       header: "Name",
-      field: "name",
+      field: "name", 
     },
     {
       header: "Status",
       field: "status",
-      render: (data) => {
-        const isActive = Number(data) === 1;
+      body: (rowData) => {
+        const isActive = Number(rowData.status) === 1;
 
-        return `
-        <div style="
-          display:inline-block;
-          padding:4px 10px;
-          border-radius:50px;
-          font-size:12px;
-          font-weight:600;
-          background:${isActive ? "#e6fffa" : "#ffe5e5"};
-          color:${isActive ? "green" : "red"};
-        ">
-          ${isActive ? "Active" : "Inactive"}
-        </div>
-      `;
+        return (
+          <div
+            style={{
+              display: "inline-block",
+              padding: "4px 10px",
+              borderRadius: "50px",
+              fontSize: "12px",
+              fontWeight: 600,
+              background: isActive ? "#e6fffa" : "#ffe5e5",
+              color: isActive ? "green" : "red",
+            }}
+          >
+            {isActive ? "Active" : "Inactive"}
+          </div>
+        );
       },
     },
     {
       header: "Action",
-      field: null,
-      render: (data, type, row) => {
-        const id = `actions-${row.Sno}`;
+      field: "action",
+      body: (row) => {
+        const roleId = row._id || row.id; // ✅ get id properly
 
-        setTimeout(() => {
-          const container = document.getElementById(id);
-          if (container) {
-            if (!container._root) {
-              container._root = createRoot(container);
-            }
+        return (
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => {
+                setViewRole(row);
+                setViewModalOpen(true);
+              }}
+              className="p-1 bg-blue-50 text-[#057fc4] rounded-md"
+            >
+              <FaEye />
+            </button>
 
-            container._root.render(
-              <div className="flex gap-3 justify-center">
-                <button
-                  onClick={() => {
-                    setViewRole(row);
-                    setViewModalOpen(true);
-                  }}
-                  className="p-1 bg-blue-50 text-blue-600 rounded-md"
-                >
-                  <FaEye />
-                </button>
+            <TfiPencilAlt
+              className="cursor-pointer"
+              onClick={() => openEditModal(row)}
+            />
 
-                <TfiPencilAlt
-                  className="cursor-pointer"
-                  onClick={() => openEditModal(row)}
-                />
-
-                <MdOutlineDeleteOutline
-                  className="text-red-600 cursor-pointer"
-                  onClick={() => deleteRoles(row._id)}
-                />
-              </div>,
-              container
-            );
-          }
-        }, 0);
-
-        return `<div id="${id}"></div>`;
+            <MdOutlineDeleteOutline
+              className="text-red-600 cursor-pointer"
+              onClick={() => deleteRoles(roleId)} // ✅ now correct
+            />
+          </div>
+        );
       },
-    },
+    }
+
   ];
 
   const resetFilters = () => {
     setRoleFilter("");
     setStatusFilter("");
-    setDateFilter(""); // reset to today
+    setDateFilter(getToday());
   };
 
-  const rawData = [
-    { Sno: 1, role_name: "Writer", Status: 0, date: "2026-02-01" },
-    { Sno: 2, role_name: "Editor", Status: 1, date: "2026-02-02" },
-    { Sno: 3, role_name: "Editor", Status: 1, date: "2026-02-03" },
-  ];
 
   const data = roles.filter((item) => {
     return (
-      (roleFilter ? item.role_name === roleFilter : true) &&
-      (statusFilter ? String(item.status) === statusFilter : true) &&
-      (dateFilter ? item.date === dateFilter : true)
+      (roleFilter ? item.name === roleFilter : true) &&
+      (statusFilter ? String(item.status) === statusFilter : true)
     );
   });
-
-
+  console.log("data", data);
 
 
   return (
@@ -460,8 +412,12 @@ const Roles_Mainbar = () => {
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >
                   <option value="">All Roles</option>
-                  <option value="Writer">Writer</option>
-                  <option value="Editor">Editor</option>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.name}>
+                      {role.name}
+                    </option>
+                  ))}
+
                 </select>
               </div>
 
@@ -474,8 +430,8 @@ const Roles_Mainbar = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="">All Status</option>
-                  <option value="0">Active</option>
-                  <option value="1">Inactive</option>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
                 </select>
               </div>
 
@@ -523,21 +479,14 @@ const Roles_Mainbar = () => {
               className="mt-2 md:mt-8"
               value={data}
               paginator
-              // rows={rows}
-              // first={(page - 1) * rows}
-              // onPage={onPageChange}
-              // totalRecords={totalRecords}
+              rows={10}
               rowsPerPageOptions={[10, 25, 50, 100]}
-              // globalFilter={globalFilter}
               showGridlines
               resizableColumns
               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
               paginatorClassName="custom-paginator"
               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-            // loading={loading}
             >
-
-              {/* Render only selected columns */}
               {columns.map((col, index) => (
                 <Column
                   key={index}
@@ -548,6 +497,7 @@ const Roles_Mainbar = () => {
                 />
               ))}
             </DataTable>
+
           </div>
         </div>
 
@@ -587,7 +537,7 @@ const Roles_Mainbar = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <input
                       type="text"
-                      id="role_name"
+                      id="name"
                       value={roleName}
                       placeholder="Enter role name"
                       onChange={(e) => {
@@ -769,7 +719,7 @@ const Roles_Mainbar = () => {
                 {/* Name */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Role Name</span>
-                  <span>{viewRole.role_name}</span>
+                  <span>{viewRole.name}</span>
                 </div>
 
 

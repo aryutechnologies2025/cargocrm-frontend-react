@@ -30,7 +30,7 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("admin_token");
       localStorage.removeItem("admin_token_expires");
-      window.location.href = "/";
+      // window.location.href = "/";
     }
     return Promise.reject(error);
   }
