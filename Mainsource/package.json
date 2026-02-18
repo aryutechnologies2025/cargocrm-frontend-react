@@ -19,6 +19,7 @@
     "datatables.net-react": "^1.0.0",
     "datatables.net-responsive-dt": "^3.0.3",
     "datatables.net-select-dt": "^2.1.0",
+    "js-cookie": "^3.0.5",
     "material-react-table": "^3.1.0",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.7",
