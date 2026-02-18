@@ -50,19 +50,13 @@ html {
   transition: background-color 0.2s ease;
 }
 
-/*  */
-
 .datatable-container{
-  padding: 2px;
+  padding: 5px;
 }
 .p-resizable-column{
   background-color: #e6f2fa;
-}
-.p-datatable-tbody{
-  padding: 5px;
-}
-.td{
-  background-color: #067fc4;
+  padding: 1px;
+  font-size: 15px;
 }
 .dt-length{
   text-transform: capitalize;
@@ -145,7 +139,7 @@ html {
 .dataTable th,
 .dataTable td {
   text-align: center;
-  padding: 8px;
+  padding: 7px;
   white-space: wrap; /* Prevent wrapping in cells */
 }
 
@@ -200,5 +194,8 @@ tbody {
   font-weight: 600;
 }
 .dt-orderable-asc {
+  background-color: #e6f2fa;
+}
+.dt-orderable-none{
   background-color: #e6f2fa;
 }
