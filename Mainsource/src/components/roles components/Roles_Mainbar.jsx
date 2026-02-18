@@ -52,10 +52,6 @@ const Roles_Mainbar = () => {
   const [formErrors, setFormErrors] = useState({});
   const [editingRoleId, setEditingRoleId] = useState(null);
   console.log("editing role ID", editingRoleId);
-  const [roleDetails, setRoleDetails] = useState({
-    name: "",
-    status: "",
-  });
 
   //local storage 
   const storedDetatis = localStorage.getItem("cargouser");
@@ -71,8 +67,8 @@ const Roles_Mainbar = () => {
 
     if (!roleName.trim()) {
       errors.roleName = "Role name is required";
-    } else if (roleName.length < 3) {
-      errors.roleName = "Role name must be at least 3 characters";
+    } else if (roleName.length < 1) {
+      errors.roleName = "Role name must be at least 1 characters";
     }
 
     if (status === "") {
@@ -88,8 +84,8 @@ const Roles_Mainbar = () => {
 
     if (!editRoleName.trim()) {
       errors.editRoleName = "Role name is required";
-    } else if (editRoleName.length < 3) {
-      errors.editRoleName = "Role name must be at least 3 characters";
+    } else if (editRoleName.length < 1) {
+      errors.editRoleName = "Role name must be at least 1 characters";
     }
 
     if (editStatus === "") {
@@ -314,11 +310,27 @@ const Roles_Mainbar = () => {
       title: "Status",
       data: "status",
       render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
+        const isActive = data === 1 || data === "1";
+
+        const textColor = isActive ? "green" : "red";
+        const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
+
+        return `
+      <div style="
+        display: inline-block;
+        padding: 4px 8px;
+        color: ${textColor};
+        background-color: ${bgColor};
+        border: 1px solid ${bgColor};
+        border-radius: 50px;
+        text-align: center;
+        width:100px;
+        font-size: 10px;
+        font-weight: 700;
+      ">
+        ${isActive ? "Active" : "Inactive"}
+      </div>
+    `;
       },
     },
     {
@@ -389,37 +401,37 @@ const Roles_Mainbar = () => {
     setDateFilter("");
   };
 
-// const data = roles.filter((item) => {
-//   return (
-//     (roleFilter ? item.name === roleFilter : true) &&
-//     (statusFilter ? String(item.status) === statusFilter : true) &&
-//     (dateFilter ? item.created_at?.split("T")[0] === dateFilter : true)
-//   );
-// });
+  // const data = roles.filter((item) => {
+  //   return (
+  //     (roleFilter ? item.name === roleFilter : true) &&
+  //     (statusFilter ? String(item.status) === statusFilter : true) &&
+  //     (dateFilter ? item.created_at?.split("T")[0] === dateFilter : true)
+  //   );
+  // });
 
-// const data = roles.filter((item) => {
-//   const itemDate = item.created_at
-//     ? new Date(item.created_at).toISOString().split("T")[0]
-//     : "";
+  // const data = roles.filter((item) => {
+  //   const itemDate = item.created_at
+  //     ? new Date(item.created_at).toISOString().split("T")[0]
+  //     : "";
 
-//   return (
-//     (roleFilter ? item.name === roleFilter : true) &&
-//     (statusFilter ? String(item.status) === statusFilter : true) &&
-//     (dateFilter ? itemDate === dateFilter : true)
-//   );
-// });
+  //   return (
+  //     (roleFilter ? item.name === roleFilter : true) &&
+  //     (statusFilter ? String(item.status) === statusFilter : true) &&
+  //     (dateFilter ? itemDate === dateFilter : true)
+  //   );
+  // });
 
-const data = roles.filter((item) => {
-  const itemDate = item.created_at
-    ? new Date(item.created_at).toISOString().split("T")[0]
-    : "";
+  const data = roles.filter((item) => {
+    const itemDate = item.created_at
+      ? new Date(item.created_at).toISOString().split("T")[0]
+      : "";
 
-  return (
-    (!roleFilter || item.name === roleFilter) &&
-    (!statusFilter || String(item.status) === statusFilter) &&
-    (!dateFilter || itemDate === dateFilter)
-  );
-});
+    return (
+      (!roleFilter || item.name === roleFilter) &&
+      (!statusFilter || String(item.status) === statusFilter) &&
+      (!dateFilter || itemDate === dateFilter)
+    );
+  });
 
 
 
@@ -427,7 +439,7 @@ const data = roles.filter((item) => {
 
 
   return (
-    <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
+    <div className="bg-gray-100 flex flex-col justify-between w-full min-h-screen px-5 pt-2 md:pt-4">
       <div>
         <Mobile_Sidebar />
         <div className="flex  gap-2 mt-2 md:mt-0 ms-5 items-center">
@@ -521,29 +533,7 @@ const data = roles.filter((item) => {
 
         <div className="bg-white datatable-container md:mt-4">
           <div className="table-scroll-container" id="datatable">
-            {/* <DataTable
-              className="mt-2 md:mt-8"
-              value={data}
-              paginator
-              rows={10}
-              rowsPerPageOptions={[10, 25, 50, 100]}
-              showGridlines
-              resizableColumns
-              tableStyle={{ minWidth: '50rem' }}
-              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
-              paginatorClassName="custom-paginator"
-              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-            >
-              {columns.map((col, index) => (
-                <Column
-                  key={index}
-                  field={col.field}
-                  header={col.header}
-                  body={col.body}
-                  style={col.style}
-                />
-              ))}
-            </DataTable> */}
+
 
             <DataTable
               data={data}
@@ -572,7 +562,7 @@ const data = roles.filter((item) => {
             <div className="absolute inset-0 " onClick={closeAddModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[43vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
                 }`}
             >
               <div
@@ -583,9 +573,9 @@ const data = roles.filter((item) => {
                 <IoIosArrowForward className="w-3 h-3" />
               </div>
 
-              <div className="px-5 lg:px-14 py-2 md:py-10">
+              <div className="px-5 lg:px-14 py-2 md:py-5">
                 <p className="text-2xl md:text-3xl font-medium">Add Role</p>
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                <div className="mt-2 md:mt-4 flex justify-between items-center ">
                   <div className="">
                     <label
                       htmlFor="roleName"
@@ -645,7 +635,6 @@ const data = roles.filter((item) => {
 
                   </div>
                 </div>
-                {/* {error.status && <p className="error">{error.status}</p>} */}
 
                 <div className="flex  justify-end gap-2 mt-5 md:mt-14">
                   <button
@@ -673,7 +662,7 @@ const data = roles.filter((item) => {
             <div className="absolute inset-0 " onClick={closeEditModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[43vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
                 }`}
             >
               <div
@@ -684,10 +673,10 @@ const data = roles.filter((item) => {
                 <IoIosArrowForward className="w-3 h-3" />
               </div>
 
-              <div className="px-5 lg:px-14 py-10">
+              <div className="px-5 lg:px-14 py-5">
                 <p className="text-2xl md:text-3xl font-medium">Edit Roles</p>
 
-                <div className="mt-10  rounded-lg ">
+                <div className="mt-5 rounded-lg ">
                   <div className="bg-white  rounded-xl w-full">
 
                     <div className="mt-8 flex justify-between items-center">
