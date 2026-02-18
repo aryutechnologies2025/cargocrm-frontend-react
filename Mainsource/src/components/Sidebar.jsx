@@ -8,7 +8,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { BsCalendar4 } from "react-icons/bs";
 import { IoPeopleOutline } from "react-icons/io5";
 import { CiDeliveryTruck, CiBoxList } from "react-icons/ci";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
 import { BsCalendar2Check } from "react-icons/bs";
@@ -22,6 +22,8 @@ import cargoLord from "../assets/cargoLord_logo.png";
 import { MdOutlineCreditScore } from "react-icons/md";
 import { MdContacts } from "react-icons/md";
 import { TbLogs } from "react-icons/tb";
+import axiosInstance from "../api/axiosInstance";
+import { API_URL } from "../Config";
 
 
 const Sidebar = () => {
@@ -32,6 +34,7 @@ const Sidebar = () => {
   });
   const [selectAnyOneClicked, setSelectAnyOneClicked] = useState(false);
   const [currentOpen, setCurrentOpen] = useState(null);
+  const [buttonLoading, setButtonLoading] = useState(false);
   const toggleMenu = (menu) => {
     setCurrentOpen(currentOpen === menu ? null : menu);
   };
@@ -45,15 +48,48 @@ const Sidebar = () => {
     localStorage.setItem("sidebarState", newState); // Persist the new state
   };
 
-  const onClickSidebarMenu = (label) => {
-    if (label === "/") {
-      navigate("/");
-      window.scrollTo({ top: 0, behavior: "instant" });
-    } else {
-      navigate(`/${label.toLowerCase()}`);
+const onClickSidebarMenu = async (label) => {
+
+  if (label === "logout") {
+    try {
+      setButtonLoading(true);
+      await logoutUser();
+    } catch (err) {
+      console.log("Logout error", err);
+    } finally {
+      setButtonLoading(false);
+      navigate("/", { replace: true });
       window.scrollTo({ top: 0, behavior: "instant" });
     }
-  };
+    return;
+  }
+
+  // normal navigation
+  navigate(`/${label.toLowerCase()}`);
+  window.scrollTo({ top: 0, behavior: "instant" });
+};
+;
+
+
+
+const isLoggingOut = useRef(false);
+
+const logoutUser = async () => {
+  if (isLoggingOut.current) return;
+  isLoggingOut.current = true;
+
+  try {
+    const response = await axiosInstance.post("/api/auth/logout");
+    return;
+    console.log("Logout API success");
+  } catch (error) {
+    console.error("Logout API failed", error);
+  } finally {
+    localStorage.clear();
+    sessionStorage.clear();
+  }
+};
+
 
   const onChangeSelect = (e) => {
     let value = e.target.value;
@@ -380,7 +416,7 @@ const Sidebar = () => {
 
               {/* logout */}
               <div
-                onClick={() => onClickSidebarMenu("/")}
+                onClick={() => onClickSidebarMenu("logout")}
                 className={`flex items-center ${arrowClicked ? "justify-center" : "justify-normal"
                   } px-2 py-3 gap-5 md:mt-2 items-center bg-[#067fc4] hover:bg-[#2d93cf] rounded-full cursor-pointer`}
               >
