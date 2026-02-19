@@ -15,10 +15,23 @@ import { useNavigate } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
+import axiosInstance from "../../api/axiosInstance";
 DataTable.use(DT);
+import { Dropdown } from "primereact/dropdown";
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
 
 const User_detail = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [totalRecords, setTotalRecords] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -26,26 +39,44 @@ const User_detail = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewUser, setViewUser] = useState(null);
-  const [roleFilter, setRoleFilter] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState([]);
+  console.log("statusFilter",statusFilter);
   const getToday = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
   };
   const [dateFilter, setDateFilter] = useState(getToday());
+  const [isDateTouched, setIsDateTouched] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
+  const [roles, setRoles] = useState("");
   const [status, setStatus] = useState("");
   const [editFirstName, setEditFirstName] = useState("");
   const [editLastName, setEditLastName] = useState("");
   const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editRole, setEditRole] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  const [editingUserId, setEditingUserId] = useState(null);
+  console.log("editing User ID", editingUserId);
+
+  //local storage 
+  const storedDetatis = localStorage.getItem("cargouser");
+  console.log("storedDetatis.... : ", storedDetatis);
+  const parsedDetails = JSON.parse(storedDetatis);
+  console.log("....parsedDetails.... : ", parsedDetails);
+  const userid = parsedDetails ? parsedDetails.id : null;
+  console.log("userid.... : ", userid);
+
+  const roleOptions = roles;
 
   const validateAddForm = () => {
     let errors = {};
@@ -58,6 +89,9 @@ const User_detail = () => {
     }
     if (!email.trim()) {
       errors.email = "Email is required";
+    }
+    if (!password.trim()) {
+      errors.password = "Password is required";
     }
     if (!phone.trim()) {
       errors.phone = "Phone Number is required";
@@ -85,6 +119,9 @@ const User_detail = () => {
     if (!editEmail.trim()) {
       errors.editEmail = "Email is required";
     }
+    if (!editPassword.trim()) {
+      errors.editPassword = "Password is required";
+    }
     if (!editPhone.trim()) {
       errors.editPhone = "Phone Number is required";
     }
@@ -99,49 +136,274 @@ const User_detail = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddSubmit = () => {
-    if (!validateAddForm()) return;
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-    const payload = {
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-      phone_no: phone,
-      role: role,
-      status: status,
-    };
+  // list
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get("api/users/get-users");
 
-    console.log("Add Payload:", payload);
+      if (response.data?.success) {
 
-    //  Call your API here
+        const formattedUsers = response.data.users.map((user, index) => {
+          const [first = "", last = ""] = user.name?.split(" ");
 
-    closeAddModal();
+          return {
+            ...user,
+            sno: index + 1,
+            first_name: first,
+            last_name: last,
+            role_id: user.role?._id,
+            role_name: user.role?.name || "",
+            status: String(user.status),
+          };
+        });
+
+        setUsers(formattedUsers);
+
+       
+        if (response.data.role) {   
+          const formattedRoles = response.data.role.map((r) => ({
+            id: r._id,
+            name: r.name,
+          }));
+
+          setRoles(formattedRoles);
+        }
+
+      } else {
+        setUsers([]);
+        setRoles([]);
+      }
+
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setUsers([]);
+      setRoles([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = () => {
+  // create
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateAddForm()) return;
+    if (submitting) return;
+
+    setSubmitting(true);
+
+    try {
+      const formdata = {
+        name: `${firstName} ${lastName}`,
+        email: email,
+        password: password,
+        phone: phone,
+        role: role, 
+        status: status,
+        createdBy: userid,
+      };
+
+      const response = await axiosInstance.post(
+        "api/users/create-users",
+        formdata
+      );
+
+      if (response.data?.status || response.data?.success) {
+        toast.success("User created successfully");
+        fetchUsers();
+        closeAddModal();
+      } else {
+        toast.error("Failed to create user");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Error creating user");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // edit
+const openEditModal = async (row) => {
+  const userId = row?._id;
+
+  if (!userId) {
+    toast.error("Invalid User ID");
+    return;
+  }
+
+  try {
+    setEditingUserId(userId);
+
+    const response = await axiosInstance.get(
+      `api/users/get-users/${userId}`
+    );
+
+    console.log("EDIT RESPONSE:", response.data);
+
+    
+    const data =
+      response.data?.data ||
+      response.data?.user ||
+      response.data;
+
+    if (!data || !data._id) {
+      toast.error("User data not found");
+      return;
+    }
+
+    const [first = "", last = ""] = (data.name || "").split(" ");
+
+    setEditFirstName(first);
+    setEditLastName(last);
+    setEditEmail(data.email || "");
+    setEditPhone(data.phone || "");
+    setEditPassword("");
+    setEditRole(data.role?._id || "");
+    setEditStatus(String(data.status ?? ""));
+
+    setIsEditModalOpen(true);
+    setTimeout(() => setIsAnimating(true), 10);
+
+  } catch (err) {
+    console.error("EDIT ERROR:", err.response?.data || err);
+    toast.error("Unable to fetch user details");
+  }
+};
+
+  // update
+  const handleUpdate = async () => {
     if (!validateEditForm()) return;
 
-    const payload = {
-      id: selectedUser._id,
-      first_name: editFirstName,
-      last_name: editLastName,
-      email: editEmail,
-      phone_no: editPhone,
-      role: editRole,
-      status: editStatus,
-    };
+    try {
+      const response = await axiosInstance.put(
+        `api/users/edit-users/${editingUserId}`,
+        {
+          name: `${editFirstName} ${editLastName}`,
+          email: editEmail,
+          password: editPassword,
+          phone: editPhone,
+          role: editRole,
+          status: editStatus,
+          updatedBy: userid,
+        }
+      );
 
-    console.log("Update Payload:", payload);
-
-    //  Call update API here
-
-    closeEditModal();
+      if (response.data?.status || response.data?.success) {
+        toast.success("User updated successfully");
+        fetchUsers();   
+        closeEditModal();
+      } else {
+        toast.error("Failed to update user");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating user");
+    }
   };
 
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
+  // view
+const openViewModal = async (userId) => {
+  if (!userId) {
+    toast.error("Invalid User ID");
+    return;
+  }
+
+  try {
+    const response = await axiosInstance.get(
+      `api/users/get-users/${userId}`,
+      {
+        headers: {
+          "Cache-Control": "no-cache"
+        }
+      }
+    );
+
+    console.log("VIEW RESPONSE:", response.data);
+
+    // 🔥 IMPORTANT: Handle multiple backend formats safely
+    const data =
+      response.data?.data ||
+      response.data?.user ||
+      response.data?.users ||
+      response.data;
+
+    if (!data || !data._id) {
+      toast.error("User data not found");
+      return;
+    }
+
+    const [first = "", last = ""] = (data.name || "").split(" ");
+
+    setViewUser({
+      ...data,
+      first_name: first,
+      last_name: last,
+      role_name: data.role?.name || "",
+    });
+
+    setViewModalOpen(true);
+
+  } catch (error) {
+    console.error("VIEW ERROR:", error.response?.data || error);
+    toast.error("Error fetching user details");
+  }
+};
+
+  // delete
+  const deleteUsers = async (userId) => {
+    if (!userId) {
+      toast.error("Invalid User ID");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this user?",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await axiosInstance.delete(
+        `api/users/delete-users/${userId}`
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("User deleted successfully");
+        fetchUsers(); // refresh table
+
+      } else {
+        toast.error(response.data?.message || "Failed to delete User");
+      }
+    } catch (error) {
+      console.error("Delete error:", error.response?.data || error);
+      toast.error("Error deleting User");
+    }
   };
+
+const openAddModal = () => {
+
+  setFirstName("");
+  setLastName("");
+  setEmail("");
+  setPassword("");
+  setPhone("");
+  setRole("");
+  setStatus("");
+  setFormErrors({});
+
+  setIsAddModalOpen(true);
+  setTimeout(() => setIsAnimating(true), 10);
+};
+
 
   useEffect(() => {
     const table = document.querySelector(".datatable-container");
@@ -164,64 +426,77 @@ const User_detail = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (row) => {
-    if (!row) return;
-    setSelectedUser(row);
-    setEditFirstName(row.first_name || "");
-    setEditLastName(row.last_name || "");
-    setEditEmail(row.email || "");
-    setEditPhone(row.phone_no || "");
-    setEditRole(row.role || "");
-    setEditStatus(row.Status !== undefined ? row.Status.toString() : "")
-    setIsEditModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
-  };
-
   const closeEditModal = () => {
-    setIsEditModalOpen(false);
+    setIsAnimating(false);
     setTimeout(() => setIsEditModalOpen(false), 250);
   };
+
 
   const resetFilters = () => {
     setRoleFilter("");
     setStatusFilter("");
-    setDateFilter(""); // reset to today
+    setDateFilter(getToday());
+    setIsDateTouched(false);
   };
 
   const columns = [
     {
       title: "Sno",
-      data: "Sno",
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      }
     },
     {
       title: "First Name",
-      data: "first_name",
+      data: null,
+      render: (row) => row.first_name || "-",
     },
     {
       title: "Last Name",
-      data: "last_name",
+      data: null,
+      render: (row) => row.last_name || "-",
     },
     {
       title: "Email",
-      data: "email",
+      data: null,
+      render: (row) => row.email || "-",
     },
     {
       title: "Phone Number",
-      data: "phone_no",
+      data: null,
+      render: (row) => row.phone || "-",
     },
     {
       title: "Role",
-      data: "role",
+      data: null,
+      render: (row) => row.role_name || "-",
     },
     {
       title: "Status",
-      data: "Status",
+      data: "status",
       render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
+        const isActive = data === 1 || data === "1";
+
+        const textColor = isActive ? "green" : "red";
+        const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
+
+        return `
+      <div style="
+        display: inline-block;
+        padding: 4px 8px;
+        color: ${textColor};
+        background-color: ${bgColor};
+        border: 1px solid ${bgColor};
+        border-radius: 50px;
+        text-align: center;
+        width:100px;
+        font-size: 10px;
+        font-weight: 700;
+      ">
+        ${isActive ? "Active" : "Inactive"}
+      </div>
+    `;
       },
     },
     {
@@ -253,10 +528,9 @@ const User_detail = () => {
                 >
                   <button
                     onClick={() => {
-                      setViewUser(row);
-                      setViewModalOpen(true);
-
+                      openViewModal(row._id);
                     }}
+
                     className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
                   >
                     <FaEye />
@@ -270,7 +544,7 @@ const User_detail = () => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteRoles(row._id);
+                      deleteUsers(row._id);
                     }}
                   />
                 </div>
@@ -292,19 +566,20 @@ const User_detail = () => {
     },
   ];
 
-  const rawData = [
-    { Sno: 1, first_name: "Writer", last_name: "S", email: "writer@gmail.com", phone_no: "9685748596", role: "Manager", Status: 0, date: "2026-02-01" },
-    { Sno: 2, first_name: "Editor", last_name: "S", email: "writer@gmail.com", phone_no: "9685748596", role: "Manager", Status: 1, date: "2026-02-02" },
-    { Sno: 3, first_name: "Editor", last_name: "S", email: "writer@gmail.com", phone_no: "9685748596", role: "Manager", Status: 1, date: "2026-02-03" },
-  ];
+  const data = users.filter((item) => {
+    const itemDate = item.createdAt
+      ? new Date(item.createdAt).toISOString().split("T")[0]
+      : "";
 
-  const data = rawData.filter((item) => {
+
     return (
-      (roleFilter ? item.role === roleFilter : true) &&
-      (statusFilter ? String(item.Status) === statusFilter : true) &&
-      (dateFilter ? item.date === dateFilter : true)
+      (!roleFilter || item.role_id === roleFilter) &&
+      (!statusFilter || String(item.status) === statusFilter) &&
+      (!isDateTouched || itemDate === dateFilter) 
     );
   });
+
+
 
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
@@ -332,17 +607,18 @@ const User_detail = () => {
               {/* Role Filter */}
               <div className="gap-2">
                 <label className="text-sm font-medium text-gray-600 p-1">Role</label>
-                <select
-                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                <Dropdown
                   value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                >
-                  <option value="">All Roles</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Manager">Manager</option>
-                  <option value="Staff">Staff</option>
-                  <option value="User">User</option>
-                </select>
+                  options={roleOptions}
+                  onChange={(e) => setRoleFilter(e.value)}
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select role"
+                  className="border text-sm rounded-lg min-w-[140px]"
+                />
+
+
+
               </div>
 
               {/* Status Filter */}
@@ -354,8 +630,8 @@ const User_detail = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="">All Status</option>
-                  <option value="0">Active</option>
-                  <option value="1">Inactive</option>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
                 </select>
               </div>
 
@@ -366,7 +642,10 @@ const User_detail = () => {
                   type="date"
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
                   value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  onChange={(e) => {
+                    setDateFilter(e.target.value);
+                    setIsDateTouched(true);
+                  }}
                 />
 
               </div>
@@ -400,6 +679,7 @@ const User_detail = () => {
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
+              key={data.length}
               data={data}
               columns={columns}
               options={{
@@ -448,22 +728,16 @@ const User_detail = () => {
 
                   <div className="w-[60%] md:w-[50%]">
 
-                    <select
-                      id="role"
+                    <Dropdown
                       value={role}
-                      onChange={(e) => { 
-                        setRole(e.target.value);
-                        setFormErrors({ ...formErrors, role: ""});
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="">Select role</option>
-                      <option value="Admin">Admin</option>
-                      <option value="Manager">Manager</option>
-                      <option value="Staff">Staff</option>
-                      <option value="User">User</option>
-                    </select>
+                      options={roleOptions}
+                      onChange={(e) => setRole(e.value)}
+                      optionLabel="name"
+                      optionValue="id"
+                      placeholder="Select role"
+                      className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+
                     {formErrors.role && (<p className="text-red-500 text-sm mb-4 mt-1">{formErrors.role}</p>)}
 
                   </div>
@@ -485,14 +759,14 @@ const User_detail = () => {
                     <input
                       type="text"
                       value={firstName}
-                      onChange={(e) => { 
+                      onChange={(e) => {
                         setFirstName(e.target.value);
-                        setFormErrors({ ...formErrors, firstName: ""});
+                        setFormErrors({ ...formErrors, firstName: "" });
                       }}
                       placeholder="Enter first name"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.firstName && ( <p className="text-red-500 text-sm">{formErrors.firstName}</p>)}
+                    {formErrors.firstName && (<p className="text-red-500 text-sm">{formErrors.firstName}</p>)}
 
 
                   </div>
@@ -517,12 +791,12 @@ const User_detail = () => {
                       value={lastName}
                       onChange={(e) => {
                         setLastName(e.target.value);
-                        setFormErrors({ ...formErrors, lastName: ""});
+                        setFormErrors({ ...formErrors, lastName: "" });
                       }}
                       placeholder="Enter last name"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.lastName && ( <p className="text-red-500 text-sm">{formErrors.lastName}</p>) }
+                    {formErrors.lastName && (<p className="text-red-500 text-sm">{formErrors.lastName}</p>)}
 
                   </div>
                 </div>
@@ -541,14 +815,42 @@ const User_detail = () => {
                     <input
                       type="email"
                       value={email}
+                      autoComplete="off"
                       onChange={(e) => {
                         setEmail(e.target.value);
-                        setFormErrors({ ...formErrors, email: ""});
+                        setFormErrors({ ...formErrors, email: "" });
                       }}
                       placeholder="Enter email"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.email && ( <p className="text-red-500 text-sm">{formErrors.email}</p>)}
+                    {formErrors.email && (<p className="text-red-500 text-sm">{formErrors.email}</p>)}
+
+                  </div>
+                </div>
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Password <span className="text-red-500">*</span>
+                    </label>
+
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="password"
+                      value={password}
+                      autoComplete="new-password"
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setFormErrors({ ...formErrors, password: "" });
+                      }}
+                      placeholder="Enter password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.password && (<p className="text-red-500 text-sm">{formErrors.password}</p>)}
 
                   </div>
                 </div>
@@ -569,12 +871,12 @@ const User_detail = () => {
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value);
-                        setFormErrors({ ...formErrors, phone: ""});
+                        setFormErrors({ ...formErrors, phone: "" });
                       }}
                       placeholder="Enter phone number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {formErrors.phone && ( <p className="text-red-500 text-sm">{formErrors.phone}</p> )}
+                    {formErrors.phone && (<p className="text-red-500 text-sm">{formErrors.phone}</p>)}
 
                   </div>
                 </div>
@@ -595,7 +897,7 @@ const User_detail = () => {
                       value={status}
                       onChange={(e) => {
                         setStatus(e.target.value);
-                        setFormErrors({ ...formErrors, status: ""});
+                        setFormErrors({ ...formErrors, status: "" });
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
@@ -603,7 +905,7 @@ const User_detail = () => {
                       <option value="1">Active</option>
                       <option value="0">Inactive</option>
                     </select>
-                    {formErrors.status && ( <p className="text-red-500 text-sm">{formErrors.status}</p>) }
+                    {formErrors.status && (<p className="text-red-500 text-sm">{formErrors.status}</p>)}
 
                   </div>
                 </div>
@@ -662,22 +964,21 @@ const User_detail = () => {
                       </div>
 
                       <div className="w-[60%] md:w-[50%]">
-                        <select
-                          id="role"
+                        <Dropdown
                           value={editRole}
+                          options={roleOptions}
                           onChange={(e) => {
-                            setEditRole(e.target.value);
+                            setEditRole(e.value);
                             setFormErrors({ ...formErrors, editRole: "" });
                           }}
-                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 
-    ${formErrors.editRole ? "border-red-500" : "border-gray-300"}`}
-                        >
-                          <option value="">Select role</option>
-                          <option value="Admin">Admin</option>
-                          <option value="Manager">Manager</option>
-                          <option value="Staff">Staff</option>
-                          <option value="User">User</option>
-                        </select>
+                          optionLabel="name"
+                          optionValue="id"
+                          placeholder="Select role"
+                          className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+
+
+
 
                         {formErrors.editRole && (
                           <p className="text-red-500 text-sm mt-1">{formErrors.editRole}</p>
@@ -698,7 +999,7 @@ const User_detail = () => {
                           value={editFirstName}
                           onChange={(e) => {
                             setEditFirstName(e.target.value);
-                            setFormErrors({ ...formErrors, editFirstName: ""})
+                            setFormErrors({ ...formErrors, editFirstName: "" })
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -720,7 +1021,7 @@ const User_detail = () => {
                           value={editLastName}
                           onChange={(e) => {
                             setEditLastName(e.target.value);
-                            setFormErrors({ ...formErrors, editLastName: ""})
+                            setFormErrors({ ...formErrors, editLastName: "" })
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -743,12 +1044,35 @@ const User_detail = () => {
                           value={editEmail}
                           onChange={(e) => {
                             setEditEmail(e.target.value);
-                            setFormErrors({ ...formErrors, editEmail: ""})
+                            setFormErrors({ ...formErrors, editEmail: "" })
                           }}
+                          autoComplete="off"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editEmail && (
                           <p className="text-red-500 text-sm ">{formErrors.editEmail}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Password <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="password"
+                          placeholder="Enter password"
+                          value={editPassword}
+                          onChange={(e) => {
+                            setEditPassword(e.target.value);
+                            setFormErrors({ ...formErrors, editPassword: "" })
+                          }}
+                          autoComplete="new-password"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editPassword && (
+                          <p className="text-red-500 text-sm">{formErrors.editPassword}</p>
                         )}
                       </div>
                     </div>
@@ -764,7 +1088,7 @@ const User_detail = () => {
                           value={editPhone}
                           onChange={(e) => {
                             setEditPhone(e.target.value);
-                            setFormErrors({ ...formErrors, editPhone: ""});
+                            setFormErrors({ ...formErrors, editPhone: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -862,13 +1186,13 @@ const User_detail = () => {
                 {/* phone number */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Phone Number</span>
-                  <span>{viewUser.phone_no}</span>
+                  <span>{viewUser.phone}</span>
                 </div>
 
                 {/* role */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Role</span>
-                  <span>{viewUser.role}</span>
+                  <span>{viewUser.role_name}</span>
                 </div>
 
 

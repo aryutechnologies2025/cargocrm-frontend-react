@@ -16,10 +16,18 @@ import { createRoot } from "react-dom/client";
 import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
 import { BiCustomize } from "react-icons/bi";
+import axiosInstance from "../../api/axiosInstance";
 DataTable.use(DT);
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Customer_detail = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [totalRecords, setTotalRecords] = useState("");
+  const [customer, setCustomer] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -29,7 +37,6 @@ const Customer_detail = () => {
   const [viewCustomer, setViewCustomer] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
-    Sno: true,
     customer_id: true,
     name: true,
     phone_no: true,
@@ -37,12 +44,13 @@ const Customer_detail = () => {
     address: true,
     status: true,
   });
-  const [statusFilter, setStatusFilter] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
   const getToday = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
   };
   const [dateFilter, setDateFilter] = useState(getToday());
+  const [isDateTouched, setIsDateTouched] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -54,6 +62,17 @@ const Customer_detail = () => {
   const [editEmail, setEditEmail] = useState("");
   const [editAddress, setEditAddress] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  const [editingCustomerId, setEditingCustomerId] = useState(null);
+
+
+  const storedDetatis = localStorage.getItem("cargouser");
+  console.log("storedDetatis.... : ", storedDetatis);
+  const parsedDetails = JSON.parse(storedDetatis);
+  console.log("....parsedDetails.... : ", parsedDetails);
+  const userid = parsedDetails ? parsedDetails.id : null;
+  console.log("userid.... : ", userid);
+
+
 
   const validateAddForm = () => {
     let errors = {};
@@ -101,41 +120,180 @@ const Customer_detail = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddSubmit = () => {
-    if (!validateAddForm()) return;
+  useEffect(() => {
+    fetchCustomer();
+  }, []);
 
-    const payload = {
-      name: name,
-      email: email,
-      phone_no: phone,
-      address: address,
-      status: status,
-    };
+  // list
+  const fetchCustomer = async () => {
+    console.log("fetch customer called");
+    setLoading(true);
 
-    console.log("Add Payload:", payload);
+    try {
+      const response = await axiosInstance.get(
+        `api/customers/view-customers`
+      );
 
-    //  Call your API here
+      console.log("Customer API Response:", response.data);
 
-    closeAddModal();
+      if (response.data?.status === true || response.data?.success === true) {
+        const customerData = response.data.data || [];
+        setCustomer(customerData);
+        setTotalRecords(customerData.length);
+      } else {
+        setCustomer([]);
+        setTotalRecords(0);
+      }
+    } catch (error) {
+      console.error("Fetch customer error:", error);
+      setCustomer([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = () => {
+  // create
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateAddForm()) return;
+
+    try {
+      const formdata = {
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        status: status,
+        createdBy: userid, // must match backend
+      };
+
+      const response = await axiosInstance.post(
+        `api/customers/create-customers`,
+        formdata
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Customer created successfully");
+
+        fetchCustomer();
+        closeAddModal();
+
+        // reset form
+        setName("");
+        setPhone("");
+        setEmail("");
+        setAddress("");
+        setStatus("");
+
+      } else {
+        toast.error("Failed to create customer");
+      }
+
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Error creating customer");
+    }
+  };
+
+  // edit
+  const openEditModal = async (row) => {
+    const customerId = row._id;
+
+    if (!customerId) {
+      toast.error("Invalid customer ID");
+      return;
+    }
+
+    try {
+      setEditingCustomerId(customerId);
+      setIsEditModalOpen(true);
+      setIsAnimating(true);
+
+      const response = await axiosInstance.get(
+        `api/customers/view-customers/${customerId}`
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        const data = response.data.data;
+
+        setEditName(data.name);
+        setEditEmail(data.email);
+        setEditPhone(data.phone);
+        setEditAddress(data.address);
+        setEditStatus(String(data.status));
+      }
+
+    } catch (err) {
+      toast.error("Unable to fetch customer details");
+    }
+  };
+
+  // Update
+  const handleUpdate = async () => {
     if (!validateEditForm()) return;
 
-    const payload = {
-      id: selectedCustomer._id,
-      name: editName,
-      email: editEmail,
-      phone_no: editPhone,
-      address: editAddress,
-      status: editStatus,
-    };
+    try {
+      const response = await axiosInstance.put(
+        `api/customers/edit-customers/${editingCustomerId}`,
+        {
+          name: editName.trim(),
+          email: editEmail.trim(),
+          phone: editPhone.trim(),
+          address: editAddress.trim(),
+          status: editStatus,
+          updatedBy: userid
+        }
+      );
 
-    console.log("Update Payload:", payload);
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Customer updated successfully");
 
-    //  Call update API here
+        fetchCustomer();
+        closeEditModal();
+      } else {
+        toast.error("Failed to update customer");
+      }
 
-    closeEditModal();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating customer");
+    }
+  };
+
+  // delete
+  const deleteCustomer = async (customerId) => {
+    if (!customerId) {
+      toast.error("Invalid customer ID");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this customer?",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await axiosInstance.delete(
+        `api/customers/delete-customers/${customerId}`
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Customer deleted successfully");
+        fetchCustomer();
+
+      } else {
+        toast.error(response.data?.message || "Failed to delete customer");
+      }
+    } catch (error) {
+      console.error("Delete error:", error.response?.data || error);
+      toast.error("Error deleting customer");
+    }
   };
 
   const resetFilters = () => {
@@ -153,9 +311,10 @@ const Customer_detail = () => {
         name: 2,
         phone_no: 3,
         email: 4,
-        address: 6,
-        status: 7,
+        address: 5,
+        status: 6,
       };
+
 
       const index = columnIndexMap[key];
 
@@ -193,20 +352,6 @@ const Customer_detail = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (row) => {
-    if (!row) return;
-
-    setSelectedCustomer(row);
-    setEditName(row.name || "");
-    setEditEmail(row.email || "");
-    setEditAddress(row.address || "");
-    setEditPhone(row.phone || "");   // FIXED
-    setEditStatus(row.Status !== undefined ? row.Status.toString() : "");
-
-    setIsEditModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
-  };
-
   const closeEditModal = () => {
     setIsAnimating(false);
     setTimeout(() => setIsEditModalOpen(false), 250);
@@ -215,7 +360,10 @@ const Customer_detail = () => {
   const columns = [
     {
       title: "Sno",
-      data: "Sno",
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      }
     },
     {
       title: "Customer ID",
@@ -227,7 +375,7 @@ const Customer_detail = () => {
     },
     {
       title: "Phone Number",
-      data: "phone_no",
+      data: "phone",
     },
     {
       title: "Email",
@@ -241,13 +389,30 @@ const Customer_detail = () => {
       title: "Status",
       data: "status",
       render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
+        const isActive = String(data) === "1"; // ✅ 1 = Active
+
+        const textColor = isActive ? "green" : "red";
+        const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
+
+        return `
+      <div style="
+        display:inline-block;
+        padding:4px 8px;
+        color:${textColor};
+        background-color:${bgColor};
+        border:1px solid ${bgColor};
+        border-radius:50px;
+        text-align:center;
+        width:100px;
+        font-size:10px;
+        font-weight:700;
+      ">
+        ${isActive ? "Active" : "Inactive"}
+      </div>
+    `;
       },
     },
+
     {
       title: "Action",
       data: null,
@@ -294,7 +459,7 @@ const Customer_detail = () => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteRoles(row._id);
+                      deleteCustomer(row._id);
                     }}
                   />
                 </div>
@@ -316,18 +481,25 @@ const Customer_detail = () => {
     },
   ];
 
-  const rawData = [
-    { Sno: 1, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 0, date: "2026-02-01" },
-    { Sno: 2, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 1, date: "2026-02-02" },
-    { Sno: 3, customer_id: "c77884", name: "cargo", phone_no: "9685741425", email: "cargo@gmail.com", address: "chennai", status: 1, date: "2026-02-03" },
-  ];
 
-  const data = rawData.filter((item) => {
+  // const data = customer.filter((item) => {
+  //   return (
+  //     (statusFilter ? String(item.status) === statusFilter : true) &&
+  //     (dateFilter ? item.createdAt?.split("T")[0] === dateFilter : true)
+  //   );
+  // });
+
+  const data = customer.filter((item) => {
     return (
       (statusFilter ? String(item.status) === statusFilter : true) &&
-      (dateFilter ? item.date === dateFilter : true)
+      (dateFilter
+        ? item.createdAt?.split("T")[0] === dateFilter
+        : true)
     );
   });
+
+
+
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -349,7 +521,8 @@ const Customer_detail = () => {
           <div className="flex flex-wrap items-end gap-3 justify-between">
 
             {/* Left Side Filters */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap md:flex-nowrap items-end gap-3">
+
 
               {/* Status Filter */}
               <div className="gap-2">
@@ -404,19 +577,22 @@ const Customer_detail = () => {
                         <button onClick={() => setShowCustomize(false)}>✕</button>
                       </div>
 
-                      {Object.keys(visibleColumns).map((col) => (
-                        <label
-                          key={col}
-                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={visibleColumns[col]}
-                            onChange={() => toggleColumn(col)}
-                          />
-                          {col}
-                        </label>
-                      ))}
+                      {Object.keys(visibleColumns)
+                        .filter(col => col !== "Sno")
+                        .map((col) => (
+
+                          <label
+                            key={col}
+                            className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={visibleColumns[col]}
+                              onChange={() => toggleColumn(col)}
+                            />
+                            {col}
+                          </label>
+                        ))}
                     </div>
                   )}
                 </div>
@@ -437,7 +613,7 @@ const Customer_detail = () => {
           </div>
         </div>
         <div className="bg-white datatable-container">
-        
+
 
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
@@ -448,9 +624,9 @@ const Customer_detail = () => {
                 paging: true,
                 searching: true,
                 ordering: true,
-                scrollX: true, // Horizontal scrolling
-                responsive: true, // Enable responsiveness
-                autoWidth: false, // Disable auto width for proper column adjustments
+                scrollX: true,
+                responsive: true,
+                autoWidth: false,
               }}
               className="display nowrap bg-white"
               ref={(el) => (window.contactTable = el?.dt())}
@@ -831,13 +1007,7 @@ const Customer_detail = () => {
                 {/* phone number */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Phone Number</span>
-                  <span>{viewCustomer.phone_no}</span>
-                </div>
-
-                {/* role */}
-                <div className="flex justify-between ">
-                  <span className="font-medium">Email</span>
-                  <span>{viewCustomer.email}</span>
+                  <span>{viewCustomer.phone}</span>
                 </div>
 
                 {/* role */}

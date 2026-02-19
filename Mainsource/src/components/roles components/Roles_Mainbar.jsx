@@ -28,7 +28,7 @@ const Roles_Mainbar = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [totalRecords, setTotalRecords] = useState("")
+  const [totalRecords, setTotalRecords] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -45,6 +45,7 @@ const Roles_Mainbar = () => {
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
   };
   const [dateFilter, setDateFilter] = useState(getToday());
+  const [isDateTouched, setIsDateTouched] = useState(false);
   const [roleName, setRoleName] = useState("");
   const [status, setStatus] = useState("");
   const [editRoleName, setEditRoleName] = useState("");
@@ -96,6 +97,34 @@ const Roles_Mainbar = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // list
+  const fetchRoles = async () => {
+    console.log("fetchRoles called");
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(
+        `api/roles/view-roles`
+      );
+
+      console.log("Role API Response:", response.data);
+
+      if (response.data?.status === true || response.data?.success === true) {
+        const roleData = response.data.data || [];
+        setRoles(roleData);
+        setTotalRecords(roleData.length);
+      } else {
+        setRoles([]);
+        setTotalRecords(0);
+      }
+    } catch (error) {
+      console.error("Fetch roles error:", error);
+      setRoles([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // create
   const handleAddSubmit = async (e) => {
     e.preventDefault();
@@ -135,6 +164,39 @@ const Roles_Mainbar = () => {
   };
 
   // edit
+  const openEditModal = async (row) => {
+    const roleId = row._id || row.id;
+
+    if (!roleId) {
+      toast.error("Invalid Role ID");
+      return;
+    }
+
+    try {
+      setEditingRoleId(roleId);
+      setIsEditModalOpen(true);
+      setIsAnimating(true);
+
+      const response = await axiosInstance.get(
+        `api/roles/view-roles/${roleId}`
+      );
+
+      console.log("openEditModal response", response.data);
+
+      if (response.data?.status === true || response.data?.success === true) {
+        const data = response.data.data;
+
+        setEditRoleName(data.name);
+        setEditStatus(String(data.status));
+      }
+
+    } catch (err) {
+      console.error("Edit fetch error:", err);
+      toast.error("Unable to fetch role details");
+    }
+  };
+
+  // Update
   const handleUpdate = async () => {
     if (!validateEditForm()) return;
 
@@ -202,33 +264,6 @@ const Roles_Mainbar = () => {
     fetchRoles();
   }, []);
 
-  // list
-  const fetchRoles = async () => {
-    console.log("fetchRoles called");
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get(
-        `api/roles/view-roles`
-      );
-
-      console.log("Role API Response:", response.data);
-
-      if (response.data?.status === true || response.data?.success === true) {
-        const roleData = response.data.data || [];
-        setRoles(roleData);
-        setTotalRecords(roleData.length);
-      } else {
-        setRoles([]);
-        setTotalRecords(0);
-      }
-    } catch (error) {
-      console.error("Fetch roles error:", error);
-      setRoles([]);
-      setTotalRecords(0);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const openAddModal = () => {
     setIsAddModalOpen(true);
@@ -256,43 +291,19 @@ const Roles_Mainbar = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  // edit
-  const openEditModal = async (row) => {
-    const roleId = row._id || row.id;
-
-    if (!roleId) {
-      toast.error("Invalid Role ID");
-      return;
-    }
-
-    try {
-      setEditingRoleId(roleId);
-      setIsEditModalOpen(true);
-      setIsAnimating(true);
-
-      const response = await axiosInstance.get(
-        `api/roles/view-roles/${roleId}`
-      );
-
-      console.log("openEditModal response", response.data);
-
-      if (response.data?.status === true || response.data?.success === true) {
-        const data = response.data.data;
-
-        setEditRoleName(data.name);
-        setEditStatus(String(data.status));
-      }
-
-    } catch (err) {
-      console.error("Edit fetch error:", err);
-      toast.error("Unable to fetch role details");
-    }
-  };
-
   const closeEditModal = () => {
     setIsAnimating(false);
     setTimeout(() => setIsEditModalOpen(false), 250);
   };
+
+
+  const resetFilters = () => {
+    setRoleFilter("");
+    setStatusFilter("");
+    setDateFilter(getToday());   // show today again
+    setIsDateTouched(false);     // disable date filtering
+  };
+
 
   const columns = [
     {
@@ -395,19 +406,6 @@ const Roles_Mainbar = () => {
     },
   ];
 
-  const resetFilters = () => {
-    setRoleFilter("");
-    setStatusFilter("");
-    setDateFilter("");
-  };
-
-  // const data = roles.filter((item) => {
-  //   return (
-  //     (roleFilter ? item.name === roleFilter : true) &&
-  //     (statusFilter ? String(item.status) === statusFilter : true) &&
-  //     (dateFilter ? item.created_at?.split("T")[0] === dateFilter : true)
-  //   );
-  // });
 
   // const data = roles.filter((item) => {
   //   const itemDate = item.created_at
@@ -415,9 +413,9 @@ const Roles_Mainbar = () => {
   //     : "";
 
   //   return (
-  //     (roleFilter ? item.name === roleFilter : true) &&
-  //     (statusFilter ? String(item.status) === statusFilter : true) &&
-  //     (dateFilter ? itemDate === dateFilter : true)
+  //     (!roleFilter || item.name === roleFilter) &&
+  //     (!statusFilter || String(item.status) === statusFilter) &&
+  //     (!dateFilter || itemDate === dateFilter)
   //   );
   // });
 
@@ -429,7 +427,7 @@ const Roles_Mainbar = () => {
     return (
       (!roleFilter || item.name === roleFilter) &&
       (!statusFilter || String(item.status) === statusFilter) &&
-      (!dateFilter || itemDate === dateFilter)
+      (!isDateTouched || itemDate === dateFilter) 
     );
   });
 
@@ -501,9 +499,11 @@ const Roles_Mainbar = () => {
                   type="date"
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
                   value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  onChange={(e) => {
+                    setDateFilter(e.target.value);
+                    setIsDateTouched(true); 
+                  }}
                 />
-
               </div>
 
               {/* Reset */}
