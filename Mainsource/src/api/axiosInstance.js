@@ -1,10 +1,10 @@
-    import axios from "axios";
+import axios from "axios";
 import { API_URL } from "../Config";
 
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: false,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -28,7 +28,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("admin_token");
+      // localStorage.removeItem("admin_token");
       localStorage.removeItem("admin_token_expires");
       // window.location.href = "/";
     }
