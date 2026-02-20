@@ -595,7 +595,7 @@ const Roles_Mainbar = () => {
                         setRoleName(e.target.value);
                         setFormErrors({ ...formErrors, roleName: "" });
                       }}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
                     />
 
                     {formErrors.roleName && (
@@ -622,7 +622,7 @@ const Roles_Mainbar = () => {
                         setStatus(e.target.value);
                         setFormErrors({ ...formErrors, status: "" });
                       }}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
                     >
                       <option value="">Select a status</option>
                       <option value="1">Active</option>
@@ -692,7 +692,7 @@ const Roles_Mainbar = () => {
                             setEditRoleName(e.target.value);
                             setFormErrors({ ...formErrors, editRoleName: "" });
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                         />
 
                         {formErrors.editRoleName && (
@@ -712,7 +712,7 @@ const Roles_Mainbar = () => {
                             setEditStatus(e.target.value);
                             setFormErrors({ ...formErrors, editStatus: "" });
                           }}
-                          className="w-full px-3 py-2 border rounded-lg"
+                          className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
                         >
                           <option value="">Select status</option>
                           <option value="1">Active</option>

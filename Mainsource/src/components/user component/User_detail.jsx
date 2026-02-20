@@ -575,7 +575,7 @@ const openAddModal = () => {
     return (
       (!roleFilter || item.role_id === roleFilter) &&
       (!statusFilter || String(item.status) === statusFilter) &&
-      (!isDateTouched || itemDate === dateFilter) 
+      (!isDateTouched ? true : itemDate === dateFilter) 
     );
   });
 
@@ -735,7 +735,7 @@ const openAddModal = () => {
                       optionLabel="name"
                       optionValue="id"
                       placeholder="Select role"
-                      className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
 
                     {formErrors.role && (<p className="text-red-500 text-sm mb-4 mt-1">{formErrors.role}</p>)}
@@ -764,7 +764,7 @@ const openAddModal = () => {
                         setFormErrors({ ...formErrors, firstName: "" });
                       }}
                       placeholder="Enter first name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
                     {formErrors.firstName && (<p className="text-red-500 text-sm">{formErrors.firstName}</p>)}
 
@@ -794,7 +794,7 @@ const openAddModal = () => {
                         setFormErrors({ ...formErrors, lastName: "" });
                       }}
                       placeholder="Enter last name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
                     {formErrors.lastName && (<p className="text-red-500 text-sm">{formErrors.lastName}</p>)}
 
@@ -821,7 +821,7 @@ const openAddModal = () => {
                         setFormErrors({ ...formErrors, email: "" });
                       }}
                       placeholder="Enter email"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
                     {formErrors.email && (<p className="text-red-500 text-sm">{formErrors.email}</p>)}
 
@@ -848,7 +848,7 @@ const openAddModal = () => {
                         setFormErrors({ ...formErrors, password: "" });
                       }}
                       placeholder="Enter password"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
                     {formErrors.password && (<p className="text-red-500 text-sm">{formErrors.password}</p>)}
 
@@ -874,7 +874,7 @@ const openAddModal = () => {
                         setFormErrors({ ...formErrors, phone: "" });
                       }}
                       placeholder="Enter phone number"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
                     {formErrors.phone && (<p className="text-red-500 text-sm">{formErrors.phone}</p>)}
 
@@ -899,7 +899,7 @@ const openAddModal = () => {
                         setStatus(e.target.value);
                         setFormErrors({ ...formErrors, status: "" });
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     >
                       <option value="">Select status</option>
                       <option value="1">Active</option>
@@ -974,12 +974,8 @@ const openAddModal = () => {
                           optionLabel="name"
                           optionValue="id"
                           placeholder="Select role"
-                          className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                         />
-
-
-
-
                         {formErrors.editRole && (
                           <p className="text-red-500 text-sm mt-1">{formErrors.editRole}</p>
                         )}
@@ -1001,7 +997,7 @@ const openAddModal = () => {
                             setEditFirstName(e.target.value);
                             setFormErrors({ ...formErrors, editFirstName: "" })
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                         />
                         {formErrors.editFirstName && (
                           <p className="text-red-500 text-sm">{formErrors.editFirstName}</p>
@@ -1023,7 +1019,7 @@ const openAddModal = () => {
                             setEditLastName(e.target.value);
                             setFormErrors({ ...formErrors, editLastName: "" })
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                         />
                         {
                           formErrors.editLastName && (
@@ -1047,7 +1043,7 @@ const openAddModal = () => {
                             setFormErrors({ ...formErrors, editEmail: "" })
                           }}
                           autoComplete="off"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                         />
                         {formErrors.editEmail && (
                           <p className="text-red-500 text-sm ">{formErrors.editEmail}</p>
@@ -1069,7 +1065,7 @@ const openAddModal = () => {
                             setFormErrors({ ...formErrors, editPassword: "" })
                           }}
                           autoComplete="new-password"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                         />
                         {formErrors.editPassword && (
                           <p className="text-red-500 text-sm">{formErrors.editPassword}</p>
@@ -1090,7 +1086,7 @@ const openAddModal = () => {
                             setEditPhone(e.target.value);
                             setFormErrors({ ...formErrors, editPhone: "" });
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                         />
                         {formErrors.editPhone && (
                           <p className="text-red-500 text-sm ">{formErrors.editPhone}</p>
@@ -1108,7 +1104,7 @@ const openAddModal = () => {
                             setEditStatus(e.target.value);
                             setFormErrors({ ...formErrors, editStatus: "" }); // clear error on change
                           }}
-                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 
+                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4] 
     ${formErrors.editStatus ? "border-red-500" : "border-gray-300"}`}
                         >
                           <option value="">Select status</option>
