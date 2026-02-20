@@ -47,7 +47,7 @@ const Customer_detail = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const getToday = () => {
     const today = new Date();
-    return today.toISOString().split("T")[0]; // YYYY-MM-DD
+    return today.toISOString().split("T")[0];
   };
   const [dateFilter, setDateFilter] = useState(getToday());
   const [isDateTouched, setIsDateTouched] = useState(false);
@@ -296,9 +296,15 @@ const Customer_detail = () => {
     }
   };
 
+  // const resetFilters = () => {
+  //   setStatusFilter("");
+  //   setDateFilter(""); // reset to today
+  // };
+
   const resetFilters = () => {
     setStatusFilter("");
-    setDateFilter(""); // reset to today
+    setDateFilter(getToday());
+    setIsDateTouched(false);
   };
 
   const toggleColumn = (key) => {
@@ -389,7 +395,7 @@ const Customer_detail = () => {
       title: "Status",
       data: "status",
       render: (data) => {
-        const isActive = String(data) === "1"; // ✅ 1 = Active
+        const isActive = String(data) === "1";
 
         const textColor = isActive ? "green" : "red";
         const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
@@ -489,12 +495,22 @@ const Customer_detail = () => {
   //   );
   // });
 
+  // const data = customer.filter((item) => {
+  //   return (
+  //     (statusFilter ? String(item.status) === statusFilter : true) &&
+  //     // (dateFilter
+  //     //   ? item.createdAt?.split("T")[0] === dateFilter
+  //     //   : true)
+  //     (!isDateTouched || itemDate === dateFilter) 
+  //   );
+  // });
+
   const data = customer.filter((item) => {
+    const itemDate = item.createdAt?.split("T")[0];
+
     return (
       (statusFilter ? String(item.status) === statusFilter : true) &&
-      (dateFilter
-        ? item.createdAt?.split("T")[0] === dateFilter
-        : true)
+      (isDateTouched ? itemDate === dateFilter : true)
     );
   });
 
@@ -533,8 +549,8 @@ const Customer_detail = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="">All Status</option>
-                  <option value="0">Active</option>
-                  <option value="1">Inactive</option>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
                 </select>
               </div>
 
@@ -545,7 +561,10 @@ const Customer_detail = () => {
                   type="date"
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
                   value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  onChange={(e) => {
+                    setDateFilter(e.target.value);
+                    setIsDateTouched(true);
+                  }}
                 />
 
               </div>
@@ -675,7 +694,7 @@ const Customer_detail = () => {
                         setFormErrors({ ...formErrors, name: "" });
                       }}
                       placeholder="Enter name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
                     {formErrors.name && (<p className="text-red-500 text-sm">{formErrors.name}</p>)}
                   </div>
