@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  font-family: "Poppins", serif;
+  font-family:'roboto';
   margin: 0;
   padding: 0;
   overflow-x: hidden;
