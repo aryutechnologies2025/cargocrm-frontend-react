@@ -4,12 +4,11 @@ import cargo from "../assets/Cargos.svg"
 import { LuUser } from "react-icons/lu";
 import { SlLock } from "react-icons/sl";
 import { useNavigate } from "react-router-dom";
-
+import ReCAPTCHA from "react-google-recaptcha";
 import Footer from "../components/Footer";
 import cargoLord from "../assets/cargoLord_logo.png";
-
 import axios from "axios";
-import { API_URL } from "../Config";
+import { API_URL, CAPCHA_URL } from "../Config";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { FaEye } from "react-icons/fa";
@@ -20,11 +19,17 @@ const Login = () => {
   let navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-  email: "",
-  password: ""
-});
+    email: "",
+    password: ""
+  });
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [error, setError] = useState(null);
 
-const [error, setError] = useState(null);
+  const handleCaptchaChange = (value) => {
+    setCaptchaValue(value);
+    // console.log("Captcha value:", value);
+  };
+
 
   // function onCLickLogin() {
   //   navigate("/dashboard");
@@ -35,40 +40,40 @@ const [error, setError] = useState(null);
   //   });
   // }
 
-    const onCLickLogin = async (e) => {
-  e.preventDefault();
-  setError(null);
+  const onCLickLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
 
-  try {
-   const res = await axiosInstance.post(
-      `${API_URL}/api/auth/login`,
-      formData,
-      
-    );
-
-     if (res.data.success) {
-      localStorage.setItem(
-        "cargouser",
-        JSON.stringify(res.data.user)
-      );
-      localStorage.setItem("admin_token", res.data.token);
-      localStorage.setItem("loginTime", Date.now());
-
-      navigate("/dashboard", { replace: true });
+    // ✅ Check captcha first
+    if (!captchaValue) {
+      setError("Please verify that you are not a robot.");
+      return;
     }
-  } catch (err) {
-    setError(
-      err.response?.data?.message || "Login failed"
-    );
-  }
-};
+
+    try {
+      const res = await axiosInstance.post(
+        `${API_URL}/api/auth/login`,
+        formData
+      );
+
+      if (res.data.success) {
+        localStorage.setItem("cargouser", JSON.stringify(res.data.user));
+        localStorage.setItem("admin_token", res.data.token);
+        localStorage.setItem("loginTime", Date.now());
+
+        navigate("/dashboard", { replace: true });
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
 
   const handleChange = (e) => {
-  setFormData({
-    ...formData,
-    [e.target.name]: e.target.value
-  });
-};
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleKeyUp = (event) => {
     setError("");
@@ -78,8 +83,8 @@ const [error, setError] = useState(null);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword); // Toggle password visibility state
   };
-const activeClass = "underline font-bold text-blue-600";
-const inactiveClass = "hover:underline";
+  const activeClass = "underline font-bold text-blue-600";
+  const inactiveClass = "hover:underline";
 
   return (
     <div className="min-h-screen flex flex-col justify-between">
@@ -121,20 +126,29 @@ const inactiveClass = "hover:underline";
               placeholder="Password"
               name="password"
               id=""
-               onKeyUp={handleKeyUp}
+              onKeyUp={handleKeyUp}
               className="border-none outline-none bg-transparent text-black placeholder-black"
             />
             <span
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-4 cursor-pointer text-gray-600"
-                >
-                  {showPassword ? (
-                    <FaEye className="text-xl" />
-                  ) : (
-                    <FaEyeSlash className="text-xl" />
-                  )}
-                </span>
+              onClick={togglePasswordVisibility}
+              className="absolute right-4 cursor-pointer text-gray-600"
+            >
+              {showPassword ? (
+                <FaEye className="text-xl" />
+              ) : (
+                <FaEyeSlash className="text-xl" />
+              )}
+            </span>
           </div>
+
+          <ReCAPTCHA
+            // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //locatl
+            sitekey={CAPCHA_URL} //live
+            onChange={handleCaptchaChange}
+          />
+          {error && (
+            <p className="text-red-500 text-sm mt-2">{error}</p>
+          )}
 
           <button
             onClick={onCLickLogin}
