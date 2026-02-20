@@ -89,12 +89,16 @@ const User_detail = () => {
     }
     if (!email.trim()) {
       errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Enter a valid email address";
     }
     if (!password.trim()) {
       errors.password = "Password is required";
     }
     if (!phone.trim()) {
       errors.phone = "Phone Number is required";
+    } else if (!/^[0-9]{10}$/.test(phone)) {
+      errors.phone = "Enter a valid 10-digit phone number";
     }
     if (role === "") {
       errors.role = "Role is required";
@@ -118,12 +122,16 @@ const User_detail = () => {
     }
     if (!editEmail.trim()) {
       errors.editEmail = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
+      errors.editEmail = "Enter a valid email address";
     }
     if (!editPassword.trim()) {
       errors.editPassword = "Password is required";
     }
     if (!editPhone.trim()) {
       errors.editPhone = "Phone Number is required";
+    } else if (!/^[0-9]{10}$/.test(editPhone)) {
+      errors.editPhone = "Enter a valid 10-digit phone number";
     }
     if (editRole === "") {
       errors.editRole = "Role is required";

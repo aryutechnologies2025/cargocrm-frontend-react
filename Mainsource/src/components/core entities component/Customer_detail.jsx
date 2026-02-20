@@ -82,11 +82,15 @@ const Customer_detail = () => {
     }
     if (!email.trim()) {
       errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Enter a valid email address";
     }
     if (!phone.trim()) {
       errors.phone = "Phone Number is required";
+    } else if (!/^[0-9]{10}$/.test(phone)) {
+      errors.phone = "Enter a valid 10-digit phone number";
     }
-    if (address.trim() === "") {
+    if (!address.trim()) {
       errors.address = "Address is required";
     }
     if (status === "") {
@@ -103,13 +107,17 @@ const Customer_detail = () => {
     if (!editName.trim()) {
       errors.editName = "Name is required";
     }
-    if (!editEmail.trim()) {
+    if (!editEmail.trim())  {
       errors.editEmail = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
+      errors.editEmail = "Enter a valid email address";
     }
     if (!editPhone.trim()) {
       errors.editPhone = "Phone Number is required";
+    } else if (!/^[0-9]{10}$/.test(editPhone)) {
+      errors.editPhone = "Enter a valid 10-digit phone number";
     }
-    if (editAddress.trim() === "") {
+    if (editAddress.trim()) {
       errors.editAddress = "Address is required";
     }
     if (editStatus === "") {
@@ -373,23 +381,28 @@ const Customer_detail = () => {
     },
     {
       title: "Customer ID",
-      data: "customer_id",
+      data: null,
+      render: (row) => row.customer_id || "-",
     },
     {
       title: "Name",
-      data: "name",
+      data: null,
+      render: (row) => row.name || "-",
     },
     {
       title: "Phone Number",
-      data: "phone",
+      data: null,
+      render: (row) => row.phone || "-",
     },
     {
       title: "Email",
-      data: "email",
+      data: null,
+      render: (row) => row.email || "-",
     },
     {
       title: "Address",
-      data: "address",
+      data: null,
+      render: (row) => row.address || "-",
     },
     {
       title: "Status",
@@ -590,7 +603,7 @@ const Customer_detail = () => {
                   </button>
 
                   {showCustomize && (
-                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 h-52 overflow-x-auto p-3 z-50">
                       <div className="flex justify-between items-center mb-2">
                         <p className="font-medium  text-sm">Customize Columns</p>
                         <button onClick={() => setShowCustomize(false)}>✕</button>
