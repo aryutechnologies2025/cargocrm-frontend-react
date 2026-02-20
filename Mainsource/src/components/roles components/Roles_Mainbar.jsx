@@ -315,7 +315,8 @@ const Roles_Mainbar = () => {
     },
     {
       title: "Name",
-      data: "name",
+      data: null,
+      render: (row) => row.name || "-",
     },
     {
       title: "Status",

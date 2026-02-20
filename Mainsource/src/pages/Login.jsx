@@ -24,6 +24,30 @@ const Login = () => {
   });
   const [captchaValue, setCaptchaValue] = useState(null);
   const [error, setError] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+
+  const validateLoginForm = () => {
+    let errors = {};
+
+    if (!formData.email.trim()) {
+      errors.email = "Username (Email) is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        errors.email = "Please enter a valid email address";
+      }
+    }
+
+    if (!formData.password.trim()) {
+      errors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
 
   const handleCaptchaChange = (value) => {
     setCaptchaValue(value);
@@ -44,7 +68,10 @@ const Login = () => {
     e.preventDefault();
     setError(null);
 
-    // ✅ Check captcha first
+    // Validate username & password first
+    if (!validateLoginForm()) return;
+
+    // Check captcha
     if (!captchaValue) {
       setError("Please verify that you are not a robot.");
       return;
@@ -115,6 +142,12 @@ const Login = () => {
               id=""
               className="border-none outline-none bg-transparent text-black placeholder-black"
             />
+            {formErrors.email && (
+              <p className="text-red-500 text-sm mt-1 w-[450px]">
+                {formErrors.email}
+              </p>
+            )}
+
           </div>
 
           <div className="relative flex md:w-[450px] gap-3 items-center bg-[#e6f2fa] px-4 py-3 rounded-2xl">
@@ -129,6 +162,8 @@ const Login = () => {
               onKeyUp={handleKeyUp}
               className="border-none outline-none bg-transparent text-black placeholder-black"
             />
+            
+
             <span
               onClick={togglePasswordVisibility}
               className="absolute right-4 cursor-pointer text-gray-600"
@@ -139,10 +174,11 @@ const Login = () => {
                 <FaEyeSlash className="text-xl" />
               )}
             </span>
+            
           </div>
 
           <ReCAPTCHA
-            // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //locatl
+            // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //local
             sitekey={CAPCHA_URL} //live
             onChange={handleCaptchaChange}
           />

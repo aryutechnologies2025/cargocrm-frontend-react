@@ -17,38 +17,49 @@ import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
 import { BiCustomize } from "react-icons/bi";
 DataTable.use(DT);
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axiosInstance from "../../api/axiosInstance";
 
 const Order_detail = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [totalRecords, setTotalRecords] = useState("");
+  const [order, setOrder] = useState([]);
+  console.log("order", order)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [errors, setErrors] = useState({});
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [senderList, setSenderList] = useState([]);
+  const [beneficiaryList, setBeneficiaryList] = useState([]);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewOrder, setViewOrder] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
-    Sno: true,
-    tracking_no: true,
+    tracking_number: true,
     sender_id: true,
     beneficiary_id: true,
     cargo_mode: true,
     packed: true,
     created_by: true,
-    created_date: true,
+    createdAt: true,
     status: true,
   });
-  const [statusFilter, setStatusFilter] = useState([]);
-  const [beneficiaryFilter, setBeneficiaryFilter] = useState([]);
-  const [senderFilter, setSenderFilter] = useState([]);
-  const [createdByFilter, setCreatedByFilter] = useState([]);
-  const [createdDateFilter, setCreatedDateFilter] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [beneficiaryFilter, setBeneficiaryFilter] = useState("");
+  const [senderFilter, setSenderFilter] = useState("");
+  const [createdByFilter, setCreatedByFilter] = useState("");
+  const [createdDateFilter, setCreatedDateFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const getToday = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
   };
-  const [dateFilter, setDateFilter] = useState(getToday());
+  const [isDateTouched, setIsDateTouched] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [senderId, setSenderId] = useState("");
   const [beneficiaryId, setBeneficiaryId] = useState("");
@@ -65,6 +76,16 @@ const Order_detail = () => {
   const [editCreatedBy, setEditCreatedBy] = useState("");
   const [editCreatedDate, setEditCreatedDate] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  const [editingOrderId, setEditingOrderId] = useState(null);
+
+
+  const storedDetatis = localStorage.getItem("cargouser");
+  console.log("storedDetatis.... : ", storedDetatis);
+  const parsedDetails = JSON.parse(storedDetatis);
+  console.log("....parsedDetails.... : ", parsedDetails);
+  const userid = parsedDetails ? parsedDetails.id : null;
+  console.log("userid.... : ", userid);
+
 
   const validateAddForm = () => {
     let errors = {};
@@ -80,12 +101,6 @@ const Order_detail = () => {
     }
     if (!packed.trim()) {
       errors.packed = "Packed is required";
-    }
-    if (createdBy.trim() === "") {
-      errors.createdBy = "Created By is required";
-    }
-    if (createdDate.trim() === "") {
-      errors.createdDate = "Created Date is required";
     }
     if (status === "") {
       errors.status = "Status is required";
@@ -110,12 +125,6 @@ const Order_detail = () => {
     if (!editPacked.trim()) {
       errors.editPacked = "Packed is required";
     }
-    if (editCreatedBy.trim() === "") {
-      errors.editCreatedBy = "Created By is required";
-    }
-    if (editCreatedDate.trim() === "") {
-      errors.editCreatedDate = "Created Date is required";
-    }
     if (editStatus === "") {
       errors.editStatus = "Status is required";
     }
@@ -124,50 +133,189 @@ const Order_detail = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddSubmit = () => {
-    if (!validateAddForm()) return;
 
-    const payload = {
-      beneficiary_id: beneficiaryId,
-      sender_id: senderId,
-      cargo_mode: cargoMode,
-      packed: packed,
-      created_by: createdBy,
-      created_date: createdDate,
-      status: status,
-    };
+  useEffect(() => {
+    fetchOrder();
+  }, []);
 
-    console.log("Add Payload:", payload);
+  // list
+  const fetchOrder = async () => {
+    console.log("fetch order called");
+    setLoading(true);
 
-    //  Call your API here
+    try {
+      const response = await axiosInstance.get(
+        `api/orders/view-orders`
+      );
 
-    closeAddModal();
+      console.log("Order API Response:", response.data);
+
+      if (response.data?.status === true || response.data?.success === true) {
+        const orderData = response.data.data || [];
+        setOrder(orderData);
+        setTotalRecords(orderData.length);
+      } else {
+        setOrder([]);
+        setTotalRecords(0);
+      }
+    } catch (error) {
+      console.error("Fetch order error:", error);
+      setOrder([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = () => {
+  // create
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateAddForm()) return;
+
+    try {
+      const formdata = {
+        sender_id: senderId,
+        beneficiary_id: beneficiaryId,
+        cargo_mode: cargoMode,
+        packed: packed,
+        status: Number(status),
+        created_by: userid
+      };
+
+      const response = await axiosInstance.post(
+        `api/orders/create-orders`,
+        formdata
+      );
+
+      if (response.data?.status || response.data?.success) {
+        toast.success("Order created successfully");
+
+        await fetchOrder();   // refresh table
+        closeAddModal();
+
+        // reset form
+        setSenderId("");
+        setBeneficiaryId("");
+        setCargoMode("");
+        setPacked("");
+        setStatus("");
+
+      } else {
+        toast.error("Failed to create order");
+      }
+
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Error creating order");
+    }
+  };
+
+  // edit
+  const openEditModal = async (row) => {
+    const orderId = row._id;
+
+    if (!orderId) {
+      toast.error("Invalid order ID");
+      return;
+    }
+
+    try {
+      setEditingOrderId(orderId);
+      setIsEditModalOpen(true);
+      setIsAnimating(true);
+
+      const response = await axiosInstance.get(
+        `api/orders/view-orders/${orderId}`
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        const data = response.data.data;
+
+        setEditName(data.name);
+        setEditEmail(data.email);
+        setEditPhone(data.phone);
+        setEditAddress(data.address);
+        setEditStatus(String(data.status));
+      }
+
+    } catch (err) {
+      toast.error("Unable to fetch order details");
+    }
+  };
+
+  // Update
+  const handleUpdate = async () => {
     if (!validateEditForm()) return;
 
-    const payload = {
-      id: selectedOrder._id,
-      beneficiary_id: editBeneficiaryId,
-      sender_id: editSenderId,
-      cargo_mode: editCargoMode,
-      packed: editPacked,
-      created_by: editCreatedBy,
-      created_date: editCreatedDate,
-      status: editStatus,
-    };
+    try {
+      const response = await axiosInstance.put(
+        `api/orders/edit-orders/${editingOrderId}`,
+        {
+          sender_id: editSenderId,
+          beneficiary_id: editBeneficiaryId,
+          cargo_mode: editCargoMode,
+          packed: editPacked,
+          status: Number(editStatus),
+          updated_by: userid
+        }
+      );
 
-    console.log("Update Payload:", payload);
+      if (response.data?.status || response.data?.success) {
+        toast.success("Order updated successfully");
+        await fetchOrder();
+        closeEditModal();
+      } else {
+        toast.error("Failed to update order");
+      }
 
-    closeEditModal();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating order");
+    }
+  };
+
+  // delete
+  const deleteOrder = async (orderId) => {
+    if (!orderId) {
+      toast.error("Invalid order ID");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this order?",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await axiosInstance.delete(
+        `api/orders/delete-orders/${orderId}`
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Order deleted successfully");
+        fetchOrder();
+
+      } else {
+        toast.error(response.data?.message || "Failed to delete order");
+      }
+    } catch (error) {
+      console.error("Delete error:", error.response?.data || error);
+      toast.error("Error deleting order");
+    }
   };
 
   const resetFilters = () => {
     setStatusFilter("");
     setBeneficiaryFilter("");
     setSenderFilter("");
-    setDateFilter(""); // reset to today
+    setCreatedByFilter("");
+    setCreatedDateFilter("");
+    setDateFilter("");
   };
 
   const toggleColumn = (key) => {
@@ -176,13 +324,13 @@ const Order_detail = () => {
 
       const columnIndexMap = {
         Sno: 0,
-        tracking_no: 1,
+        tracking_number: 1,
         sender_id: 2,
         beneficiary_id: 3,
         cargo_mode: 4,
         packed: 5,
         created_by: 6,
-        created_by: 7,
+        createdAt: 7,
         status: 8,
       };
 
@@ -201,7 +349,6 @@ const Order_detail = () => {
     setTimeout(() => setIsAnimating(true), 10);
   };
 
-
   useEffect(() => {
     const table = document.querySelector(".datatable-container");
 
@@ -217,30 +364,11 @@ const Order_detail = () => {
     return () => table?.removeEventListener("click", handleClick);
   }, []);
 
-
-
   const closeAddModal = () => {
     setIsAnimating(false);
     setErrors({});
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
-
-  const openEditModal = (row) => {
-    if (!row) return;
-
-    setSelectedOrder(row);
-    setBeneficiaryId(row.beneficiary_id || "");
-    setSenderId(row.sender_id || "");
-    setCargoMode(row.cargo_mode || "");
-    setCreatedBy(row.created_by || "");
-    setPacked(row.packed || "");
-    setCreatedBy(row.created_by || "");
-    setCreatedDate(row.created_date || "");
-    setEditStatus(row.status !== undefined ? String(row.status) : "");
-    setIsEditModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
-  };
-
 
   const closeEditModal = () => {
     setIsAnimating(false);
@@ -250,35 +378,58 @@ const Order_detail = () => {
   const columns = [
     {
       title: "Sno",
-      data: "Sno",
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      }
     },
     {
       title: "Tracking Number",
-      data: "tracking_no",
+      data: null,
+      render: (row) => row.tracking_number || "-",
     },
     {
       title: "Sender ID",
-      data: "sender_id",
+      data: null,
+      render: (row) =>
+        typeof row.sender_id === "object"
+          ? row.sender_id?._id || "-"
+          : row.sender_id || "-",
     },
     {
       title: "Beneficiary ID",
-      data: "beneficiary_id",
+      data: null,
+      render: (row) =>
+        typeof row.beneficiary_id === "object"
+          ? row.beneficiary_id?._id || "-"
+          : row.beneficiary_id || "-",
     },
     {
       title: "Cargo Mode",
-      data: "cargo_mode",
+      data: null,
+      render: (row) => row.cargo_mode || "-",
     },
     {
       title: "Packed",
-      data: "packed",
+      data: null,
+      render: (row) => row.packed || "-",
     },
     {
       title: "Created By",
-      data: "created_by",
+      data: null,
+      render: (row) =>
+        typeof row.created_by === "object"
+          ? row.created_by?.name || row.created_by?._id || "-"
+          : row.created_by || "-",
     },
     {
       title: "Created Date",
-      data: "created_date",
+      data: null,
+      render: (row) => {
+        if (!row.createdAt) return "-";
+        const date = new Date(row.createdAt);
+        return date.toLocaleDateString();
+      },
     },
     {
       title: "Status",
@@ -337,7 +488,7 @@ const Order_detail = () => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteRoles(row._id);
+                      deleteOrder(row._id);
                     }}
                   />
                 </div>
@@ -358,22 +509,24 @@ const Order_detail = () => {
       },
     },
   ];
+  console.log("columns", columns)
 
 
-  const rawData = [
-    { Sno: 1, tracking_no: "c77884", sender_id: "22_cargo", beneficiary_id: "96F5741425", cargo_mode: "Us mode", packed: "5", created_by: "Cargo", created_date: "12-07-2025", status: 0, date: "2026-02-01" },
-    { Sno: 2, tracking_no: "c77884", sender_id: "22_cargo", beneficiary_id: "96F5741425", cargo_mode: "Us mode", packed: "5", created_by: "Cargo", created_date: "12-07-2025", status: 1, date: "2026-02-02" },
-    { Sno: 3, tracking_no: "c77884", sender_id: "22_cargo", beneficiary_id: "96F5741425", cargo_mode: "Us mode", packed: "5", created_by: "Cargo", created_date: "12-07-2025", status: 1, date: "2026-02-03" },
-  ];
+  const data = order.filter((item) => {
+    const itemDate = item.createdAt
+      ? new Date(item.createdAt).toISOString().split("T")[0]
+      : "";
 
-  const data = rawData.filter((item) => {
     return (
-      (statusFilter ? String(item.status) === statusFilter : true) &&
-      (beneficiaryFilter ? String(item.beneficiary_id) === beneficiaryFilter : true) &&
-      (senderFilter ? String(item.sender_id) === senderFilter : true) &&
-      (dateFilter ? item.date === dateFilter : true)
+      (!statusFilter || String(item.status) === statusFilter) &&
+      (!dateFilter || itemDate === dateFilter)
     );
   });
+  console.log("order:", order);
+  console.log("dateFilter:", dateFilter);
+  console.log("statusFilter:", statusFilter);
+  console.log("data", data)
+
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -731,68 +884,6 @@ const Order_detail = () => {
                   </div>
                 </div>
 
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Created By <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <select
-                      type={createdBy}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                      onChange={(e) => {
-                        setCreatedBy(e.target.value);
-                        setFormErrors({ ...formErrors, createdBy: "" });
-                      }}
-                    >
-                      <option>Select created by</option>
-                      <option value="Admin">Admin</option>
-                      <option value="Manager">Agent</option>
-                    </select>
-                    {formErrors.createdBy && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.createdBy}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Created Date <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="date"
-                      value={createdDate}
-                      placeholder="Enter created date"
-                      onChange={(e) => {
-                        setCreatedDate(e.target.value);
-                        setFormErrors({ ...formErrors, createdDate: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.createdDate && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.createdDate}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div className="">
                     <label
@@ -880,7 +971,7 @@ const Order_detail = () => {
                         <select
                           value={editSenderId}
                           onChange={(e) => {
-                            setSenderId(e.target.value);
+                            setEditSenderId(e.target.value);
                             setFormErrors({ ...formErrors, editSenderId: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg 
@@ -914,7 +1005,7 @@ const Order_detail = () => {
                         <select
                           value={editBeneficiaryId}
                           onChange={(e) => {
-                            setBeneficiaryId(e.target.value);
+                            setEditBeneficiaryId(e.target.value);
                             setFormErrors({ ...formErrors, editBeneficiaryId: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg 
@@ -944,7 +1035,7 @@ const Order_detail = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg 
                  focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                           onChange={(e) => {
-                            setCargoMode(e.target.value);
+                            setEditCargoMode(e.target.value);
                             setFormErrors({ ...formErrors, editCargoMode: "" });
                           }}
                         >
@@ -1008,57 +1099,6 @@ const Order_detail = () => {
                         {formErrors.editPacked && (
                           <p className="text-red-500 text-sm mb-4 mt-1">
                             {formErrors.editPacked}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Created By <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <select
-                          value={editCreatedBy}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                          onChange={(e) => {
-                            setEditCreatedBy(e.target.value);
-                            setFormErrors({ ...formErrors, editCreatedBy: "" });
-                          }}
-                        >
-                          <option >Select created by</option>
-                          <option value="Admin">Admin</option>
-                          <option value="Manager">Agent</option>
-                        </select>
-                        {formErrors.editCreatedBy && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editCreatedBy}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Created Date <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="date"
-                          placeholder="Enter created date"
-                          value={editCreatedDate}
-                          onChange={(e) => {
-                            setEditCreatedDate(e.target.value);
-                            setFormErrors({ ...formErrors, editCreatedDate: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editCreatedDate && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editCreatedDate}
                           </p>
                         )}
                       </div>
@@ -1133,7 +1173,7 @@ const Order_detail = () => {
                 {/* First Name */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Tracking No</span>
-                  <span>{viewOrder.tracking_no}</span>
+                  <span>{viewOrder.tracking_number}</span>
                 </div>
 
                 {/* Last Name */}
@@ -1167,9 +1207,8 @@ const Order_detail = () => {
                 {/* role */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Created Date</span>
-                  <span>{viewOrder.created_date}</span>
+                  <span>{new Date(viewOrder.createdAt).toLocaleDateString()}</span>
                 </div>
-
 
                 {/* Status */}
                 <div className="flex justify-between ">
