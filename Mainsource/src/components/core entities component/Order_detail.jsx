@@ -21,6 +21,10 @@ import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axiosInstance from "../../api/axiosInstance";
+import { Dropdown } from "primereact/dropdown";
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 
 const Order_detail = () => {
   const navigate = useNavigate();
@@ -28,7 +32,7 @@ const Order_detail = () => {
   const [submitting, setSubmitting] = useState(false);
   const [totalRecords, setTotalRecords] = useState("");
   const [order, setOrder] = useState([]);
-  console.log("order", order)
+  console.log("order check", order)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -50,6 +54,9 @@ const Order_detail = () => {
     status: true,
   });
   const [statusFilter, setStatusFilter] = useState("");
+  const [senderOptions, setSenderOptions] = useState([]);
+  const [beneficiaryOptions, setBeneficiaryOptions] = useState([]);
+  console.log("beneficiaryOptions", beneficiaryOptions)
   const [beneficiaryFilter, setBeneficiaryFilter] = useState("");
   const [senderFilter, setSenderFilter] = useState("");
   const [createdByFilter, setCreatedByFilter] = useState("");
@@ -136,32 +143,70 @@ const Order_detail = () => {
 
   useEffect(() => {
     fetchOrder();
+    fetchBeneficiary();
   }, []);
 
   // list
   const fetchOrder = async () => {
-    console.log("fetch order called");
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.get(`api/orders/view-orders`);
+
+      console.log("Order API:", response.data);
+
+      if (response.data?.success || response.data?.status) {
+        const apiData = response.data.data || [];
+        const apiDatas = JSON.parse(atob(apiData));
+
+        setOrder(apiDatas.data);
+        setTotalRecords(apiDatas.data);
+
+        const senderList = Array.isArray(apiDatas.customer)
+          ? apiDatas.customer : [];
+
+        setSenderOptions(senderList);
+        console.log("senderList", senderList);
+      } else {
+        setOrder([]);
+        setTotalRecords(0);
+        setSenderOptions([]);
+      }
+    } catch (error) {
+      console.error(error);
+      setOrder([]);
+      setTotalRecords(0);
+      setSenderOptions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  // list
+  const fetchBeneficiary = async () => {
     setLoading(true);
 
     try {
       const response = await axiosInstance.get(
-        `api/orders/view-orders`
+        `api/orders/get-sender-by-beneficiary`
       );
 
-      console.log("Order API Response:", response.data);
+      if (response.data?.success || response.data?.status) {
+        const beniData = response.data.data || [];
+        const apiDatas = JSON.parse(atob(beniData));
 
-      if (response.data?.status === true || response.data?.success === true) {
-        const orderData = response.data.data || [];
-        setOrder(orderData);
-        setTotalRecords(orderData.length);
+        console.log("Beneficiary API:", apiDatas);
+
+        const beneficiaryList = Array.isArray(apiDatas.customer)
+          ? apiDatas.customer
+          : [];
+        console.log("beneficiaryList", beneficiaryList);
+        setBeneficiaryOptions(beneficiaryList);
       } else {
-        setOrder([]);
-        setTotalRecords(0);
+        setBeneficiaryOptions([]);
       }
     } catch (error) {
-      console.error("Fetch order error:", error);
-      setOrder([]);
-      setTotalRecords(0);
+      console.error(error);
+      setBeneficiaryOptions([]);
     } finally {
       setLoading(false);
     }
@@ -512,20 +557,20 @@ const Order_detail = () => {
   console.log("columns", columns)
 
 
-  const data = order.filter((item) => {
-    const itemDate = item.createdAt
-      ? new Date(item.createdAt).toISOString().split("T")[0]
-      : "";
+  // const data = order.filter((item) => {
+  //   const itemDate = item.createdAt
+  //     ? new Date(item.createdAt).toISOString().split("T")[0]
+  //     : "";
 
-    return (
-      (!statusFilter || String(item.status) === statusFilter) &&
-      (!dateFilter || itemDate === dateFilter)
-    );
-  });
+  //   return (
+  //     (!statusFilter || String(item.status) === statusFilter) &&
+  //     (!dateFilter || itemDate === dateFilter)
+  //   );
+  // });
   console.log("order:", order);
   console.log("dateFilter:", dateFilter);
   console.log("statusFilter:", statusFilter);
-  console.log("data", data)
+  // console.log("data", data)
 
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
@@ -554,7 +599,7 @@ const Order_detail = () => {
               {/* Beneficiary Filter */}
               <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Beneficiary ID</label>
-                <select
+                {/* <select
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
                   value={beneficiaryFilter}
                   onChange={(e) => setBeneficiaryFilter(e.target.value)}
@@ -562,13 +607,22 @@ const Order_detail = () => {
                   <option value="">Select Beneficiary ID</option>
                   <option value="0">96F5741425</option>
                   <option value="1">96F5741424</option>
-                </select>
+                </select> */}
+                <Dropdown
+                  // value={customer}
+                  // options={customerOption}
+                  // onChange={(e) => setCustomer(e.value)}
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select customer"
+                  className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                />
               </div>
 
               {/* Sender Filter */}
               <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Sender ID</label>
-                <select
+                {/* <select
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
                   value={senderFilter}
                   onChange={(e) => setSenderFilter(e.target.value)}
@@ -576,21 +630,30 @@ const Order_detail = () => {
                   <option value="">Select Sender ID</option>
                   <option value="0">22_cargo</option>
                   <option value="1">22_cargo</option>
-                </select>
+                </select> */}
+                <Dropdown
+                  // value={customer}
+                  // options={customerOption}
+                  // onChange={(e) => setCustomer(e.value)}
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select sender ID"
+                  className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                />
               </div>
 
               {/* Created By */}
               <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Created By</label>
-                <select
-                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
-                  value={createdByFilter}
-                  onChange={(e) => setCreatedByFilter(e.target.value)}
-                >
-                  <option value="">Select created by</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Agent">Agent</option>
-                </select>
+                <Dropdown
+                  // value={customer}
+                  // options={customerOption}
+                  // onChange={(e) => setCustomer(e.value)}
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Select sender ID"
+                  className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                />
               </div>
 
               {/* Created Date */}
@@ -695,7 +758,7 @@ const Order_detail = () => {
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
-              data={data}
+              data={order}
               columns={columns}
               options={{
                 paging: true,
@@ -741,20 +804,15 @@ const Order_detail = () => {
                   </div>
 
                   <div className="w-[60%] md:w-[50%]">
-                    <select
+                    <Dropdown
                       value={senderId}
-                      onChange={(e) => {
-                        setSenderId(e.target.value);
-                        setFormErrors({ ...formErrors, senderId: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-      focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="">Select Sender ID</option>
-                      <option value="S001">S001</option>
-                      <option value="S002">S002</option>
-                      <option value="S003">S003</option>
-                    </select>
+                      options={senderOptions}
+                      onChange={(e) => setSenderId(e.value)}
+                      optionLabel="name"
+                      optionValue="id"
+                      placeholder="Select sender ID"
+                      className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                    />
 
                     {formErrors.senderId && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
@@ -774,20 +832,15 @@ const Order_detail = () => {
                   </div>
 
                   <div className="w-[60%] md:w-[50%]">
-                    <select
+                    <Dropdown
                       value={beneficiaryId}
-                      onChange={(e) => {
-                        setBeneficiaryId(e.target.value);
-                        setFormErrors({ ...formErrors, beneficiaryId: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg 
-      focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="">Select Beneficiary ID</option>
-                      <option value="101">101</option>
-                      <option value="102">102</option>
-                      <option value="103">103</option>
-                    </select>
+                      options={beneficiaryOptions}
+                      onChange={(e) => setBeneficiaryId(e.value)}
+                      optionLabel="name"
+                      optionValue="_id"   // ✅ FIX HERE
+                      placeholder="Select Beneficiary ID"
+                      className="w-full border border-gray-300 rounded-lg"
+                    />
 
                     {formErrors.beneficiaryId && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
