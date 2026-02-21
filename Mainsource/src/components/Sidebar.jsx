@@ -75,12 +75,30 @@ const onClickSidebarMenu = async (label) => {
 const isLoggingOut = useRef(false);
 
 const logoutUser = async () => {
+  const storedUser = localStorage.getItem("cargouser");
+
+  let loginLogId = null;
+
+  if (storedUser) {
+    const parsedUser = JSON.parse(storedUser);
+    loginLogId = parsedUser.log_id;
+  }
+
+  console.log("loginLogId:", loginLogId);
+
+  if (!loginLogId) {
+    console.warn("No login log id found");
+    return;
+  }
+
   if (isLoggingOut.current) return;
   isLoggingOut.current = true;
 
   try {
-    const response = await axiosInstance.post("/api/auth/logout");
-    return;
+    await axiosInstance.post("/api/auth/logout", {
+      id: loginLogId,
+    });
+
     console.log("Logout API success");
   } catch (error) {
     console.error("Logout API failed", error);
@@ -89,7 +107,6 @@ const logoutUser = async () => {
     sessionStorage.clear();
   }
 };
-
 
   const onChangeSelect = (e) => {
     let value = e.target.value;
