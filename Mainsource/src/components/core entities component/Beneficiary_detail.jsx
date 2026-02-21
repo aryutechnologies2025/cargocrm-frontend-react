@@ -18,6 +18,10 @@ import { IoIosCloseCircle } from "react-icons/io"
 import { BiCustomize } from "react-icons/bi";
 DataTable.use(DT);
 import Swal from "sweetalert2";
+import { Dropdown } from "primereact/dropdown";
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axiosInstance from "../../api/axiosInstance";
@@ -28,6 +32,7 @@ const Beneficiary_detail = () => {
   const [submitting, setSubmitting] = useState(false);
   const [totalRecords, setTotalRecords] = useState("");
   const [beneficiary, setBeneficiary] = useState([]);
+  console.log("beneficiary",beneficiary)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -37,6 +42,7 @@ const Beneficiary_detail = () => {
   const [viewBeneficiary, setViewBeneficiary] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
+    customerId:true,
     beneficiary_id: true,
     name: true,
     email: true,
@@ -56,6 +62,9 @@ const Beneficiary_detail = () => {
   const [editEmail, setEditEmail] = useState("");
   const [isDateTouched, setIsDateTouched] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [customerOption, setCustomerOption] = useState([]);
+  const [customer, setCustomer] = useState("");
+  console.log("customer", customerOption, customer)
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -63,6 +72,7 @@ const Beneficiary_detail = () => {
   const [country, setCountry] = useState("");
   const [status, setStatus] = useState("");
 
+  const [editCustomer, setEditCustomer] = useState("");
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editAddress, setEditAddress] = useState("");
@@ -72,15 +82,18 @@ const Beneficiary_detail = () => {
   const [editingBeneficiaryId, setEditingBeneficiaryId] = useState(null);
 
   const storedDetatis = localStorage.getItem("cargouser");
-  console.log("storedDetatis.... : ", storedDetatis);
+  // console.log("storedDetatis.... : ", storedDetatis);
   const parsedDetails = JSON.parse(storedDetatis);
-  console.log("....parsedDetails.... : ", parsedDetails);
+  // console.log("....parsedDetails.... : ", parsedDetails);
   const userid = parsedDetails ? parsedDetails.id : null;
-  console.log("userid.... : ", userid);
+  // console.log("userid.... : ", userid);
 
   const validateAddForm = () => {
     let errors = {};
 
+    if (!customer.trim()) {
+      errors.customer = "Customer is required";
+    }
     if (!name.trim()) {
       errors.name = "Name is required";
     }
@@ -114,6 +127,9 @@ const Beneficiary_detail = () => {
   const validateEditForm = () => {
     let errors = {};
 
+    if (!editCustomer.trim()) {
+      errors.editCustomer = "Customer is required";
+    }
     if (!editName.trim()) {
       errors.editName = "Name is required";
     }
@@ -150,7 +166,6 @@ const Beneficiary_detail = () => {
 
   // list
   const fetchBeneficiary = async () => {
-    console.log("fetch Beneficiary called");
     setLoading(true);
 
     try {
@@ -158,20 +173,35 @@ const Beneficiary_detail = () => {
         `api/beneficiary/view-beneficiary`
       );
 
-      console.log("Beneficiary API Response:", response.data);
-
       if (response.data?.status === true || response.data?.success === true) {
-        const customerData = response.data.data || [];
-        setBeneficiary(customerData);
-        setTotalRecords(customerData.length);
+
+        const apiData = response.data?.data;
+
+        // Decode Base64
+        const apiDatas = JSON.parse(atob(apiData));
+        console.log("Decoded Data:", apiDatas);
+
+        setBeneficiary(apiDatas.data);
+        setTotalRecords(apiDatas.data);
+
+        // Customer Dropdown List
+        const customerList = Array.isArray(apiDatas?.customer)
+          ? apiDatas.customer
+          : [];
+
+        setCustomerOption(customerList);
+        console.log("customerList:", customerList);
+
       } else {
         setBeneficiary([]);
         setTotalRecords(0);
+        setCustomerOption([]);
       }
     } catch (error) {
       console.error("Fetch Beneficiary error:", error);
       setBeneficiary([]);
       setTotalRecords(0);
+      setCustomerOption([]);
     } finally {
       setLoading(false);
     }
@@ -185,6 +215,7 @@ const Beneficiary_detail = () => {
 
     try {
       const formdata = {
+        customer_id: customer,
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
@@ -204,6 +235,7 @@ const Beneficiary_detail = () => {
         toast.success("Beneficiary created successfully");
 
         fetchBeneficiary();
+        resetFilters(); 
         closeAddModal();
 
         setName("");
@@ -225,7 +257,7 @@ const Beneficiary_detail = () => {
 
   // edit
   const openEditModal = async (row) => {
-    const beneficiaryId = row._id;
+    const beneficiaryId = row.id;
 
     if (!beneficiaryId) {
       toast.error("Invalid Beneficiary ID");
@@ -243,7 +275,7 @@ const Beneficiary_detail = () => {
 
       if (response.data?.success || response.data?.status) {
         const data = response.data.data;
-
+        setEditCustomer(data.customerId)
         setEditName(data.name);
         setEditEmail(data.email);
         setEditPhone(data.phone);
@@ -266,6 +298,7 @@ const Beneficiary_detail = () => {
       const response = await axiosInstance.put(
         `api/beneficiary/edit-beneficiary/${editingBeneficiaryId}`,
         {
+          customer_id: editCustomer,
           name: editName.trim(),
           email: editEmail.trim(),
           phone: editPhone.trim(),
@@ -326,8 +359,6 @@ const Beneficiary_detail = () => {
     }
   };
 
-
-
   const resetFilters = () => {
     setStatusFilter("");
     setDateFilter(getToday());
@@ -340,14 +371,15 @@ const Beneficiary_detail = () => {
 
       const columnIndexMap = {
         Sno: 0,
-        beneficiary_id: 1,
-        name: 2,
-        email:3,
-        phone: 4,
-        address: 5,
-        city: 6,
-        country: 7,
-        status: 8,
+        customerId: 1,
+        beneficiary_id: 2,
+        name: 3,
+        email: 4,
+        phone: 5,
+        address: 6,
+        city: 7,
+        country: 8,
+        status: 9,
       };
 
       const index = columnIndexMap[key];
@@ -398,6 +430,11 @@ const Beneficiary_detail = () => {
       render: function (data, type, row, meta) {
         return meta.row + 1;
       }
+    },
+    {
+      title: "Customer ID",
+      data: null,
+      render: (row) => row.customerId || "-",
     },
     {
       title: "Beneficiary ID",
@@ -465,7 +502,7 @@ const Beneficiary_detail = () => {
       title: "Action",
       data: null,
       render: (data, type, row) => {
-        const id = `actions-${row.sno || Math.random()}`;
+        const id = `actions-${row.id}`;
         setTimeout(() => {
           const container = document.getElementById(id);
           if (container) {
@@ -507,7 +544,7 @@ const Beneficiary_detail = () => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteBeneficiary(row._id);
+                      deleteBeneficiary(row.id);
                     }}
                   />
                 </div>
@@ -529,14 +566,16 @@ const Beneficiary_detail = () => {
     },
   ];
 
-  const data = beneficiary.filter((item) => {
-    const itemDate = item.createdAt?.split("T")[0];
+  const data = Array.isArray(beneficiary)
+    ? beneficiary.filter((item) => {
+      const itemDate = item.createdAt?.split("T")[0];
 
-    return (
-      (statusFilter ? String(item.status) === statusFilter : true) &&
-      (isDateTouched ? itemDate === dateFilter : true)
-    );
-  });
+      return (
+        (statusFilter ? String(item.status) === statusFilter : true) &&
+        (isDateTouched ? itemDate === dateFilter : true)
+      );
+    })
+    : [];
 
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
@@ -582,8 +621,12 @@ const Beneficiary_detail = () => {
                   type="date"
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
                   value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  onChange={(e) => {
+                    setDateFilter(e.target.value);
+                    setIsDateTouched(true);
+                  }}
                 />
+
 
               </div>
 
@@ -657,9 +700,11 @@ const Beneficiary_detail = () => {
           <div className="table-scroll-container">
 
             <DataTable
+            key={data.length}
               data={data}
               columns={columns}
               options={{
+                destroy: true,
                 paging: true,
                 searching: true,
                 ordering: true,
@@ -694,7 +739,43 @@ const Beneficiary_detail = () => {
               <div className="px-5 lg:px-14 py-2 md:py-10">
                 <p className="text-2xl md:text-3xl font-medium">Add Beneficiary</p>
 
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Customer ID <span className="text-red-500">*</span>
+                    </label>
 
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <Dropdown
+                      value={customer}
+                      options={customerOption}
+                      onChange={(e) => setCustomer(e.value)}
+                      optionLabel="name"
+                      optionValue="id"
+                      placeholder="Select customer"
+                      className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                    />
+                    {/* <input
+                      type="text"
+                      value={customer}
+                      onChange={(e) => {
+                        setCustomer(e.target.value);
+                        setFormErrors({ ...formErrors, customer: "" });
+                      }}
+                      placeholder="select customer ID"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    /> */}
+                    {formErrors.customer && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.customer}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
@@ -946,6 +1027,28 @@ const Beneficiary_detail = () => {
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Customer ID <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <Dropdown
+                          value={editCustomer}
+                          options={customerOption}
+                          onChange={(e) => setEditCustomer(e.value)}
+                          optionLabel="name"
+                          optionValue="id"
+                          placeholder="Select customer"
+                          className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                        />
+                        {formErrors.editCustomer && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editCustomer}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
                         Name <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
@@ -977,7 +1080,7 @@ const Beneficiary_detail = () => {
                           placeholder="Enter email"
                           value={editEmail}
                           onChange={(e) => {
-                            setEditName(e.target.value);
+                            setEditEmail(e.target.value);
                             setFormErrors({ ...formErrors, editEmail: "" });
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1153,40 +1256,46 @@ const Beneficiary_detail = () => {
 
               <div className="space-y-4 text-sm text-gray-700">
 
+                {/* customer ID */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Customer ID</span>
+                  <span>{viewBeneficiary.customerId || "-"}</span>
+                </div>
+
                 {/* beneficiary ID */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Beneficiary ID</span>
-                  <span>{viewBeneficiary.beneficiary_id}</span>
+                  <span>{viewBeneficiary.beneficiary_id || "-"}</span>
                 </div>
 
                 {/* Name */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Name</span>
-                  <span>{viewBeneficiary.name}</span>
+                  <span>{viewBeneficiary.name || "-"}</span>
                 </div>
 
                 {/* phone number */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Phone Number</span>
-                  <span>{viewBeneficiary.phone}</span>
+                  <span>{viewBeneficiary.phone || "-"}</span>
                 </div>
 
                 {/* address */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Address</span>
-                  <span>{viewBeneficiary.address}</span>
+                  <span>{viewBeneficiary.address || "-"}</span>
                 </div>
 
                 {/* city */}
                 <div className="flex justify-between ">
                   <span className="font-medium">City</span>
-                  <span>{viewBeneficiary.city}</span>
+                  <span>{viewBeneficiary.city || "-"}</span>
                 </div>
 
                 {/* country */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Country</span>
-                  <span>{viewBeneficiary.country}</span>
+                  <span>{viewBeneficiary.country || "-"}</span>
                 </div>
 
 
