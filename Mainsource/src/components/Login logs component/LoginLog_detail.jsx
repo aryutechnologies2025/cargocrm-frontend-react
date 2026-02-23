@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { TfiPencilAlt } from "react-icons/tfi";
 import ReactDOMServer from "react-dom/server";
@@ -15,9 +15,14 @@ import { useNavigate } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
+import { use } from "react";
+import axiosInstance from "../../api/axiosInstance";
+import { useDateUtils } from "../../utils/useDateUtils";
 DataTable.use(DT);
 
 const LoginLog_detail = () => {
+
+    const formatDateTime = useDateUtils();
     const navigate = useNavigate();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -26,7 +31,47 @@ const LoginLog_detail = () => {
     const [selectedLog, setSelectedLog] = useState(null);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [viewLog, setViewLog] = useState(null);
+    const [logs, setLogs] = useState([]);
+    console.log("Logs",logs);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [loading, setLoading] = useState(false);
 
+
+
+      const fetchLogs = async () => {
+    console.log("fetchLogs called");
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(
+        `api/logs/login-logs`
+      );
+
+    //   console.log("Logs API Response:", response.data.data);
+
+      if (response.data?.status === true || response.data?.success === true) {
+        const logData = response.data.data || [];
+
+        const deCodedData = JSON.parse(atob(logData));
+
+        console.log("Logs API Response after decode:", deCodedData);
+        setLogs(deCodedData);
+        setTotalRecords(deCodedData.length);
+      } else {
+        setLogs([]);
+        setTotalRecords(0);
+      }
+    } catch (error) {
+      console.error("Fetch roles error:", error);
+      setLogs([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
 
     const openAddModal = () => {
         setIsAddModalOpen(true);
@@ -52,109 +97,134 @@ const LoginLog_detail = () => {
 
     const columns = [
         {
-            title: "Sno",
-            data: "Sno",
-        },
+      title: "Sno",
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      }
+    },
         {
             title: "User ID",
-            data: "user_id",
+            data: "_id",
         },
         {
             title: "User Name",
-            data: "user_name",
+            data: "name",
         },
+        
         {
-            title: "Login Time",
-            data: "login_time",
-        },
+    title: "Login Time",
+    data: "login_time",
+    render: (data) => {
+      return data
+        ? formatDateTime(data, {
+            includeTime: true,
+            includeSeconds: false, // change true if you want seconds
+          })
+        : "—";
+    },
+  },
+  {
+    title: "Logout Time",
+    data: "logout_time",
+    render: (data) => {
+      return data
+        ? formatDateTime(data, {
+            includeTime: true,
+            includeSeconds: false,
+          })
+        : "—";
+    },
+  },
+
         {
             title: "IP Address",
-            data: "ip_address",
+            data: "ip",
         },
-        {
-            title: "Status",
-            data: "status",
-            render: (data) => {
-                const textColor = data === 1 ? "red" : "green";
-                const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-                return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
-            },
-        },
-        {
-            title: "Action",
-            data: null,
-            render: (data, type, row) => {
-                const id = `actions-${row.sno || Math.random()}`;
-                setTimeout(() => {
-                    const container = document.getElementById(id);
-                    if (container) {
-                        if (!container._root) {
-                            container._root = createRoot(container);
-                        }
-                        container._root.render(
-                            <div
-                                className="action-container"
-                                style={{
-                                    display: "flex",
-                                    gap: "15px",
-                                    alignItems: "flex-end",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <div
-                                    className="modula-icon-edit flex gap-2"
-                                    style={{
-                                        color: "#000",
-                                    }}
-                                >
-                                    <button
-                                        onClick={() => {
-                                            setViewLog(row);
-                                            setViewModalOpen(true);
+        // {
+        //     title: "Status",
+        //     data: "status",
+        //     render: (data) => {
+        //         const textColor = data === 1 ? "red" : "green";
+        //         const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
+        //         return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
+        //           ${data === 1 ? "Inactive" : "Active"}
+        //         </div>`;
+        //     },
+        // },
+        // {
+        //     title: "Action",
+        //     data: null,
+        //     render: (data, type, row) => {
+        //         const id = `actions-${row.sno || Math.random()}`;
+        //         setTimeout(() => {
+        //             const container = document.getElementById(id);
+        //             if (container) {
+        //                 if (!container._root) {
+        //                     container._root = createRoot(container);
+        //                 }
+        //                 container._root.render(
+        //                     <div
+        //                         className="action-container"
+        //                         style={{
+        //                             display: "flex",
+        //                             gap: "15px",
+        //                             alignItems: "flex-end",
+        //                             justifyContent: "center",
+        //                         }}
+        //                     >
+        //                         <div
+        //                             className="modula-icon-edit flex gap-2"
+        //                             style={{
+        //                                 color: "#000",
+        //                             }}
+        //                         >
+        //                             <button
+        //                                 onClick={() => {
+        //                                     setViewLog(row);
+        //                                     setViewModalOpen(true);
 
-                                        }}
-                                        className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
-                                    >
-                                        <FaEye />
-                                    </button>
-                                    {/* <TfiPencilAlt
-                                        className="cursor-pointer "
-                                        onClick={() => {
-                                            openEditModal(
-                                                row._id,
-                                                row.user_id,
-                                                row.user_name,
-                                                row.login_time,
-                                                row.ip_address,
-                                                row.status,
-                                            );
-                                        }}
-                                    /> */}
-                                    {/* <MdOutlineDeleteOutline
-                                        className="text-red-600 text-xl cursor-pointer"
-                                        onClick={() => {
-                                            deleteRoles(row._id);
-                                        }}
-                                    /> */}
-                                </div>
+        //                                 }}
+        //                                 className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
+        //                             >
+        //                                 <FaEye />
+        //                             </button>
+        //                             {/* <TfiPencilAlt
+        //                                 className="cursor-pointer "
+        //                                 onClick={() => {
+        //                                     openEditModal(
+        //                                         row._id,
+        //                                         row.user_id,
+        //                                         row.user_name,
+        //                                         row.login_time,
+        //                                         row.ip_address,
+        //                                         row.status,
+        //                                     );
+        //                                 }}
+        //                             /> */}
+        //                             {/* <MdOutlineDeleteOutline
+        //                                 className="text-red-600 text-xl cursor-pointer"
+        //                                 onClick={() => {
+        //                                     deleteRoles(row._id);
+        //                                 }}
+        //                             /> */}
+        //                         </div>
 
-                                {/* <div className="modula-icon-del" style={{
-                      color: "red"
-                    }}>
-                      <RiDeleteBin6Line
-                        onClick={() => handleDelete(row.id)}
-                      />
-                    </div> */}
-                            </div>,
-                            container
-                        );
-                    }
-                }, 0);
-                return `<div id="${id}"></div>`;
-            },
-        },
+        //                         {/* <div className="modula-icon-del" style={{
+        //               color: "red"
+        //             }}>
+        //               <RiDeleteBin6Line
+        //                 onClick={() => handleDelete(row.id)}
+        //               />
+        //             </div> */}
+        //                     </div>,
+        //                     container
+        //                 );
+        //             }
+        //         }, 0);
+        //         return `<div id="${id}"></div>`;
+        //     },
+        // },
     ];
 
     const data = [
@@ -213,7 +283,7 @@ const LoginLog_detail = () => {
                     {/* Responsive wrapper for the table */}
                     <div className="table-scroll-container">
                         <DataTable
-                            data={data}
+                            data={logs}
                             columns={columns}
                             options={{
                                 paging: true,
