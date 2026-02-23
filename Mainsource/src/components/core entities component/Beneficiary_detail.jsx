@@ -172,21 +172,22 @@ const Beneficiary_detail = () => {
       const response = await axiosInstance.get(
         `api/beneficiary/view-beneficiary`
       );
+      console.log("respo", response);
 
       if (response.data?.status === true || response.data?.success === true) {
 
-        const apiData = response.data?.data;
+        const apiDatas = response.data?.data;
 
         // Decode Base64
-        const apiDatas = JSON.parse(atob(apiData));
+        // const apiDatas = JSON.parse(atob(apiData));
         console.log("Decoded Data:", apiDatas);
 
-        setBeneficiary(apiDatas.data);
-        setTotalRecords(apiDatas.data);
+        setBeneficiary(apiDatas);
+        setTotalRecords(apiDatas);
 
         // Customer Dropdown List
-        const customerList = Array.isArray(apiDatas?.customer)
-          ? apiDatas.customer
+        const customerList = Array.isArray(response?.data.customer)
+          ? response?.data.customer
           : [];
 
         setCustomerOption(customerList);
@@ -215,7 +216,7 @@ const Beneficiary_detail = () => {
 
     try {
       const formdata = {
-        customer_id: customer,
+        customerId: customer,
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),

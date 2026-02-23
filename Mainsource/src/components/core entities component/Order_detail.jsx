@@ -26,10 +26,11 @@ import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
+
 const Order_detail = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);  
   const [totalRecords, setTotalRecords] = useState("");
   const [order, setOrder] = useState([]);
   console.log("order check", order)
@@ -55,6 +56,7 @@ const Order_detail = () => {
   });
   const [statusFilter, setStatusFilter] = useState("");
   const [senderOptions, setSenderOptions] = useState([]);
+  console.log("senderOptions",senderOptions);
   const [beneficiaryOptions, setBeneficiaryOptions] = useState([]);
   console.log("beneficiaryOptions", beneficiaryOptions)
   const [beneficiaryFilter, setBeneficiaryFilter] = useState("");
@@ -69,7 +71,9 @@ const Order_detail = () => {
   const [isDateTouched, setIsDateTouched] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [senderId, setSenderId] = useState("");
+  console.log("senderId", senderId);
   const [beneficiaryId, setBeneficiaryId] = useState("");
+  console.log("beneficiaryId", beneficiaryId);
   const [cargoMode, setCargoMode] = useState("");
   const [packed, setPacked] = useState("");
   const [createdBy, setCreatedBy] = useState("");
@@ -141,10 +145,6 @@ const Order_detail = () => {
   };
 
 
-  useEffect(() => {
-    fetchOrder();
-    fetchBeneficiary();
-  }, []);
 
   // list
   const fetchOrder = async () => {
@@ -153,19 +153,20 @@ const Order_detail = () => {
     try {
       const response = await axiosInstance.get(`api/orders/view-orders`);
 
-      console.log("Order API:", response.data);
+      console.log("Order API:", response);
 
       if (response.data?.success || response.data?.status) {
-        const apiData = response.data.data || [];
-        const apiDatas = JSON.parse(atob(apiData));
+        const apiDatas = response.data.data || [];
+        console.log("Decoded Data:", apiDatas);
+        // const apiDatas = JSON.parse(atob(apiData));
 
-        setOrder(apiDatas.data);
-        setTotalRecords(apiDatas.data);
+        setOrder(apiDatas);
+        setTotalRecords(apiDatas);
 
-        const senderList = Array.isArray(apiDatas.customer)
-          ? apiDatas.customer : [];
+        // const senderList = Array.isArray(apiDatas.customer)
+        //   ? apiDatas.customer : [];
 
-        setSenderOptions(senderList);
+        setSenderOptions(response.data.customer);
         console.log("senderList", senderList);
       } else {
         setOrder([]);
@@ -182,35 +183,87 @@ const Order_detail = () => {
     }
   };
   // list
+  // const fetchBeneficiary = async () => {
+  //   // setLoading(true);
+  //   try {
+  //     const response = await axiosInstance.get(
+  //       `api/orders/get-sender-by-beneficiary`,
+  //       {
+  //         params: {
+  //           customerId: senderId
+  //         }
+  //       }
+  //     );
+  //     // console.log("Beneficiary API:", response.data.data);
+
+      
+  //       const beniData = response.data.data || [];
+  //       const apiDatas = JSON.parse(atob(beniData));
+
+  //       console.log("Beneficiary API:", apiDatas);
+
+  //       // const beneficiaryList = Array.isArray(apiDatas)
+  //       //   ? apiDatas
+  //       //   : [];
+
+  //       console.log("beneficiaryList", apiDatas);
+  //       setBeneficiaryOptions(apiDatas);
+
+
+  //   } catch (error) {
+  //     console.error(error);
+  //     setBeneficiaryOptions([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchBeneficiary = async () => {
-    setLoading(true);
-
-    try {
-      const response = await axiosInstance.get(
-        `api/orders/get-sender-by-beneficiary`
-      );
-
-      if (response.data?.success || response.data?.status) {
-        const beniData = response.data.data || [];
-        const apiDatas = JSON.parse(atob(beniData));
-
-        console.log("Beneficiary API:", apiDatas);
-
-        const beneficiaryList = Array.isArray(apiDatas.customer)
-          ? apiDatas.customer
-          : [];
-        console.log("beneficiaryList", beneficiaryList);
-        setBeneficiaryOptions(beneficiaryList);
-      } else {
-        setBeneficiaryOptions([]);
+  setLoading(true);
+  try {
+    const response = await axiosInstance.get(
+      `api/orders/get-sender-by-beneficiary`,
+      {
+        params: {
+          customerId: senderId
+        }
       }
-    } catch (error) {
-      console.error(error);
-      setBeneficiaryOptions([]);
-    } finally {
-      setLoading(false);
+    );
+    
+    let beneficiaryData = [];
+    
+    if (response.data?.data) {
+      if (Array.isArray(response.data.data)) {
+        beneficiaryData = response.data.data;
+      } else if (typeof response.data.data === 'object') {
+        beneficiaryData = [response.data.data];
+      }
     }
-  };
+    
+    setBeneficiaryOptions(beneficiaryData);
+    
+  } catch (error) {
+    console.error(error);
+    setBeneficiaryOptions([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  
+  useEffect(() => {
+    // fetchOrder();
+    fetchBeneficiary();
+    
+  }, [senderId]);
+
+
+
+  useEffect(() => {
+    fetchOrder();
+    // fetchBeneficiary();
+    
+  }, []);
 
   // create
   const handleAddSubmit = async (e) => {
@@ -619,6 +672,7 @@ const Order_detail = () => {
                 />
               </div>
 
+
               {/* Sender Filter */}
               <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Sender ID</label>
@@ -837,7 +891,7 @@ const Order_detail = () => {
                       options={beneficiaryOptions}
                       onChange={(e) => setBeneficiaryId(e.value)}
                       optionLabel="name"
-                      optionValue="_id"   // ✅ FIX HERE
+                      optionValue="_id" 
                       placeholder="Select Beneficiary ID"
                       className="w-full border border-gray-300 rounded-lg"
                     />

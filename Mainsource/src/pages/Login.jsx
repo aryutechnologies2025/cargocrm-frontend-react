@@ -8,7 +8,8 @@ import ReCAPTCHA from "react-google-recaptcha";
 import Footer from "../components/Footer";
 import cargoLord from "../assets/cargoLord_logo.png";
 import axios from "axios";
-import { API_URL, CAPCHA_URL } from "../Config";
+import { API_URL} from "../Config";
+import {CAPCHA_URL } from "../Config";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { FaEye } from "react-icons/fa";
@@ -179,11 +180,11 @@ const Login = () => {
 
           <ReCAPTCHA
             // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //local
-            sitekey={CAPCHA_URL} //live
+           sitekey={CAPCHA_URL} //live
             onChange={handleCaptchaChange}
           />
           {error && (
-            <p className="text-red-500 text-sm mt-2">{error}</p>
+           <p className="text-red-500 text-sm mt-2">{error}</p>
           )}
 
           <button

@@ -105,17 +105,15 @@ const Roles_Mainbar = () => {
       const response = await axiosInstance.get(
         `api/roles/view-roles`
       );
+      console.log("roles...", response);
 
       console.log("Role API Response:", response.data);
 
-      if (response.data?.status === true || response.data?.success === true) {
-        const roleData = response.data.data || [];
+        const roleData = response.data || [];
+        console.log("roleData", roleData);
         setRoles(roleData);
         setTotalRecords(roleData.length);
-      } else {
-        setRoles([]);
-        setTotalRecords(0);
-      }
+    
     } catch (error) {
       console.error("Fetch roles error:", error);
       setRoles([]);
