@@ -349,7 +349,7 @@ const Sidebar = () => {
                             : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                           }`}
                       >
-                        Cargo(event)
+                        Cargo Movement
                       </button>
                     </div>
                   </div>
