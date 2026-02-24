@@ -24,6 +24,8 @@ import { MdContacts } from "react-icons/md";
 import { TbLogs } from "react-icons/tb";
 import axiosInstance from "../api/axiosInstance";
 import { API_URL } from "../Config";
+import { RiCustomerService2Line } from "react-icons/ri";
+import { MdOutlineHouseSiding } from "react-icons/md";
 
 
 const Sidebar = () => {
@@ -48,65 +50,65 @@ const Sidebar = () => {
     localStorage.setItem("sidebarState", newState); // Persist the new state
   };
 
-const onClickSidebarMenu = async (label) => {
+  const onClickSidebarMenu = async (label) => {
 
-  if (label === "logout") {
-    try {
-      setButtonLoading(true);
-      await logoutUser();
-    } catch (err) {
-      console.log("Logout error", err);
-    } finally {
-      setButtonLoading(false);
-      navigate("/", { replace: true });
-      window.scrollTo({ top: 0, behavior: "instant" });
+    if (label === "logout") {
+      try {
+        setButtonLoading(true);
+        await logoutUser();
+      } catch (err) {
+        console.log("Logout error", err);
+      } finally {
+        setButtonLoading(false);
+        navigate("/", { replace: true });
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return;
     }
-    return;
-  }
 
-  // normal navigation
-  navigate(`/${label.toLowerCase()}`);
-  window.scrollTo({ top: 0, behavior: "instant" });
-};
-;
+    // normal navigation
+    navigate(`/${label.toLowerCase()}`);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+  ;
 
 
 
-const isLoggingOut = useRef(false);
+  const isLoggingOut = useRef(false);
 
-const logoutUser = async () => {
-  const storedUser = localStorage.getItem("cargouser");
+  const logoutUser = async () => {
+    const storedUser = localStorage.getItem("cargouser");
 
-  let loginLogId = null;
+    let loginLogId = null;
 
-  if (storedUser) {
-    const parsedUser = JSON.parse(storedUser);
-    loginLogId = parsedUser.log_id;
-  }
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      loginLogId = parsedUser.log_id;
+    }
 
-  console.log("loginLogId:", loginLogId);
+    console.log("loginLogId:", loginLogId);
 
-  if (!loginLogId) {
-    console.warn("No login log id found");
-    return;
-  }
+    if (!loginLogId) {
+      console.warn("No login log id found");
+      return;
+    }
 
-  if (isLoggingOut.current) return;
-  isLoggingOut.current = true;
+    if (isLoggingOut.current) return;
+    isLoggingOut.current = true;
 
-  try {
-    await axiosInstance.post("/api/auth/logout", {
-      id: loginLogId,
-    });
+    try {
+      await axiosInstance.post("/api/auth/logout", {
+        id: loginLogId,
+      });
 
-    console.log("Logout API success");
-  } catch (error) {
-    console.error("Logout API failed", error);
-  } finally {
-    localStorage.clear();
-    sessionStorage.clear();
-  }
-};
+      console.log("Logout API success");
+    } catch (error) {
+      console.error("Logout API failed", error);
+    } finally {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+  };
 
   const onChangeSelect = (e) => {
     let value = e.target.value;
@@ -173,7 +175,188 @@ const logoutUser = async () => {
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
 
+              {/* customer */}
+              <div
+                onClick={() => onClickSidebarMenu("Customer")}
+                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/customer"
+                    ? "bg-[#e6f2fa] text-[#057fc4]"
+                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                  }`}
+              >
+                <RiCustomerService2Line />
+                {!arrowClicked && <p className="text-sm">Customer</p>}
+              </div>
 
+              {/* beneficiary */}
+              <div
+                onClick={() => onClickSidebarMenu("Beneficiary")}
+                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/beneficiary"
+                    ? "bg-[#e6f2fa] text-[#057fc4]"
+                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                  }`}
+              >
+                <MdOutlineHouseSiding />
+                {!arrowClicked && <p className="text-sm">Beneficiary</p>}
+              </div>
+
+              {/* order */}
+              <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
+
+                <div
+                  onClick={() => toggleMenu("Order")}
+                  className={`flex items-center w-full flex-grow
+      ${arrowClicked ? "justify-center" : "justify-normal"}
+      px-2 py-3 h-10 rounded-md gap-2 text-sm font-medium cursor-pointer
+      ${currentPath === "/parcel" || currentPath === "/order" || currentPath === "/collection"
+                      ? "bg-[#e6f2fa] text-[#057fc4] hover:text-[#057fc4]"
+                      : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                    }`}
+                >
+                  <IoPeopleOutline className="w-5" />
+
+                  {!arrowClicked && (
+                    <div className="flex items-center gap- justify-between w-full">
+                      <span className="text-sm font-medium">Order</span>
+                      {currentOpen === "Order" ||
+                        currentPath === "/parcel" ||
+                        currentPath === "/order" ||
+                        currentPath === "/collection" ? (
+                        <IoIosArrowUp />
+                      ) : (
+                        <IoIosArrowDown />
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {!arrowClicked && (
+                  <div
+                    className={`overflow-hidden transition-all duration-500 ease-in-out ${currentOpen === "Order" ||
+                      currentPath === "/parcel" ||
+                      currentPath === "/order" ||
+                      currentPath === "/collection"
+                      ? "max-h-40 opacity-100 mt-1"
+                      : "max-h-0 opacity-0"
+                      }`}
+                  >
+                    <div className="flex gap-2 ms-8 flex-col text-sm font-medium text-gray-500">
+
+                      <button
+                        onClick={() => {
+                          navigate("/parcel");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/parcel"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Parcel / Pieces
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/order");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/order"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Order List
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/collection");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/collection"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Collection
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* events */}
+              <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
+
+                <div
+                  onClick={() => toggleMenu("Event")}
+                  className={`flex items-center w-full flex-grow
+      ${arrowClicked ? "justify-center" : "justify-normal"}
+      px-2 py-3 h-10 rounded-md gap-2 text-sm font-medium cursor-pointer
+      ${currentPath === "/event-master" || currentPath === "/event"
+                      ? "bg-[#e6f2fa] text-[#057fc4] hover:text-[#057fc4]"
+                      : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                    }`}
+                >
+                  <IoPeopleOutline className="w-5" />
+
+                  {!arrowClicked && (
+                    <div className="flex items-center gap- justify-between w-full">
+                      <span className="text-sm font-medium">Events</span>
+                      {currentOpen === "Event" ||
+                        currentPath === "/event-master" ||
+                        currentPath === "/event"  ? (
+                        <IoIosArrowUp />
+                      ) : (
+                        <IoIosArrowDown />
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {!arrowClicked && (
+                  <div
+                    className={`overflow-hidden transition-all duration-500 ease-in-out ${currentOpen === "Event" ||
+                      currentPath === "/event-master" ||
+                      currentPath === "/event" 
+                      ? "max-h-40 opacity-100 mt-1"
+                      : "max-h-0 opacity-0"
+                      }`}
+                  >
+                    <div className="flex gap-2 ms-8 flex-col text-sm font-medium text-gray-500">
+
+                      <button
+                        onClick={() => {
+                          navigate("/event-master");
+                          setCurrentOpen("Event");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/event-list"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Event Master
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/event");
+                          setCurrentOpen("Event");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/event"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Cargo(event)
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* user */}
               <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
@@ -246,16 +429,29 @@ const logoutUser = async () => {
                 )}
               </div>
 
+              {/* Receipt */}
+              <div
+                onClick={() => onClickSidebarMenu("Receipt")}
+                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/receipt"
+                    ? "bg-[#e6f2fa] text-[#057fc4]"
+                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                  }`}
+              >
+                <CiBoxList />
+                {!arrowClicked && <p className="text-sm">Receipt</p>}
+              </div>
+
 
               {/* Core entities */}
-              <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
+              {/* <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
 
                 <div
                   onClick={() => toggleMenu("core")}
                   className={`flex items-center w-full flex-grow
       ${arrowClicked ? "justify-center" : "justify-normal"}
       px-2 py-3 h-10 rounded-md gap-2 text-sm font-medium cursor-pointer
-      ${currentPath === "/customer" || currentPath === "/beneficiary" || currentPath === "/parcel" || currentPath === "/event" || currentPath === "/order" || currentPath === "/run"
+      ${currentPath === "/parcel" || currentPath === "/event" || currentPath === "/order" || currentPath === "/run"
                       ? "bg-[#e6f2fa] text-[#057fc4]"
                       : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                     }`}
@@ -267,8 +463,6 @@ const logoutUser = async () => {
                     <div className="flex items-center justify-between w-full">
                       <span className="text-sm font-medium">Core Entities</span>
                       {currentOpen === "core" ||
-                        currentPath === "/customer" ||
-                        currentPath === "/beneficiary" ||
                         currentPath === "/parcel" ||
                         currentPath === "/event" ||
                         currentPath === "/order" ||
@@ -284,8 +478,6 @@ const logoutUser = async () => {
                 {!arrowClicked && (
                   <div
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${currentOpen === "core" ||
-                      currentPath === "/customer" ||
-                      currentPath === "/beneficiary" ||
                       currentPath === "/parcel" ||
                       currentPath === "/event" ||
                       currentPath === "/order" ||
@@ -296,32 +488,6 @@ const logoutUser = async () => {
                   >
                     <div className="flex gap-2 ms-8 flex-col text-sm font-medium text-gray-500">
 
-                      <button
-                        onClick={() => {
-                          navigate("/customer");
-                          setCurrentOpen("core");
-                        }}
-                        className={`w-full text-left px-2 py-1 rounded-md transition
-            ${currentPath === "/customer"
-                            ? "text-[#057fc4]"
-                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                          }`}
-                      >
-                        Customer
-                      </button>
-                      <button
-                        onClick={() => {
-                          navigate("/beneficiary");
-                          setCurrentOpen("core");
-                        }}
-                        className={`w-full text-left px-2 py-1 rounded-md transition
-            ${currentPath === "/beneficiary"
-                            ? "text-[#057fc4]"
-                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                          }`}
-                      >
-                        Beneficiary
-                      </button>
                       <button
                         onClick={() => {
                           navigate("/order");
@@ -377,7 +543,7 @@ const logoutUser = async () => {
                     </div>
                   </div>
                 )}
-              </div>
+              </div> */}
 
               {/* contact us */}
               <div
@@ -392,17 +558,17 @@ const logoutUser = async () => {
                 {!arrowClicked && <p className="text-sm">Contact Us</p>}
               </div>
 
-              {/* login log */}
+              {/* audit log */}
               <div
-                onClick={() => onClickSidebarMenu("login-logs")}
+                onClick={() => onClickSidebarMenu("audit-logs")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
-                  }  px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/login-logs"
+                  }  px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/audit-logs"
                     ? "bg-[#e6f2fa] text-[#057fc4]"
                     : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                   }`}
               >
                 <TbLogs />
-                {!arrowClicked && <p className="text-sm">Login Logs</p>}
+                {!arrowClicked && <p className="text-sm">Audit Logs</p>}
               </div>
 
             </div>
@@ -418,9 +584,9 @@ const logoutUser = async () => {
                       key={idx}
                       className={`flex items-center ${arrowClicked ? "justify-center" : "justify-normal"
                         }  px-2 py-3 rounded-md gap-3 text-sm font-medium cursor-pointer ${currentPath === "/system-setting"
-                    ? "bg-[#e6f2fa] text-[#057fc4]"
-                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                  }`}
+                          ? "bg-[#e6f2fa] text-[#057fc4]"
+                          : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                        }`}
                     >
                       <div className="flex items-center justify-center h-5 w-5">
                         {item.icon}

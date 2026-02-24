@@ -16,6 +16,15 @@ pipeline {
                 }
             }
         }
+        
+        stage('Security Scan - Semgrep (Cloud)') {
+            environment {
+                SEMGREP_APP_TOKEN = credentials('semgrep-token')
+            }
+            steps {
+                sh 'semgrep ci || true'
+            }
+        } 
 
         stage('Build Frontend') {
             steps {
