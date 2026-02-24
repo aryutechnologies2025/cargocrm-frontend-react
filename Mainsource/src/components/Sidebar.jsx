@@ -168,33 +168,7 @@ const Sidebar = () => {
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
-
-              {/* customer */}
-              <div
-                onClick={() => onClickSidebarMenu("Customer")}
-                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
-                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/customer"
-                    ? "bg-[#e6f2fa] text-[#057fc4]"
-                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                  }`}
-              >
-                <RiCustomerService2Line />
-                {!arrowClicked && <p className="text-sm">Customer</p>}
-              </div>
-
-              {/* beneficiary */}
-              <div
-                onClick={() => onClickSidebarMenu("Beneficiary")}
-                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
-                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/beneficiary"
-                    ? "bg-[#e6f2fa] text-[#057fc4]"
-                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                  }`}
-              >
-                <MdOutlineHouseSiding />
-                {!arrowClicked && <p className="text-sm">Beneficiary</p>}
-              </div>
-
+              
               {/* order */}
               <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
 
@@ -203,7 +177,7 @@ const Sidebar = () => {
                   className={`flex items-center w-full flex-grow
       ${arrowClicked ? "justify-center" : "justify-normal"}
       px-2 py-3 h-10 rounded-md gap-2 text-sm font-medium cursor-pointer
-      ${currentPath === "/parcel" || currentPath === "/order" || currentPath === "/collection"
+      ${currentPath === "/parcel" || currentPath === "/order" || currentPath === "/collection" || currentPath === "/customer" || currentPath === "/beneficiary"
                       ? "bg-[#e6f2fa] text-[#057fc4] hover:text-[#057fc4]"
                       : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                     }`}
@@ -216,6 +190,8 @@ const Sidebar = () => {
                       {currentOpen === "Order" ||
                         currentPath === "/parcel" ||
                         currentPath === "/order" ||
+                        currentPath === "/customer" ||
+                        currentPath === "/beneficiary" ||
                         currentPath === "/collection" ? (
                         <IoIosArrowUp />
                       ) : (
@@ -230,13 +206,41 @@ const Sidebar = () => {
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${currentOpen === "Order" ||
                       currentPath === "/parcel" ||
                       currentPath === "/order" ||
+                      currentPath === "/customer" ||
+                      currentPath === "/beneficiary" ||
                       currentPath === "/collection"
-                      ? "max-h-40 opacity-100 mt-1"
+                      ? "max-h-60 opacity-100 mt-1"
                       : "max-h-0 opacity-0"
                       }`}
                   >
                     <div className="flex gap-2 ms-8 flex-col text-sm font-medium text-gray-500">
 
+                      <button
+                        onClick={() => {
+                          navigate("/customer");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/customer"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Customer
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/beneficiary");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/beneficiary"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Beneficiary
+                      </button>
                       <button
                         onClick={() => {
                           navigate("/parcel");
