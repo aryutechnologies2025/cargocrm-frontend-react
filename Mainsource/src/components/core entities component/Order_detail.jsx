@@ -97,7 +97,103 @@ const Order_detail = () => {
   const userid = parsedDetails ? parsedDetails.id : null;
   console.log("userid.... : ", userid);
 
+const OrderDetailsTable = ({ orderId, trackingOptions }) => {
+    console.log("orderId in table:", orderId);
+    console.log("trackingOptions:...", trackingOptions);
+    
+    // Use filter to get ALL matching orders, not just the first one
+    const selectedOrders = trackingOptions?.filter(
+      (order) => order?.customerId?._id === orderId 
+    ) || [];
+    
+    console.log("selectedOrders", selectedOrders);
 
+    if (!selectedOrders || selectedOrders.length === 0) return null;
+
+    const formatDate = (dateString) => {
+      if (!dateString) return "N/A";
+      return new Date(dateString).toLocaleDateString();
+    };
+
+    const renderStatus = (status) => {
+      const isActive = status === "1" || status === 1 || status === true;
+      return (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            isActive
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-600"
+          }`}
+        >
+          {isActive ? "Active" : "Inactive"}
+        </span>
+      );
+    };
+
+    return (
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+          Order Details ({selectedOrders.length} orders)
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm border border-gray-200 rounded-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                  Customer ID
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                  Name
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                  Email
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                  Phone No
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                  City
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                  Country
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {selectedOrders.map((order, index) => (
+                <tr key={order._id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                    {order.customerId?.name || "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                    {order.name || "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                    {order.email || "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                    {order.phone || "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                    {order.city || "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                    {order.country || "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
+                    {renderStatus(order.status)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
   const validateAddForm = () => {
     let errors = {};
 
@@ -182,41 +278,7 @@ const Order_detail = () => {
       setLoading(false);
     }
   };
-  // list
-  // const fetchBeneficiary = async () => {
-  //   // setLoading(true);
-  //   try {
-  //     const response = await axiosInstance.get(
-  //       `api/orders/get-sender-by-beneficiary`,
-  //       {
-  //         params: {
-  //           customerId: senderId
-  //         }
-  //       }
-  //     );
-  //     // console.log("Beneficiary API:", response.data.data);
 
-      
-  //       const beniData = response.data.data || [];
-  //       const apiDatas = JSON.parse(atob(beniData));
-
-  //       console.log("Beneficiary API:", apiDatas);
-
-  //       // const beneficiaryList = Array.isArray(apiDatas)
-  //       //   ? apiDatas
-  //       //   : [];
-
-  //       console.log("beneficiaryList", apiDatas);
-  //       setBeneficiaryOptions(apiDatas);
-
-
-  //   } catch (error) {
-  //     console.error(error);
-  //     setBeneficiaryOptions([]);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const fetchBeneficiary = async () => {
   setLoading(true);
@@ -229,6 +291,7 @@ const Order_detail = () => {
         }
       }
     );
+    console.log("resBen",response);
     
     let beneficiaryData = [];
     
@@ -652,15 +715,7 @@ const Order_detail = () => {
               {/* Beneficiary Filter */}
               <div>
                 <label className="text-sm font-medium text-gray-600 p-1">Beneficiary ID</label>
-                {/* <select
-                  className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
-                  value={beneficiaryFilter}
-                  onChange={(e) => setBeneficiaryFilter(e.target.value)}
-                >
-                  <option value="">Select Beneficiary ID</option>
-                  <option value="0">96F5741425</option>
-                  <option value="1">96F5741424</option>
-                </select> */}
+               
                 <Dropdown
                   // value={customer}
                   // options={customerOption}
@@ -875,6 +930,15 @@ const Order_detail = () => {
                     )}
                   </div>
                 </div>
+
+                <div className="mt-4 ml-auto w-[100%] md:w-[100%]">
+                    <OrderDetailsTable
+                      orderId={senderId}
+                      trackingOptions={beneficiaryOptions}
+                    />
+                  </div>
+
+
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div>
