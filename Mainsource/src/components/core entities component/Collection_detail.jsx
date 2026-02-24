@@ -14,8 +14,12 @@ import { IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import { FaEye } from "react-icons/fa6";
-import { IoIosCloseCircle } from "react-icons/io"
+import { IoIosCloseCircle } from "react-icons/io";
 import { BiCustomize } from "react-icons/bi";
+import axiosInstance from "../../api/axiosInstance";
+import { Dropdown } from "primereact/dropdown";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 DataTable.use(DT);
 
 const Collection_detail = () => {
@@ -28,6 +32,8 @@ const Collection_detail = () => {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewCollection, setViewCollection] = useState(null);
   const [statusFilter, setStatusFilter] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [senderId, setSenderId] = useState("");
   const getToday = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
@@ -42,21 +48,22 @@ const Collection_detail = () => {
   const [editAddress, setEditAddress] = useState("");
   const [editDateTime, setEditDateTime] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
 
+  const [collection, setCollection] = useState([]);
+  const [senderOptions, setSenderOptions] = useState([]);
+  console.log("senderOptions", senderOptions);
   const validateAddForm = () => {
     let errors = {};
 
-    if (!orderId.trim()) {
-      errors.orderId = "Order Id is required";
+    if (!senderId.trim()) {
+      errors.senderId = "Order Id is required";
     }
     if (!address.trim()) {
       errors.address = "Address is required";
     }
     if (!dateTime.trim()) {
       errors.dateTime = "Date & Time is required";
-    }
-    if (status === "") {
-      errors.status = "Status is required";
     }
 
     setFormErrors(errors);
@@ -75,47 +82,128 @@ const Collection_detail = () => {
     if (!editDateTime.trim()) {
       errors.editDateTime = "Date & Time is required";
     }
-    if (editStatus === "") {
-      errors.editStatus = "Status is required";
-    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddSubmit = () => {
-    if (!validateAddForm()) return;
+  const fetchCollection = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(
+        `api/collections/view-collection`,
+      );
 
-    const payload = {
-      order_id: orderId,
-      address: address,
-      date_time: dateTime,
-      status: status,
-    };
+      console.log("response", response);
 
-    console.log("Add Payload:", payload);
-
-    //  Call your API here
-
-    closeAddModal();
+      if (response.data?.success || response.data?.status) {
+        const apiData = response.data.data || [];
+        setCollection(apiData);
+        setSenderOptions(response.data.customer || []);
+      } else {
+        setCollection([]);
+        setSenderOptions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      setCollection([]);
+      setSenderOptions([]);
+      toast.error("Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = () => {
+  useEffect(() => {
+    fetchCollection();
+  }, []);
+
+  const handleAddSubmit = async () => {
+    if (!validateAddForm()) return;
+    try {
+      const payload = {
+        orderId: senderId,
+        address: address,
+        date_time: dateTime,
+      };
+
+      const response = await axiosInstance.post(
+        `api/collections/create-collection`,
+        payload,
+      );
+
+      if (response.data?.status || response.data?.success) {
+        toast.success("Order created successfully");
+        fetchCollection();
+        closeAddModal();
+        resetAddForm();
+        setAddress("");
+        setDateTime("");
+        setSenderId("");
+      } else {
+        toast.error("Failed to create order");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Error creating order");
+    }
+  };
+
+  const handleUpdate = async () => {
     if (!validateEditForm()) return;
+    try {
+      const response = await axiosInstance.put(
+        `api/collections/edit-collection/${selectedId}`,
+        {
+          orderId: editOrderId,
+          address: editAddress,
+          date_time: editDateTime,
+        },
+      );
 
-    const payload = {
-      id: selectedCollection._id,
-      order_id: editOrderId,
-      address: editAddress,
-      date_time: editDateTime,
-      status: editStatus,
-    };
+      if (response.data?.status || response.data?.success) {
+        toast.success("Order updated successfully");
+        fetchCollection();
+        closeEditModal();
+      } else {
+        toast.error("Failed to update order");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating order");
+    }
+  };
 
-    console.log("Update Payload:", payload);
+  const deleteCollection = async (orderId) => {
+    if (!orderId) {
+      toast.error("Invalid order ID");
+      return;
+    }
 
-    //  Call update API here
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this order?",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, delete it!",
+    });
 
-    closeEditModal();
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await axiosInstance.delete(
+        `api/collections/delete-collection/${orderId}`,
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Collection deleted successfully");
+        fetchCollection();
+      } else {
+        toast.error(response.data?.message || "Failed to delete order");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Error deleting order");
+    }
   };
 
   const resetFilters = () => {
@@ -123,7 +211,6 @@ const Collection_detail = () => {
     setDateFilter(""); // reset to today
     // setDateFilter(getToday());
   };
-
 
   const openAddModal = () => {
     setIsAddModalOpen(true);
@@ -152,7 +239,11 @@ const Collection_detail = () => {
   };
 
   const openEditModal = (row) => {
-    setSelectedCollection(row);
+    console.log("row", row);
+    setSelectedId(row.id);
+    setEditAddress(row.address);
+    setEditDateTime(row.date_time);
+    setEditOrderId(row.orderId?._id);
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
@@ -165,11 +256,14 @@ const Collection_detail = () => {
   const columns = [
     {
       title: "Sno",
-      data: "Sno",
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      },
     },
     {
       title: "Order ID",
-      data: "order_id",
+      data: "tracking_number",
     },
     {
       title: "Collection Address",
@@ -221,7 +315,6 @@ const Collection_detail = () => {
                     onClick={() => {
                       setViewCollection(row);
                       setViewModalOpen(true);
-
                     }}
                     className="p-1 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
                   >
@@ -236,7 +329,7 @@ const Collection_detail = () => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteRoles(row._id);
+                      deleteCollection(row.id);
                     }}
                   />
                 </div>
@@ -249,7 +342,7 @@ const Collection_detail = () => {
                          />
                        </div> */}
               </div>,
-              container
+              container,
             );
           }
         }, 0);
@@ -259,9 +352,30 @@ const Collection_detail = () => {
   ];
 
   const rawData = [
-    { Sno: 1, order_id: "#87678987", address: "H-block, #111", date_time: "13-1-2026 & 12:00PM", status: 0, date: "2026-02-01" },
-    { Sno: 2, order_id: "#9878678", address: "H-block, #111", date_time: "13-1-2026 & 12:00PM", status: 1, date: "2026-02-02" },
-    { Sno: 3, order_id: "#67896876", address: "H-block, #111", date_time: "13-1-2026 & 12:00PM", status: 1, date: "2026-02-03" },
+    {
+      Sno: 1,
+      order_id: "#87678987",
+      address: "H-block, #111",
+      date_time: "13-1-2026 & 12:00PM",
+      status: 0,
+      date: "2026-02-01",
+    },
+    {
+      Sno: 2,
+      order_id: "#9878678",
+      address: "H-block, #111",
+      date_time: "13-1-2026 & 12:00PM",
+      status: 1,
+      date: "2026-02-02",
+    },
+    {
+      Sno: 3,
+      order_id: "#67896876",
+      address: "H-block, #111",
+      date_time: "13-1-2026 & 12:00PM",
+      status: 1,
+      date: "2026-02-03",
+    },
   ];
 
   const data = rawData.filter((item) => {
@@ -288,13 +402,13 @@ const Collection_detail = () => {
         {/* Filters */}
         <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
           <div className="flex flex-wrap items-end gap-3 justify-between">
-
             {/* Left Side Filters */}
             <div className="flex flex-wrap gap-3">
-
               {/* Status Filter */}
               <div className="gap-2">
-                <label className="text-sm font-medium text-gray-600 p-1">Status</label>
+                <label className="text-sm font-medium text-gray-600 p-1">
+                  Status
+                </label>
                 <select
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
                   value={statusFilter}
@@ -308,14 +422,15 @@ const Collection_detail = () => {
 
               {/* Date Filter */}
               <div className="gap-2">
-                <label className="text-sm font-medium text-gray-600 p-1">Date</label>
+                <label className="text-sm font-medium text-gray-600 p-1">
+                  Date
+                </label>
                 <input
                   type="date"
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                 />
-
               </div>
 
               {/* Reset */}
@@ -327,7 +442,6 @@ const Collection_detail = () => {
                   Reset
                 </button>
               </div>
-
             </div>
 
             {/* Right Side Add Button */}
@@ -339,7 +453,6 @@ const Collection_detail = () => {
                 Add
               </button>
             </div>
-
           </div>
         </div>
 
@@ -347,7 +460,7 @@ const Collection_detail = () => {
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
-              data={data}
+              data={collection}
               columns={columns}
               options={{
                 paging: true,
@@ -363,15 +476,15 @@ const Collection_detail = () => {
           </div>
         </div>
 
-
         {isAddModalOpen && (
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm bg-opacity-50 z-50">
             {/* Overlay */}
             <div className="absolute inset-0 " onClick={closeAddModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${
+                isAnimating ? "translate-x-0" : "translate-x-full"
+              }`}
             >
               <div
                 className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -382,8 +495,9 @@ const Collection_detail = () => {
               </div>
 
               <div className="px-5 lg:px-14 py-2 md:py-10">
-                <p className="text-2xl md:text-3xl font-medium">Add Event Master</p>
-
+                <p className="text-2xl md:text-3xl font-medium">
+                  Add Collection
+                </p>
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
@@ -393,25 +507,23 @@ const Collection_detail = () => {
                     >
                       Order ID <span className="text-red-500">*</span>
                     </label>
-
                   </div>
                   <div className="w-[60%] md:w-[50%]">
-                    <select
-                      value={orderId}
+                    <Dropdown
+                      value={senderId}
+                      options={senderOptions}
                       onChange={(e) => {
-                        setOrderId(e.target.value);
-                        setFormErrors({ ...formErrors, orderId: "" });
+                        setSenderId(e.value);
+                        setFormErrors({ ...formErrors, senderId: "" });
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select order ID</option>
-                      <option value="#87678987">#87678987</option>
-                      <option value="#9878678">#9878678</option>
-                      <option value="#67896876">#67896876</option>
-                    </select>
-                    {formErrors.orderId && (
+                      optionLabel="name"
+                      optionValue="id"
+                      placeholder="Select sender ID"
+                      className="w-full border border-gray-300 rounded-lg"
+                    />
+                    {formErrors.senderId && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.orderId}
+                        {formErrors.senderId}
                       </p>
                     )}
                   </div>
@@ -425,7 +537,6 @@ const Collection_detail = () => {
                     >
                       Collection Address <span className="text-red-500">*</span>
                     </label>
-
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <textarea
@@ -453,7 +564,6 @@ const Collection_detail = () => {
                     >
                       Date & Time <span className="text-red-500">*</span>
                     </label>
-
                   </div>
                   <div className="w-[60%] md:w-[50%]">
                     <input
@@ -473,38 +583,6 @@ const Collection_detail = () => {
                     )}
                   </div>
                 </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div className="">
-                    <label
-                      htmlFor="status"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Status <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <select
-                      value={status}
-                      onChange={(e) => {
-                        setStatus(e.target.value);
-                        setFormErrors({ ...formErrors, status: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select a status</option>
-                      <option value="1">Active</option>
-                      <option value="0">InActive</option>
-                    </select>
-                    {formErrors.status && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.status}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
 
                 <div className="flex  justify-end gap-2 mt-5 md:mt-14">
                   <button
@@ -532,8 +610,9 @@ const Collection_detail = () => {
             <div className="absolute inset-0 " onClick={closeEditModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${
+                isAnimating ? "translate-x-0" : "translate-x-full"
+              }`}
             >
               <div
                 className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -544,37 +623,40 @@ const Collection_detail = () => {
               </div>
 
               <div className="px-5 lg:px-14 py-10">
-                <p className="text-2xl md:text-3xl font-medium">Edit Collection</p>
+                <p className="text-2xl md:text-3xl font-medium">
+                  Edit Collection
+                </p>
 
                 <div className="mt-10  rounded-lg ">
                   <div className="bg-white  rounded-xl w-full">
-
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
                         Order ID <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
-                        <select
+                        <Dropdown
                           value={editOrderId}
+                          options={senderOptions}
                           onChange={(e) => {
-                            setEditOrderId(e.target.value);
-                            setFormErrors({ ...formErrors, editOrderId: "" });
+                            setEditOrderId(e.value);
+                            setFormErrors({ ...formErrors, editSenderId: "" });
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select order ID</option>
-                          <option value="#87678987">#87678987</option>
-                          <option value="#9878678">#9878678</option>
-                          <option value="#67896876">#67896876</option>
-                        </select>
+                          optionLabel="name"
+                          optionValue="id"
+                          placeholder="Select sender ID"
+                          className="w-full border border-gray-300 rounded-lg"
+                        />
                         {formErrors.editOrderId && (
-                          <p className="text-red-500 text-sm">{formErrors.editOrderId}</p>
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editOrderId}
+                          </p>
                         )}
                       </div>
                     </div>
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Collection Address <span className="text-red-500">*</span>
+                        Collection Address{" "}
+                        <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <textarea
@@ -588,7 +670,9 @@ const Collection_detail = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editAddress && (
-                          <p className="text-red-500 text-sm">{formErrors.editAddress}</p>
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editAddress}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -608,31 +692,8 @@ const Collection_detail = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {formErrors.editDateTime && (
-                          <p className="text-red-500 text-sm">{formErrors.editDateTime}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">Status <span className="text-red-500">*</span></label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <select
-                          name="status"
-                          id="status"
-                          value={editStatus}
-                          onChange={(e) => {
-                            setEditStatus(e.target.value);
-                            setFormErrors({ ...formErrors, editStatus: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option>Select status</option>
-                          <option value="1">Active</option>
-                          <option value="0">InActive</option>
-                        </select>
-                        {formErrors.editStatus && (
-                          <p className="text-red-500 text-sm mb-4">
-                            {formErrors.editStatus}
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editDateTime}
                           </p>
                         )}
                       </div>
@@ -664,7 +725,6 @@ const Collection_detail = () => {
         {viewModalOpen && viewCollection && (
           <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
             <div className="relative bg-white w-[95%] md:w-[500px] rounded-xl shadow-lg p-6">
-
               {/* Close Icon */}
               <button
                 onClick={() => setViewModalOpen(false)}
@@ -678,11 +738,10 @@ const Collection_detail = () => {
               </h2>
 
               <div className="space-y-4 text-sm text-gray-700">
-
                 {/* order id */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Order ID</span>
-                  <span>{viewCollection.order_id}</span>
+                  <span>{viewCollection.tracking_number}</span>
                 </div>
                 {/* address */}
                 <div className="flex justify-between ">
@@ -694,23 +753,6 @@ const Collection_detail = () => {
                   <span className="font-medium">Order ID</span>
                   <span>{viewCollection.date_time}</span>
                 </div>
-
-                {/* Status */}
-                <div className="flex justify-between ">
-                  <span className="font-medium">Status</span>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium
-                                              ${viewCollection.status === 1 || viewCollection.status === "1"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-600"
-                      }`}
-                  >
-                    {viewCollection.status === 1 || viewCollection.status === "1"
-                      ? "Active"
-                      : "Inactive"}
-                  </span>
-                </div>
-
               </div>
             </div>
           </div>
@@ -725,4 +767,3 @@ const Collection_detail = () => {
 };
 
 export default Collection_detail;
-

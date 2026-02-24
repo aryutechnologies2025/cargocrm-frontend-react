@@ -179,7 +179,6 @@ const Login = () => {
           </div>
 
           <ReCAPTCHA
-            // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //local
            sitekey={CAPCHA_URL} //live
             onChange={handleCaptchaChange}
           />

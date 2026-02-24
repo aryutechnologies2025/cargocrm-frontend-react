@@ -49,7 +49,6 @@ const Parcel_detail = () => {
 
   // Add form states
   const [orderId, setOrderId] = useState("");
-  console.log("orderId", orderId);
   const [pieceNo, setPieceNo] = useState("");
   const [weight, setWeight] = useState("");
   const [length, setLength] = useState("");
@@ -60,8 +59,8 @@ const Parcel_detail = () => {
 
   // Edit form states
   const [editOrderId, setEditOrderId] = useState("");
-  console.log("editOption",editOrderId);
   const [editPieceNo, setEditPieceNo] = useState("");
+  const [editPieceDetails, setEditPieceDetails] = useState([]);
   const [editWeight, setEditWeight] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editStatus, setEditStatus] = useState("");
@@ -73,22 +72,17 @@ const Parcel_detail = () => {
   const [parcel, setParcel] = useState([]);
   const [totalRecords, setTotalRecords] = useState("");
   const [trackingOption, setTrackingOption] = useState([]);
-  console.log("trackingOptioabc", trackingOption);
+  const [pieceData, setPieceData] = useState([]);
 
-  
-const OrderDetailsTable = ({ orderId, trackingOptions }) => {
-    console.log("orderId in table:", orderId);
-    console.log("trackingOptions:...", trackingOptions);
-    
+  const OrderDetailsTable = ({ orderId, trackingOptions }) => {
     // Use filter to get all matching orders
-    const selectedOrders = trackingOptions?.filter(
-      (order) => 
-        order._id === orderId || 
-        order.order_id === orderId || 
-        order.tracking_number === orderId
-    ) || [];
-    
-    console.log("selectedOrders", selectedOrders);
+    const selectedOrders =
+      trackingOptions?.filter(
+        (order) =>
+          order._id === orderId ||
+          order.order_id === orderId ||
+          order.tracking_number === orderId,
+      ) || [];
 
     if (!selectedOrders || selectedOrders.length === 0) return null;
 
@@ -102,9 +96,7 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
       return (
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${
-            isActive
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-600"
+            isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
           }`}
         >
           {isActive ? "Active" : "Inactive"}
@@ -146,27 +138,30 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
             </thead>
             <tbody className="bg-white">
               {selectedOrders.map((order, index) => (
-                <tr key={order._id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tr
+                  key={order._id || index}
+                  className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                >
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.tracking_number || "N/A"}  {/* Changed from selectedOrder to order */}
+                    {order.tracking_number || "N/A"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.sender_id?.name || "N/A"}  {/* Changed from selectedOrder to order */}
+                    {order.sender_id?.name || "N/A"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.beneficiary_id?.name || "N/A"}  {/* Changed from selectedOrder to order */}
+                    {order.beneficiary_id?.name || "N/A"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.cargo_mode || "N/A"}  {/* Changed from selectedOrder to order */}
+                    {order.cargo_mode || "N/A"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.packed || "N/A"}  {/* Changed from selectedOrder to order */}
+                    {order.packed || "N/A"}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {formatDate(order.createdAt)}  {/* Changed from selectedOrder to order */}
+                    {formatDate(order.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {renderStatus(order.status)}  {/* Changed from selectedOrder to order */}
+                    {renderStatus(order.status)}
                   </td>
                 </tr>
               ))}
@@ -192,14 +187,32 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
     if (!orderId) {
       errors.orderId = "Order ID is required";
     }
-    if (!weight) {
-      errors.weight = "Weight is required";
-    }
+
+    
+
     if (!description) {
       errors.description = "Description is required";
     }
     if (status === "") {
       errors.status = "Status is required";
+    }
+
+    // Validate piece details if pieceNo is provided
+    if (pieceNo && parseInt(pieceNo) > 0) {
+      for (let i = 0; i < parseInt(pieceNo); i++) {
+        if (!pieceData[i]?.weight) {
+          errors[`weight-${i}`] = "Weight is required";
+        }
+        if (!pieceData[i]?.length) {
+          errors[`length-${i}`] = "Length is required";
+        }
+        if (!pieceData[i]?.width) {
+          errors[`width-${i}`] = "Width is required";
+        }
+        if (!pieceData[i]?.height) {
+          errors[`height-${i}`] = "Height is required";
+        }
+      }
     }
 
     setFormErrors(errors);
@@ -215,23 +228,29 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
     if (!editPieceNo) {
       errors.editPieceNo = "Piece Number is required";
     }
-    if (!editWeight) {
-      errors.editWeight = "Weight is required";
-    }
-    if (!editHeight) {
-      errors.editHeight = "Height is required";
-    }
-    if (!editWidth) {
-      errors.editWidth = "Width is required";
-    }
-    if (!editLength) {
-      errors.editLength = "Length is required";
-    }
     if (!editDescription) {
       errors.editDescription = "Description is required";
     }
     if (editStatus === "") {
       errors.editStatus = "Status is required";
+    }
+
+    // Validate edit piece details
+    if (editPieceNo && parseInt(editPieceNo) > 0 && editPieceDetails.length > 0) {
+      for (let i = 0; i < parseInt(editPieceNo); i++) {
+        if (!editPieceDetails[i]?.weight) {
+          errors[`edit-weight-${i}`] = "Weight is required";
+        }
+        if (!editPieceDetails[i]?.length) {
+          errors[`edit-length-${i}`] = "Length is required";
+        }
+        if (!editPieceDetails[i]?.width) {
+          errors[`edit-width-${i}`] = "Width is required";
+        }
+        if (!editPieceDetails[i]?.height) {
+          errors[`edit-height-${i}`] = "Height is required";
+        }
+      }
     }
 
     setFormErrors(errors);
@@ -243,16 +262,18 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
 
     try {
       const response = await axiosInstance.get("api/parcels/view-parcels");
-      console.log("parcels response:", response);
 
       if (response?.data?.status === true || response?.data?.success === true) {
         const apiDatas = response?.data?.data || [];
-        
+
         // Extract orders from response
         let OrderList = [];
         if (Array.isArray(response?.data?.orders)) {
           OrderList = response?.data?.orders;
-        } else if (response?.data?.orders && typeof response?.data?.orders === "object") {
+        } else if (
+          response?.data?.orders &&
+          typeof response?.data?.orders === "object"
+        ) {
           OrderList = [response?.data?.orders];
         }
 
@@ -275,7 +296,6 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
   };
 
   const fetchTrackingDetails = async () => {
-
     try {
       const response = await axiosInstance.get(
         "api/parcels/view-tracking-detail",
@@ -285,15 +305,14 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
           },
         },
       );
-      console.log("Tracking details response:", response);
-      
+
       let trackingData = [];
       if (Array.isArray(response?.data)) {
         trackingData = response?.data;
       } else if (response?.data && typeof response?.data === "object") {
         trackingData = [response?.data];
       }
-      
+
       setTrackingOption(trackingData);
     } catch (error) {
       console.error("Fetch Tracking error:", error);
@@ -319,14 +338,23 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
     e.preventDefault();
     if (!validateAddForm()) return;
 
+    if (pieceNo < 1) {
+        toast.error("Please add at least one piece");
+        return;
+      }
+    
+    const pieceDetails = pieceData.map((piece) => ({
+      weight: piece.weight,
+      length: piece.length,
+      width: piece.width,
+      height: piece.height,
+    }));
+    
     try {
       const formData = {
         order_id: orderId,
         piece_number: pieceNo,
-        weight,
-        length,
-        width,
-        height,
+        piece_details: pieceDetails,
         description,
         status,
       };
@@ -335,6 +363,11 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
         "api/parcels/create-parcels",
         formData,
       );
+
+      // if (parseInt(pieceNo) < 1) {
+      //   toast.error("Please add at least one piece");
+      //   return;
+      // }
 
       if (response?.data?.status === true || response?.data?.success === true) {
         toast.success("Parcel created successfully");
@@ -350,6 +383,7 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
         setHeight("");
         setDescription("");
         setStatus("");
+        setPieceData([]);
       } else {
         toast.error(response?.data?.message || "Failed to create parcel");
       }
@@ -360,15 +394,19 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
 
   const handleUpdate = async () => {
     if (!validateEditForm()) return;
-
+    
+    const pieceDetails = editPieceDetails.map((piece) => ({
+      weight: piece.weight,
+      length: piece.length,
+      width: piece.width,
+      height: piece.height,
+    }));
+    
     try {
       const payload = {
         order_id: editOrderId,
         piece_no: editPieceNo,
-        weight: editWeight,
-        height: editHeight,
-        width: editWidth,
-        length: editLength,
+        piece_details: pieceDetails,
         description: editDescription,
         status: editStatus,
       };
@@ -463,22 +501,22 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
     setIsAnimating(false);
     setErrors({});
     setFormErrors({});
-    setOrderId(""); // Reset orderId when closing modal
+    setOrderId("");
+    setPieceNo("");
+    setPieceData([]);
+    setDescription("");
+    setStatus("");
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
   const openEditModal = (row) => {
-    console.log("Editing row:", row);
     if (!row) return;
 
     setSelectedParcel(row);
-    setEditingParcelId(row.id);
-    setEditOrderId(row.order_id || "");
+    setEditingParcelId(row.id || row._id);
+    setEditOrderId(row.order_id?._id || "");
     setEditPieceNo(row.piece_number || "");
-    setEditWeight(row.weight || "");
-    setEditHeight(row.height || "");
-    setEditWidth(row.width || "");
-    setEditLength(row.length || "");
+    setEditPieceDetails(row.piece_details || []);
     setEditDescription(row.description || "");
     setEditStatus(row.status !== undefined ? row.status.toString() : "");
 
@@ -489,8 +527,30 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
   const closeEditModal = () => {
     setIsAnimating(false);
     setFormErrors({});
-    setEditOrderId(""); // Reset editOrderId when closing modal
+    setEditOrderId("");
+    setEditPieceNo("");
+    setEditPieceDetails([]);
+    setEditDescription("");
+    setEditStatus("");
     setTimeout(() => setIsEditModalOpen(false), 250);
+  };
+
+  const handlePieceDataChange = (index, field, value) => {
+    const newPieceData = [...pieceData];
+    if (!newPieceData[index]) {
+      newPieceData[index] = { weight: "", length: "", width: "", height: "" };
+    }
+    newPieceData[index] = { ...newPieceData[index], [field]: value };
+    setPieceData(newPieceData);
+  };
+
+  const handleEditPieceDetailChange = (index, field, value) => {
+    const newEditPieceDetails = [...editPieceDetails];
+    if (!newEditPieceDetails[index]) {
+      newEditPieceDetails[index] = { weight: "", length: "", width: "", height: "" };
+    }
+    newEditPieceDetails[index] = { ...newEditPieceDetails[index], [field]: value };
+    setEditPieceDetails(newEditPieceDetails);
   };
 
   const columns = [
@@ -503,27 +563,11 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
     },
     {
       title: "Order ID",
-      data: "order_id",
+      data: "tracking_number",
     },
     {
       title: "Piece Number",
       data: "piece_number",
-    },
-    {
-      title: "Weight",
-      data: "weight",
-    },
-    {
-      title: "Height",
-      data: "height",
-    },
-    {
-      title: "Length",
-      data: "length",
-    },
-    {
-      title: "Width",
-      data: "width",
     },
     {
       title: "Description",
@@ -600,7 +644,7 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteParcel(row.id);
+                      deleteParcel(row.id || row._id);
                     }}
                   />
                 </div>
@@ -703,7 +747,7 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                             checked={visibleColumns[col]}
                             onChange={() => toggleColumn(col)}
                           />
-                          {col.replace(/_/g, ' ')}
+                          {col.replace(/_/g, " ")}
                         </label>
                       ))}
                     </div>
@@ -794,14 +838,14 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                 </div>
 
                 {/* Order Details Table - Add Modal */}
-                {/* {orderId && trackingOption.length > 0 && ( */}
+                {orderId && trackingOption.length > 0 && (
                   <div className="mt-4 ml-auto w-[100%] md:w-[100%]">
                     <OrderDetailsTable
                       orderId={orderId}
                       trackingOptions={trackingOption}
                     />
                   </div>
-                {/* )} */}
+                )}
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div className="">
@@ -818,111 +862,133 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                       id="pieceNo"
                       value={pieceNo}
                       placeholder="Enter piece number"
+                      min="1"
                       onChange={(e) => {
-                        setPieceNo(e.target.value);
+                        const value = e.target.value;
+                        setPieceNo(value);
+                        // Reset piece data when piece number changes
+                        const numPieces = parseInt(value) || 0;
+                        const newPieceData = Array(numPieces)
+                          .fill(null)
+                          .map(() => ({
+                            weight: "",
+                            length: "",
+                            width: "",
+                            height: "",
+                          }));
+                        setPieceData(newPieceData);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
-                <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div className="">
-                    <label
-                      htmlFor="weight"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Weight <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="number"
-                      id="weight"
-                      value={weight}
-                      placeholder="Enter Weight"
-                      onChange={(e) => {
-                        setWeight(e.target.value);
-                        setFormErrors({ ...formErrors, weight: "" });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.weight && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.weight}
-                      </p>
+                {pieceNo && parseInt(pieceNo) > 0 && (
+                  <div className="mt-4">
+                    {/* Render input fields for each piece */}
+                    {Array.from({ length: parseInt(pieceNo) }).map(
+                      (_, index) => (
+                        <div
+                          key={index}
+                          className="mb-6 p-4 border border-gray-200 rounded-lg"
+                        >
+                          <h3 className="text-md font-semibold mb-3">
+                            Piece {index + 1}
+                          </h3>
+                          <div className="flex flex-wrap justify-between items-center gap-2">
+                            <div className="w-full md:w-[22%]">
+                              <label
+                                htmlFor={`weight-${index}`}
+                                className="block text-[15px] md:text-md font-medium mb-2"
+                              >
+                                Weight <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="number"
+                                id={`weight-${index}`}
+                                value={pieceData[index]?.weight || ""}
+                                placeholder="Enter Weight"
+                                onChange={(e) => handlePieceDataChange(index, 'weight', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              {formErrors[`weight-${index}`] && (
+                                <p className="text-red-500 text-sm mt-1">
+                                  {formErrors[`weight-${index}`]}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="w-full md:w-[22%]">
+                              <label
+                                htmlFor={`length-${index}`}
+                                className="block text-[15px] md:text-md font-medium mb-2"
+                              >
+                                Length <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="number"
+                                id={`length-${index}`}
+                                value={pieceData[index]?.length || ""}
+                                placeholder="Enter Length"
+                                onChange={(e) => handlePieceDataChange(index, 'length', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              {formErrors[`length-${index}`] && (
+                                <p className="text-red-500 text-sm mt-1">
+                                  {formErrors[`length-${index}`]}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="w-full md:w-[22%]">
+                              <label
+                                htmlFor={`width-${index}`}
+                                className="block text-[15px] md:text-md font-medium mb-2"
+                              >
+                                Width <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="number"
+                                id={`width-${index}`}
+                                value={pieceData[index]?.width || ""}
+                                placeholder="Enter Width"
+                                onChange={(e) => handlePieceDataChange(index, 'width', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              {formErrors[`width-${index}`] && (
+                                <p className="text-red-500 text-sm mt-1">
+                                  {formErrors[`width-${index}`]}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="w-full md:w-[22%]">
+                              <label
+                                htmlFor={`height-${index}`}
+                                className="block text-[15px] md:text-md font-medium mb-2"
+                              >
+                                Height <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="number"
+                                id={`height-${index}`}
+                                value={pieceData[index]?.height || ""}
+                                placeholder="Enter Height"
+                                onChange={(e) => handlePieceDataChange(index, 'height', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              {formErrors[`height-${index}`] && (
+                                <p className="text-red-500 text-sm mt-1">
+                                  {formErrors[`height-${index}`]}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ),
                     )}
                   </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div className="">
-                    <label
-                      htmlFor="length"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Length
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="length"
-                      value={length}
-                      placeholder="Enter Length"
-                      onChange={(e) => {
-                        setLength(e.target.value);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div className="">
-                    <label
-                      htmlFor="width"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Width
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="width"
-                      value={width}
-                      placeholder="Enter Width"
-                      onChange={(e) => {
-                        setWidth(e.target.value);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div className="">
-                    <label
-                      htmlFor="height"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Height
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="text"
-                      id="height"
-                      value={height}
-                      placeholder="Enter Height"
-                      onChange={(e) => {
-                        setHeight(e.target.value);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
+                )}
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div className="">
@@ -1050,14 +1116,14 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                     </div>
 
                     {/* Order Details Table - Edit Modal */}
-                    {/* {editOrderId && trackingOption.length > 0 && ( */}
+                    {editOrderId && trackingOption.length > 0 && (
                       <div className="mt-4 ml-auto w-[60%] md:w-[50%]">
                         <OrderDetailsTable
                           orderId={editOrderId}
                           trackingOptions={trackingOption}
                         />
                       </div>
-                    {/* )} */}
+                    )}
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -1069,8 +1135,23 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                           placeholder="Enter piece number"
                           value={editPieceNo}
                           onChange={(e) => {
-                            setEditPieceNo(e.target.value);
+                            const value = e.target.value;
+                            setEditPieceNo(value);
                             setFormErrors({ ...formErrors, editPieceNo: "" });
+                            
+                            // Reset edit piece details when number changes
+                            const numPieces = parseInt(value) || 0;
+                            if (numPieces > 0 && editPieceDetails.length === 0) {
+                              const newEditPieceDetails = Array(numPieces)
+                                .fill(null)
+                                .map(() => ({
+                                  weight: "",
+                                  length: "",
+                                  width: "",
+                                  height: "",
+                                }));
+                              setEditPieceDetails(newEditPieceDetails);
+                            }
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -1082,97 +1163,112 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                       </div>
                     </div>
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Weight <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter weight"
-                          value={editWeight}
-                          onChange={(e) => {
-                            setEditWeight(e.target.value);
-                            setFormErrors({ ...formErrors, editWeight: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editWeight && (
-                          <p className="text-red-500 text-sm">
-                            {formErrors.editWeight}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                    {editPieceNo && parseInt(editPieceNo) > 0 && (
+                      <div className="mt-4">
+                        {/* Render input fields for each piece */}
+                        {Array.from({ length: parseInt(editPieceNo) }).map(
+                          (_, index) => (
+                            <div
+                              key={index}
+                              className="mb-6 p-4 border border-gray-200 rounded-lg"
+                            >
+                              <h3 className="text-md font-semibold mb-3">
+                                Piece {index + 1}
+                              </h3>
+                              <div className="flex flex-wrap justify-between items-center gap-2">
+                                <div className="w-full md:w-[22%]">
+                                  <label
+                                    htmlFor={`edit-weight-${index}`}
+                                    className="block text-[15px] md:text-md font-medium mb-2"
+                                  >
+                                    Weight <span className="text-red-500">*</span>
+                                  </label>
+                                  <input
+                                    type="number"
+                                    id={`edit-weight-${index}`}
+                                    value={editPieceDetails[index]?.weight || ""}
+                                    placeholder="Enter Weight"
+                                    onChange={(e) => handleEditPieceDetailChange(index, 'weight', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  {formErrors[`edit-weight-${index}`] && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {formErrors[`edit-weight-${index}`]}
+                                    </p>
+                                  )}
+                                </div>
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Height <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter height"
-                          value={editHeight}
-                          onChange={(e) => {
-                            setEditHeight(e.target.value);
-                            setFormErrors({ ...formErrors, editHeight: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editHeight && (
-                          <p className="text-red-500 text-sm">
-                            {formErrors.editHeight}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                                <div className="w-full md:w-[22%]">
+                                  <label
+                                    htmlFor={`edit-length-${index}`}
+                                    className="block text-[15px] md:text-md font-medium mb-2"
+                                  >
+                                    Length <span className="text-red-500">*</span>
+                                  </label>
+                                  <input
+                                    type="number"
+                                    id={`edit-length-${index}`}
+                                    value={editPieceDetails[index]?.length || ""}
+                                    placeholder="Enter Length"
+                                    onChange={(e) => handleEditPieceDetailChange(index, 'length', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  {formErrors[`edit-length-${index}`] && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {formErrors[`edit-length-${index}`]}
+                                    </p>
+                                  )}
+                                </div>
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Width <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter width"
-                          value={editWidth}
-                          onChange={(e) => {
-                            setEditWidth(e.target.value);
-                            setFormErrors({ ...formErrors, editWidth: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editWidth && (
-                          <p className="text-red-500 text-sm">
-                            {formErrors.editWidth}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                                <div className="w-full md:w-[22%]">
+                                  <label
+                                    htmlFor={`edit-width-${index}`}
+                                    className="block text-[15px] md:text-md font-medium mb-2"
+                                  >
+                                    Width <span className="text-red-500">*</span>
+                                  </label>
+                                  <input
+                                    type="number"
+                                    id={`edit-width-${index}`}
+                                    value={editPieceDetails[index]?.width || ""}
+                                    placeholder="Enter Width"
+                                    onChange={(e) => handleEditPieceDetailChange(index, 'width', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  {formErrors[`edit-width-${index}`] && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {formErrors[`edit-width-${index}`]}
+                                    </p>
+                                  )}
+                                </div>
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Length <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="text"
-                          placeholder="Enter length"
-                          value={editLength}
-                          onChange={(e) => {
-                            setEditLength(e.target.value);
-                            setFormErrors({ ...formErrors, editLength: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editLength && (
-                          <p className="text-red-500 text-sm">
-                            {formErrors.editLength}
-                          </p>
+                                <div className="w-full md:w-[22%]">
+                                  <label
+                                    htmlFor={`edit-height-${index}`}
+                                    className="block text-[15px] md:text-md font-medium mb-2"
+                                  >
+                                    Height <span className="text-red-500">*</span>
+                                  </label>
+                                  <input
+                                    type="number"
+                                    id={`edit-height-${index}`}
+                                    value={editPieceDetails[index]?.height || ""}
+                                    placeholder="Enter Height"
+                                    onChange={(e) => handleEditPieceDetailChange(index, 'height', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  {formErrors[`edit-height-${index}`] && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                      {formErrors[`edit-height-${index}`]}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ),
                         )}
                       </div>
-                    </div>
+                    )}
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -1266,7 +1362,7 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                 {/* Order ID */}
                 <div className="flex justify-between">
                   <span className="font-medium">Order ID</span>
-                  <span>{viewParcel.order_id}</span>
+                  <span>{viewParcel.order_id?.tracking_number}</span>
                 </div>
 
                 {/* Piece Number */}
@@ -1275,28 +1371,44 @@ const OrderDetailsTable = ({ orderId, trackingOptions }) => {
                   <span>{viewParcel.piece_number || viewParcel.piece_no}</span>
                 </div>
 
-                {/* Weight */}
-                <div className="flex justify-between">
-                  <span className="font-medium">Weight</span>
-                  <span>{viewParcel.weight}</span>
-                </div>
-
-                {/* Height */}
-                <div className="flex justify-between">
-                  <span className="font-medium">Height</span>
-                  <span>{viewParcel.height}</span>
-                </div>
-
-                {/* Width */}
-                <div className="flex justify-between">
-                  <span className="font-medium">Width</span>
-                  <span>{viewParcel.width}</span>
-                </div>
-
-                {/* Length */}
-                <div className="flex justify-between">
-                  <span className="font-medium">Length</span>
-                  <span>{viewParcel.length}</span>
+                {/* PieceDetails */}
+                <div className="border-t pt-3 mt-3">
+                  <span className="font-medium block mb-2">Piece Details:</span>
+                  {viewParcel.piece_details &&
+                  viewParcel.piece_details.length > 0 ? (
+                    viewParcel.piece_details.map((detail, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
+                      >
+                        <div className="font-semibold text-[#057fc4] mb-2">
+                          Piece {index + 1}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Weight:</span>
+                            <span className="font-medium">{detail.weight}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Length:</span>
+                            <span className="font-medium">{detail.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Width:</span>
+                            <span className="font-medium">{detail.width}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Height:</span>
+                            <span className="font-medium">{detail.height}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">
+                      No piece details available
+                    </p>
+                  )}
                 </div>
 
                 {/* Description */}
