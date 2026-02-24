@@ -18,6 +18,7 @@ import ContactUs_main from "./components/Contact us component/ContactUs_main";
 import LoginLog_main from "./components/Login logs component/LoginLog_main";
 import Collection_main from "./components/core entities component/Collection_main";
 import EventList_main from "./components/core entities component/EventList_main";
+import Receipt_main from "./components/receipt component/Receipt_main";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/collection" element={<Collection_main />} />
           <Route path="/event" element={<Event_main />} />
           <Route path="/event-master" element={<EventList_main />} />
+          <Route path="/receipt" element={<Receipt_main />} />
           <Route path="/contact-us" element={<ContactUs_main />} />
           <Route path="/audit-logs" element={<LoginLog_main />} />
           <Route path="/system-setting" element={<SystemSetting_Main />} />
