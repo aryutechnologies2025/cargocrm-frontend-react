@@ -5,19 +5,11 @@ import {
 } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
-import { BsCalendar4 } from "react-icons/bs";
 import { IoPeopleOutline } from "react-icons/io5";
-import { CiDeliveryTruck, CiBoxList } from "react-icons/ci";
+import { CiBoxList } from "react-icons/ci";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
-import { BsCalendar2Check } from "react-icons/bs";
-import medics_logo from "../assets/medics_logo.svg";
-import { FaRegMessage } from "react-icons/fa6";
-import { GrMoney } from "react-icons/gr";
-import { HiOutlineHome } from "react-icons/hi";
-import { TbUrgent } from "react-icons/tb";
-import { FaRegUser } from "react-icons/fa";
 import cargoLord from "../assets/cargoLord_logo.png";
 import { MdOutlineCreditScore } from "react-icons/md";
 import { MdContacts } from "react-icons/md";
@@ -26,6 +18,8 @@ import axiosInstance from "../api/axiosInstance";
 import { API_URL } from "../Config";
 import { RiCustomerService2Line } from "react-icons/ri";
 import { MdOutlineHouseSiding } from "react-icons/md";
+import { MdEventAvailable } from "react-icons/md";
+import { LiaShoppingBasketSolid } from "react-icons/lia";
 
 
 const Sidebar = () => {
@@ -214,7 +208,7 @@ const Sidebar = () => {
                       : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                     }`}
                 >
-                  <IoPeopleOutline className="w-5" />
+                  <LiaShoppingBasketSolid className="w-5" />
 
                   {!arrowClicked && (
                     <div className="flex items-center gap- justify-between w-full">
@@ -300,7 +294,7 @@ const Sidebar = () => {
                       : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                     }`}
                 >
-                  <IoPeopleOutline className="w-5" />
+                  <MdEventAvailable className="w-5" />
 
                   {!arrowClicked && (
                     <div className="flex items-center gap- justify-between w-full">
