@@ -3,8 +3,8 @@ import { SlLock } from "react-icons/sl";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import Footer from "../components/Footer";
-import { API_URL} from "../Config";
-import {CAPCHA_URL } from "../Config";
+import { API_URL } from "../Config";
+import { CAPCHA_URL } from "../Config";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { FaEye } from "react-icons/fa";
@@ -112,95 +112,97 @@ const Login = () => {
   const inactiveClass = "hover:underline";
 
   return (
-    <div className="min-h-screen flex flex-col justify-between">
+    <div className="min-h-screen flex flex-col justify-between overflow-x-hidden ">
 
-  
+
       {/* middle */}
-      <div className="flex-1 flex-col-reverse md:flex-row gap-8 px-4 md:px-10 flex items-center flex-wrap-reverse justify-center mt-10 md:mt-10 ">
-         <div className="w-full md:w-1/2 justify-center hidden md:flex basis-[40%]">
-          <img className="w-[80%] max-w-md h-auto" src={cargo} alt="Cargo Lord Img" />
+      <div className="flex flex-1 flex-col md:flex-row overflow-y-auto">
+        <div className="hidden md:block md:w-1/2 h-screen">
+          <img
+            src={cargo}
+            alt="Cargo"
+            className="w-full h-full object-cover p-3"
+          />
         </div>
-        
+
         <div className="w-full md:w-1/2 md:gap-6 basis-[60%] lg:basis-[50%] flex flex-col items-center justify-center gap-3">
           <div className="mb-24 md:mb-10">
-            <img className="w-full h-auto" src={cargoLogo} alt="Cargo Lord Logo"/>
+            <img className="w-full h-auto" src={cargoLogo} alt="Cargo Lord Logo" />
           </div>
           <div className="gap-2 mb-5 items-center flex flex-col">
-          <p className="text-[#000000] font-bold md:mb-5 text-md md:text-lg">
-            LOG IN
-          </p>
+            <p className="text-[#000000] font-bold md:mb-5 text-md md:text-lg">
+              LOG IN
+            </p>
 
-          <div className="relative flex md:w-[400px] gap-3 md:mb-4 items-center bg-[#b8b8b8] px-2 py-3 md:px-4 md:py-5 rounded-lg">
-            <LuUser className="text-xl text-[#ffffff]" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Username"
-              value={formData.email}
-              onChange={handleChange}
-              id=""
-              className="border-none outline-none bg-transparent text-white placeholder-white"
-            />
-            {formErrors.email && (
-              <p className="text-red-500 text-xs mt-1 w-[400px]">
-                {formErrors.email}
-              </p>
-            )}
+            <div className="md:w-[400px] mb-3">
+              <div className="shadow-sm relative flex items-center gap-3 bg-[#b8b8b8] px-4 py-5 rounded-lg">
+                <LuUser className="text-xl text-white" />
 
-          </div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Username"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="flex-1 w-full border-none outline-none bg-transparent text-white placeholder-white"
+                />
+              </div>
 
-          <div className="relative flex md:w-[400px] gap-3 md:mb-4 items-center bg-[#b8b8b8] px-2 py-3 md:px-4 md:py-5 rounded-lg">
-            <SlLock className="text-xl text-[#ffffff]" />
-            <input
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              name="password"
-              id=""
-              onKeyUp={handleKeyUp}
-              className="border-none outline-none bg-transparent text-white placeholder-white"
-            />
-            {formErrors.password && (
-              <p className="text-red-500 text-xs mt-1 w-[400px]">
-                {formErrors.password}
-              </p>
-            )}
-            
-
-            <span
-              onClick={togglePasswordVisibility}
-              className="absolute right-4 cursor-pointer text-white"
-            >
-              {showPassword ? (
-                <FaEye className="text-xl" />
-              ) : (
-                <FaEyeSlash className="text-xl" />
+              {formErrors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.email}
+                </p>
               )}
-            </span>
-            
+            </div>
+
+            <div className="md:w-[400px] mb-3">
+              <div className="shadow-sm relative flex items-center gap-3 bg-[#b8b8b8] px-4 py-5 rounded-lg">
+                <SlLock className="text-xl text-white" />
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  className="flex-1 w-full border-none outline-none bg-transparent text-white placeholder-white pr-10"
+                />
+
+                <span
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-4 cursor-pointer text-white"
+                >
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </span>
+              </div>
+
+              {formErrors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.password}
+                </p>
+              )}
+            </div>
+
+            <ReCAPTCHA
+              // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //local
+              sitekey={CAPCHA_URL} //live
+              onChange={handleCaptchaChange}
+            />
+            {error && (
+              <p className="text-red-500 text-sm mt-2">{error}</p>
+            )}
+
+
+            <button
+              onClick={onCLickLogin}
+              className="font-bold mt-3 text-sm bg-gradient-to-r from-[#ff7930] to-[#fa803d] px-5 py-2 md:px-14 md:py-4 rounded-lg text-white"
+            >
+              Log In
+            </button>
           </div>
-
-          <ReCAPTCHA
-            // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //local
-           sitekey={CAPCHA_URL} //live
-            onChange={handleCaptchaChange}
-          />
-          {error && (
-           <p className="text-red-500 text-sm mt-2">{error}</p>
-          )}
-          
-
-          <button
-            onClick={onCLickLogin}
-            className="font-bold mt-3 text-sm bg-gradient-to-r from-[#ff7930] to-[#fa803d] px-5 py-2 md:px-14 md:py-4 rounded-lg text-white"
-          >
-            Log In
-          </button>
-        </div>
         </div>
 
-       
+
       </div>
 
       {/* footer */}
