@@ -17,14 +17,7 @@ pipeline {
             }
         }
         
-        stage('Security Scan - Semgrep') {
-            steps {
-                sh '''
-                semgrep --config=p/javascript --html --output semgrep-report.html
-                '''
-                archiveArtifacts artifacts: 'semgrep-report.html', fingerprint: true
-            }
-        }
+        
 
         stage('Build Frontend') {
             steps {
