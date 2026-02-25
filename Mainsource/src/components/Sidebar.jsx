@@ -21,6 +21,7 @@ import { MdOutlineHouseSiding } from "react-icons/md";
 import { MdEventAvailable } from "react-icons/md";
 import { LiaShoppingBasketSolid } from "react-icons/lia";
 import { GoContainer } from "react-icons/go";
+import { GrStakeholder } from "react-icons/gr";
 
 
 const Sidebar = () => {
@@ -168,6 +169,19 @@ const Sidebar = () => {
               >
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
+              </div>
+
+              {/* order form */}
+              <div
+                onClick={() => onClickSidebarMenu("form-order")}
+                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/form-order"
+                    ? "bg-[#e6f2fa] text-[#057fc4]"
+                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                  }`}
+              >
+                <GrStakeholder />
+                {!arrowClicked && <p className="text-sm">OrderForm</p>}
               </div>
 
               {/* run */}

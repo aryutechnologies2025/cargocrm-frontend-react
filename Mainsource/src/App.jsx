@@ -20,6 +20,8 @@ import Collection_main from "./components/core entities component/Collection_mai
 import EventList_main from "./components/core entities component/EventList_main";
 import Receipt_main from "./components/receipt component/Receipt_main";
 import Pdf_details from "./components/pdf component/Pdf_details";
+import FormOrder from "./components/order form component/FormOrder";
+import FormOrder_main from "./pages/FormOrder_main";
 
 function App() {
   return (
@@ -50,6 +52,8 @@ function App() {
           <Route path="/audit-logs" element={<LoginLog_main />} />
           <Route path="/pdf-download" element={<Pdf_details />} />
           <Route path="/system-setting" element={<SystemSetting_Main />} />
+          <Route path="/form-order" element={<FormOrder_main />} />
+
         </Routes>
       </BrowserRouter>
     </>
