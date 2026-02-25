@@ -258,19 +258,6 @@ const Sidebar = () => {
                       </button>
                       <button
                         onClick={() => {
-                          navigate("/parcel");
-                          setCurrentOpen("Order");
-                        }}
-                        className={`w-full text-left px-2 py-1 rounded-md transition
-            ${currentPath === "/parcel"
-                            ? "text-[#057fc4]"
-                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                          }`}
-                      >
-                        Parcel / Pieces
-                      </button>
-                      <button
-                        onClick={() => {
                           navigate("/order");
                           setCurrentOpen("Order");
                         }}
@@ -281,6 +268,19 @@ const Sidebar = () => {
                           }`}
                       >
                         Order List
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/parcel");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/parcel"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Parcel / Pieces
                       </button>
                       <button
                         onClick={() => {
