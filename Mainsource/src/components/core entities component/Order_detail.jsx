@@ -323,7 +323,7 @@ const OrderDetail = () => {
 
   // Open edit modal
   const openEditModal = async (row) => {
-    console.log("row", row);
+  
     const orderId = row._id || row.id;
     if (!orderId) {
       toast.error("Invalid order ID");
@@ -336,12 +336,12 @@ const OrderDetail = () => {
       setIsAnimating(true);
 
       const response = await axiosInstance.get(`api/orders/view-orders/${orderId}`);
-      console.log("resedit", response);
+   
       if (response.data?.status === true || response.data?.success === true) {
         const data = response.data.data;  
-        console.log("data...", data);
+        
         setEditSenderId(data.sender_id?._id);
-        setEditBeneficiaryId(data.beneficiary_id?.name);
+        setEditBeneficiaryId(data.beneficiary_id?._id);
         setEditCargoMode(data.cargo_mode || row.cargo_mode);
         setEditPacked(data.packed || row.packed);
         setEditStatus(data.status?.toString() || row.status?.toString());
@@ -1184,12 +1184,12 @@ const OrderDetail = () => {
                   <span className="font-medium">Status</span>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      viewOrder.status === 0 || viewOrder.status === "0"
+                      viewOrder.status === 1 || viewOrder.status === "1"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-600"
                     }`}
                   >
-                    {viewOrder.status === 0 || viewOrder.status === "0" ? "Active" : "Inactive"}
+                    {viewOrder.status === 1 || viewOrder.status === "1" ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>
