@@ -182,43 +182,22 @@ const Login = () => {
                 </p>
               )}
             </div>
-
             <ReCAPTCHA
-              // sitekey="6LdBR6wqAAAAAKiqjNXKIxWOyBtdn3Vx_-MdRc8-" //local
-              sitekey={CAPCHA_URL} //live
-              onChange={handleCaptchaChange}
-            />
-            {error && (
-              <p className="text-red-500 text-sm mt-2">{error}</p>
-            )}
-
-
-            <button
-              onClick={onCLickLogin}
-              className="font-bold mt-3 text-sm bg-gradient-to-r from-[#ff7930] to-[#fa803d] px-5 py-2 md:px-14 md:py-4 rounded-lg text-white"
-            >
-              Log In
-            </button>
-          </div>
-
-          {/* <ReCAPTCHA
            sitekey={CAPCHA_URL} //live
             onChange={handleCaptchaChange}
           />
           {error && (
            <p className="text-red-500 text-sm mt-2">{error}</p>
-          )} */}
-          
-
-          {/* <button
+          )} 
+           <button
             onClick={onCLickLogin}
-            className="font-bold mt-3 text-sm bg-gradient-to-r from-[#057fc4] to-[#1492db] px-10 py-5 rounded-2xl text-white"
+            className="font-bold mt-3 text-sm bg-gradient-to-r from-[#057fc4] to-[#1492db] px-5 py-2 md:px-14 md:py-4 rounded-lg text-white"
           >
-            Login Now
-          </button> */}
+             Log In
+          </button>
+          </div>
+        
         </div>
-
-
       </div>
 
       {/* footer */}
