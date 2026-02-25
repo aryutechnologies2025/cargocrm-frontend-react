@@ -9,7 +9,7 @@ import { MdOutlineDeleteOutline } from "react-icons/md";
 import { FaEye } from "react-icons/fa6";
 import { IoIosArrowForward, IoIosCloseCircle } from "react-icons/io";
 import { BiCustomize } from "react-icons/bi";
-
+import { FcDownload } from "react-icons/fc";
 import DataTable from "datatables.net-react";
 import DT from "datatables.net-dt";
 import "datatables.net-responsive-dt/css/responsive.dataTables.css";
@@ -17,7 +17,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-
 import axiosInstance from "../../api/axiosInstance";
 import Footer from "../Footer";
 import Mobile_Sidebar from "../Mobile_Sidebar";
@@ -55,7 +54,7 @@ const OrderDetail = () => {
   const [createdByFilter, setCreatedByFilter] = useState("");
   const [createdDateFilter, setCreatedDateFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-  
+
   // Form states
   const [senderId, setSenderId] = useState("");
   const [beneficiaryId, setBeneficiaryId] = useState("");
@@ -93,11 +92,10 @@ const OrderDetail = () => {
       const isActive = status === "1" || status === 1 || status === true;
       return (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            isActive
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-600"
-          }`}
+          className={`px-2 py-1 rounded-full text-xs font-medium ${isActive
+            ? "bg-green-100 text-green-700"
+            : "bg-red-100 text-red-600"
+            }`}
         >
           {isActive ? "Active" : "Inactive"}
         </span>
@@ -221,7 +219,7 @@ const OrderDetail = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(`api/orders/view-orders`);
-      
+
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.data || [];
         setOrder(apiData);
@@ -243,21 +241,21 @@ const OrderDetail = () => {
   // Fetch beneficiaries
   const fetchBeneficiary = async () => {
     // if (!senderId) return;
-    
+
     setLoading(true);
     try {
       const response = await axiosInstance.get(
         `api/orders/get-sender-by-beneficiary`,
         { params: { customerId: senderId || editSenderId } }
       );
-      
+
       let beneficiaryData = [];
       if (response.data?.data) {
-        beneficiaryData = Array.isArray(response.data.data) 
-          ? response.data.data 
+        beneficiaryData = Array.isArray(response.data.data)
+          ? response.data.data
           : [response.data.data];
       }
-      
+
       setBeneficiaryOptions(beneficiaryData);
     } catch (error) {
       console.error("Error fetching beneficiaries:", error);
@@ -270,9 +268,9 @@ const OrderDetail = () => {
 
   useEffect(() => {
     // if (senderId || editSenderId) {
-      fetchBeneficiary();
+    fetchBeneficiary();
     // }
-  }, [senderId,editSenderId]);
+  }, [senderId, editSenderId]);
 
   useEffect(() => {
     fetchOrder();
@@ -323,7 +321,7 @@ const OrderDetail = () => {
 
   // Open edit modal
   const openEditModal = async (row) => {
-  
+
     const orderId = row._id || row.id;
     if (!orderId) {
       toast.error("Invalid order ID");
@@ -336,10 +334,10 @@ const OrderDetail = () => {
       setIsAnimating(true);
 
       const response = await axiosInstance.get(`api/orders/view-orders/${orderId}`);
-   
+
       if (response.data?.status === true || response.data?.success === true) {
-        const data = response.data.data;  
-        
+        const data = response.data.data;
+
         setEditSenderId(data.sender_id?._id);
         setEditBeneficiaryId(data.beneficiary_id?._id);
         setEditCargoMode(data.cargo_mode || row.cargo_mode);
@@ -516,7 +514,25 @@ const OrderDetail = () => {
         return new Date(row.createdAt).toLocaleDateString();
       },
     },
-     {
+    {
+      title: "Receipt",
+      data: null,
+      className: "text-center",
+      createdCell: (row, rowData) => {
+        const root = createRoot(row);
+
+        root.render(
+          <FcDownload
+            size={22}
+            className="cursor-pointer mx-auto block"
+            onClick={() =>
+              navigate("/pdf-download", { state: rowData })
+            }
+          />
+        );
+      }
+    },
+    {
       title: "Status",
       data: "status",
       render: (data) => {
@@ -755,9 +771,8 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeAddModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -945,9 +960,8 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeEditModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -1183,11 +1197,10 @@ const OrderDetail = () => {
                 <div className="flex justify-between">
                   <span className="font-medium">Status</span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      viewOrder.status === 1 || viewOrder.status === "1"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-600"
-                    }`}
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${viewOrder.status === 1 || viewOrder.status === "1"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-600"
+                      }`}
                   >
                     {viewOrder.status === 1 || viewOrder.status === "1" ? "Active" : "Inactive"}
                   </span>
