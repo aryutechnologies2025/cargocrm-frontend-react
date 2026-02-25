@@ -201,21 +201,21 @@ const Login = () => {
             </button>
           </div>
 
-          <ReCAPTCHA
+          {/* <ReCAPTCHA
            sitekey={CAPCHA_URL} //live
             onChange={handleCaptchaChange}
           />
           {error && (
            <p className="text-red-500 text-sm mt-2">{error}</p>
-          )}
+          )} */}
           
 
-          <button
+          {/* <button
             onClick={onCLickLogin}
             className="font-bold mt-3 text-sm bg-gradient-to-r from-[#057fc4] to-[#1492db] px-10 py-5 rounded-2xl text-white"
           >
             Login Now
-          </button>
+          </button> */}
         </div>
 
 
