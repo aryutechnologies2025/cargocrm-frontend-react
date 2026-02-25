@@ -10,9 +10,9 @@ const Pdf_details = () => {
   const pdfRef = useRef();
   const location = useLocation();
   const navigate = useNavigate();
-  const {path} = location.state || {};
+  const {id} = location.state || {};
   console.log("location.state:", location.state);
-  console.log("orderId:", path?.id);
+  console.log("orderId:", id);
   const [order, setOrder] = useState([]);
   const [loading, setLoading] = useState(false);
   const [setting, setSetting] = useState([]);
@@ -20,7 +20,7 @@ const Pdf_details = () => {
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`api/orders/view-parcel/${path?.id}`);
+      const response = await axiosInstance.get(`api/orders/view-parcel/${id}`);
       console.log("API:", response.data);
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.data?.[0] || [];
