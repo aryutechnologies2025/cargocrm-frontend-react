@@ -405,7 +405,7 @@ const Parcel_detail = () => {
     try {
       const payload = {
         order_id: editOrderId,
-        piece_no: editPieceNo,
+        piece_number: editPieceNo,
         piece_details: pieceDetails,
         description: editDescription,
         status: editStatus,

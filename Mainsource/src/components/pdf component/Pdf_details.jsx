@@ -1,10 +1,46 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import cargo from "../../assets/cargoLord_logo.png";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useLocation, useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axiosInstance";
+import { toast } from "react-toastify";
 
 const Pdf_details = () => {
   const pdfRef = useRef();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const {path} = location.state || {};
+  console.log("location.state:", location.state);
+  console.log("orderId:", path?.id);
+  const [order, setOrder] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [setting, setSetting] = useState([]);
+
+  const fetchOrder = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`api/orders/view-parcel/${path?.id}`);
+      console.log("API:", response.data);
+      if (response.data?.success || response.data?.status) {
+        const apiData = response.data.data?.[0] || [];
+        setOrder(apiData);
+        setSetting(response.data?.settings?.[0] || []);
+      } else {
+        setOrder([]);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      setOrder([]);
+      toast.error("Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrder();
+  }, []);
 
 const downloadPDF = async () => {
   const element = pdfRef.current;
@@ -28,6 +64,7 @@ const emptyRows = Array.from({ length: 12 });
   return (
     <div className="p-6">
 
+      <div className="flex justify-between">
       {/* DOWNLOAD BUTTON */}
       <button
         onClick={downloadPDF}
@@ -35,6 +72,15 @@ const emptyRows = Array.from({ length: 12 });
       >
         Download PDF
       </button>
+      <button
+        onClick={() =>
+            navigate(-1)
+          }
+        className="mb-4 bg-[#057fc4] text-white px-4 py-2 rounded"
+      >
+        Back
+      </button>
+      </div>
 
       {/* PDF CONTENT */}
       <div
@@ -60,7 +106,7 @@ const emptyRows = Array.from({ length: 12 });
               </tr>
               <tr className="w-[50%] flex flex-col">
                 <td className="px-2 py-1">001</td>
-                <td className="px-2 py-1">12-02-2026</td>
+                <td className="px-2 py-1">{new Date().toLocaleDateString()}</td>
                 <td className="border-b-0 px-2 py-1">Cash</td>
               </tr>
             </table>
@@ -74,10 +120,10 @@ const emptyRows = Array.from({ length: 12 });
               <th className="text-start px-2 py-1">CUSTOMER</th>
             </tr>
             <tr className="flex flex-col">
-              <td className="text-start px-2 py-1">Customer Name</td>
-              <td className="text-start px-2 py-1">Customer Address 1</td>
-              <td className="text-start px-2 py-1">Customer Address 2</td>
-              <td className="text-start px-2 py-1">Customer Address 3</td>
+              <td className="text-start px-2 py-1">{order?.sender?.name}</td>
+              <td className="text-start px-2 py-1">{order?.sender?.address}</td>
+              {/* <td className="text-start px-2 py-1">Customer Address 2</td>
+              <td className="text-start px-2 py-1">Customer Address 3</td> */}
             </tr>
           </table>
 
@@ -86,51 +132,52 @@ const emptyRows = Array.from({ length: 12 });
               <th className="text-start px-2 py-1">BENEFICIARY</th>
             </tr>
             <tr className="flex flex-col">
-              <td className="text-start px-2 py-1">Customer Name</td>
-              <td className="text-start px-2 py-1">Customer Address 1</td>
-              <td className="text-start px-2 py-1">Customer Address 2</td>
-              <td className="text-start px-2 py-1">Customer Address 3</td>
+              <td className="text-start px-2 py-1">{order?.beneficiary?.name}</td>
+              <td className="text-start px-2 py-1">{order?.beneficiary?.address}</td>
+              {/* <td className="text-start px-2 py-1">Customer Address 2</td>
+              <td className="text-start px-2 py-1">Customer Address 3</td> */}
             </tr>
           </table>
 
         </div>
 
         {/* TABLE */}
-        <div className="w-full border bg-[#e6f2fa] font-semibold p-2">TRACKING NUMBER: #454656367</div>
+        <div className="flex gap-20 w-full border bg-[#e6f2fa] font-semibold p-2">
+          <div className="flex">TRACKING NUMBER: {order?.tracking_number}</div>
+          <div className="flex">PIECE NO: {order?.piece_number}</div>
+          <div className="flex">DESCRIPTION: {order?.description}</div>
+          </div>
         <table className="w-full border text-center">
-          <thead className="bg-[#e6f2fa]">
-            <tr className="text-start">
-              <th className="border text-start px-2 py-1">ORDER ID</th>
-              <th className="border text-start px-2 py-1">PIECE</th>
-              <th className="border text-start px-2 py-1">WEIGHT</th>
-              <th className="border text-start px-2 py-1">DIMENSIONS</th>
-              <th className="border text-start px-2 py-1">DESCRIPTION</th>
-              <th className="border text-start px-2 py-1">TOTAL PIECE</th>
-            </tr>
-          </thead>
+  <thead className="bg-[#e6f2fa]">
+    <tr className="text-start">
+      <th className="border text-start px-2 py-1">PIECE NUMBER</th>
+      <th className="border text-start px-2 py-1">WEIGHT</th>
+      <th className="border text-start px-2 py-1">DIMENSIONS</th>
+    </tr>
+  </thead>
 
-          <tbody>
-            <tr>
-              <td className="border p-2 text-left">#cl89976</td>
-              <td className="border px-2 py-1 text-start">34</td>
-              <td className="border px-2 py-1 text-start">60KG</td>
-              <td className="border px-2 py-1 text-start">3D</td>
-              <td className="border px-2 py-1 text-start">Description notes</td>
-              <td className="border px-2 py-1 text-start">70,000</td>
-            </tr>
-            
-            {emptyRows.map((_, index) => (
-              <tr key={index}>
-                <td className="border h-8"></td>
-                <td className="border"></td>
-                <td className="border"></td>
-                <td className="border"></td>
-                <td className="border"></td>
-                <td className="border"></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  <tbody>
+    {/* Map through piece_details */}
+    {order?.piece_details?.map((piece, index) => (
+      <tr key={piece._id || index}>
+        <td className="border px-2 py-1 text-start">{index + 1}</td>
+        <td className="border px-2 py-1 text-start">{piece.weight}KG</td>
+        <td className="border px-2 py-1 text-start">
+          {piece.length} x {piece.width} x {piece.height}
+        </td>
+      </tr>
+    ))}
+    
+    {/* Empty rows if needed */}
+    {/* {emptyRows.map((_, index) => (
+      <tr key={`empty-${index}`}>
+        <td className="border h-8"></td>
+        <td className="border"></td>
+        <td className="border"></td>
+      </tr>
+    ))} */}
+  </tbody>
+</table>
 
         {/* <div className="flex w-full border-r border-l">
           <div className="w-[70%] border-r">
@@ -149,7 +196,7 @@ const emptyRows = Array.from({ length: 12 });
         {/* terms and condition */}
         <div className="mt-6 ">
           <p className="font-semibold">Terms & Condition</p>
-          <p className="border w-full mt-2 p-7"></p>
+          <p className="border w-full mt-2 p-7">{setting?.teamAndCondition}</p>
         </div>
 
         {/* Signature */}
