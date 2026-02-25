@@ -20,6 +20,7 @@ import { RiCustomerService2Line } from "react-icons/ri";
 import { MdOutlineHouseSiding } from "react-icons/md";
 import { MdEventAvailable } from "react-icons/md";
 import { LiaShoppingBasketSolid } from "react-icons/lia";
+import { GoContainer } from "react-icons/go";
 
 
 const Sidebar = () => {
@@ -168,7 +169,21 @@ const Sidebar = () => {
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
-              
+
+              {/* run */}
+              <div
+                onClick={() => onClickSidebarMenu("Run")}
+                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/run"
+                    ? "bg-[#e6f2fa] text-[#057fc4]"
+                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                  }`}
+              >
+                <GoContainer />
+                {!arrowClicked && <p className="text-sm">Container Run</p>}
+              </div>
+
+
               {/* order */}
               <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
 
@@ -305,7 +320,7 @@ const Sidebar = () => {
                       <span className="text-sm font-medium">Events</span>
                       {currentOpen === "Event" ||
                         currentPath === "/event-master" ||
-                        currentPath === "/event"  ? (
+                        currentPath === "/event" ? (
                         <IoIosArrowUp />
                       ) : (
                         <IoIosArrowDown />
@@ -318,7 +333,7 @@ const Sidebar = () => {
                   <div
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${currentOpen === "Event" ||
                       currentPath === "/event-master" ||
-                      currentPath === "/event" 
+                      currentPath === "/event"
                       ? "max-h-40 opacity-100 mt-1"
                       : "max-h-0 opacity-0"
                       }`}
