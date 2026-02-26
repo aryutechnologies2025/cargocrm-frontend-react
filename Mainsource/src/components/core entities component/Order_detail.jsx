@@ -314,6 +314,13 @@ const OrderDetail = () => {
       state: {path},
     }); 
   }
+  const handleAddOrder = (path)=>{
+    navigate(`/form-order`, {
+      state: {path},
+    }); 
+  }
+
+
 
   // Reset add form
   const resetAddForm = () => {
@@ -709,7 +716,9 @@ const OrderDetail = () => {
             {/* Add Button */}
             <div className="ml-auto">
               <button
-                onClick={openAddModal}
+                onClick={() => {
+                 handleAddOrder();
+                  }}
                 className="bg-[#057fc4] hover:bg-[#2d93cf] px-4 py-2 text-white rounded-xl"
               >
                 Add
@@ -1111,7 +1120,7 @@ const OrderDetail = () => {
         {/* View Modal */}
         {viewModalOpen && viewOrder && (
           <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-            <div className="relative bg-white w-[95%] md:w-[500px] rounded-xl shadow-lg p-6">
+            <div className="relative bg-white w-[95%] md:w-[50%] h-[70%] rounded-xl shadow-lg p-6 overflow-x-auto">
               <button
                 onClick={() => setViewModalOpen(false)}
                 className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
@@ -1119,40 +1128,92 @@ const OrderDetail = () => {
                 <IoIosCloseCircle size={28} />
               </button>
 
-              <h2 className="text-xl font-semibold mb-6 text-[#057fc4]">Order Details</h2>
+              <h2 className="text-xl font-semibold mb-6 text-[#057fc4]">Order View</h2>
 
-              <div className="space-y-4 text-sm text-gray-700">
+              <div className="space-y-4 text-sm text-gray-700 w-full gap-4">
+               
+               <div className="w-full ">
+                <div className="space-y-4 mb-2">
+                <h2 className="text-xl font-semibold mb-6 ">Customer Details</h2>
                 <div className="flex justify-between">
-                  <span className="font-medium">Tracking No</span>
-                  <span>{viewOrder.orders?.[0]?.tracking_number || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Sender ID</span>
+                  <span className="font-medium">Customer Name</span>
                   <span>{viewOrder.customerName || "-"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Beneficiary ID</span>
+                  <span className="font-medium">Email</span>
+                  <span>{viewOrder.customerEmail || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Phone Number</span>
                  
+                  <span>{viewOrder.customerPhone || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Address</span>
+                  <span>{viewOrder.customerAddress || "-"}</span>
+                </div>
+                <hr></hr>
+                </div>
+                
+                <div className="space-y-4 mb-2">
+                <h2 className="text-xl font-semibold mb-6 ">Beneficiary Details</h2>
+                <div className="flex justify-between">
+                  <span className="font-medium">Beneficiary Name</span>
                   <span>{viewOrder.beneficiaries?.[0]?.name || "-"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Cargo Mode</span>
-                  <span>{viewOrder.orders?.[0].cargo_mode || "-"}</span>
+                  <span className="font-medium">Email</span>
+                  <span>{viewOrder.beneficiaries?.[0]?.email || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Phone Number</span>
+                 
+                  <span>{viewOrder.beneficiaries?.[0]?.phone || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Address</span>
+                  <span>{viewOrder.beneficiaries?.[0].address || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">City</span>
+                  <span>{viewOrder.beneficiaries?.[0].city || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Country</span>
+                  <span>{viewOrder.beneficiaries?.[0].country || "-"}</span>
+                </div>
+                <hr></hr>
+                </div>
+                </div>
+                
+                <div className="w-full ">
+                <div className=" space-y-4 mb-2">
+                <h2 className="text-xl font-semibold mb-6 ">Parcel Details</h2>
+                <div className="flex justify-between">
+                  <span className="font-medium">Piece Number</span>
+                  <span>{viewOrder.parcels?.[0]?.piece_number || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Description </span>
+                  <span>{viewOrder.parcels?.[0]?.description || "-"}</span>
+                </div>
+                <hr></hr>
+                </div>
+                 
+                 <div className="space-y-4 mb-2">
+                <h2 className="text-xl font-semibold mb-6 ">Order Details</h2>
+                <div className="flex justify-between">
+                  <span className="font-medium">Cargo Mode </span>
+                  <span>{viewOrder.orders?.[0]?.cargo_mode || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Packed</span>
-                  <span>{viewOrder.orders?.[0].packed || "-"}</span>
+                  <span>{viewOrder.orders?.[0]?.packed || "-"}</span>
                 </div>
-                
-                <div className="flex justify-between">
-                  <span className="font-medium">Created Date</span>
-                  <span>
-                    {viewOrder.orders?.[0].createdAt
-                      ? new Date(viewOrder.orders?.[0].createdAt).toLocaleDateString()
-                      : "-"}
-                  </span>
+                <hr></hr>
                 </div>
-
+                </div>
+            
                 {/* PieceDetails */}
                 <div className="border-t pt-3 mt-3">
                   <span className="font-medium block mb-2">Piece Details:</span>
