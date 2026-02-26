@@ -244,7 +244,7 @@ const Sidebar = () => {
                   >
                     <div className="flex gap-2 ms-8 flex-col text-sm font-medium text-gray-500">
 
-                      <button
+                      {/* <button
                         onClick={() => {
                           navigate("/customer");
                           setCurrentOpen("Order");
@@ -269,7 +269,7 @@ const Sidebar = () => {
                           }`}
                       >
                         Beneficiary
-                      </button>
+                      </button> */}
                       <button
                         onClick={() => {
                           navigate("/order");
@@ -283,7 +283,7 @@ const Sidebar = () => {
                       >
                         Order List
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => {
                           navigate("/parcel");
                           setCurrentOpen("Order");
@@ -295,7 +295,7 @@ const Sidebar = () => {
                           }`}
                       >
                         Parcel / Pieces
-                      </button>
+                      </button> */}
                       <button
                         onClick={() => {
                           navigate("/collection");

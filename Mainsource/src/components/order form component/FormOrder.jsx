@@ -4,10 +4,14 @@ import Beneficiary from "./Beneficiary";
 import ParcelDetails from "./ParcelDetails";
 import OrderDetails from "./OrderDetails";
 import Mobile_Sidebar from "../Mobile_Sidebar";
-
+import { useLocation } from "react-router-dom";
 const FormOrder = () => {
 
     const [step, setStep] = useState(1);
+    const location = useLocation();
+      const {path } = location.state || {};
+      console.log("location.state:", location.state);
+    const [customerId, setCustomerId] = useState(path?.customerId || null);
 
     const [formData, setFormData] = useState({
         customer: {},
@@ -17,10 +21,11 @@ const FormOrder = () => {
     });
 
     // next step
-    const nextStep = () => setStep((prev) => prev + 1);
+    const nextStep = ({id}) =>{ setStep((prev) => prev + 1), setCustomerId(id)};
+    // const nextStep = ({id = path.customerId}) => setStep((prev) => prev + 1) || setCustomerId(id);
 
     // previous step
-    const prevStep = () => setStep((prev) => prev - 1);
+    const prevStep = ({id}) => {setStep((prev) => prev - 1),setCustomerId(id)};
 
     // update data
     const updateData = (section, data) => {
@@ -115,6 +120,7 @@ const FormOrder = () => {
                     <CustomerDetails
                         nextStep={nextStep}
                         updateData={updateData}
+                        customerId={customerId}
                     />
                 )}
 
@@ -123,6 +129,7 @@ const FormOrder = () => {
                         nextStep={nextStep}
                         prevStep={prevStep}
                         updateData={updateData}
+                        customerId={customerId}
                     />
                 )}
 
@@ -131,6 +138,7 @@ const FormOrder = () => {
                         nextStep={nextStep}
                         prevStep={prevStep}
                         updateData={updateData}
+                        customerId={customerId}
                     />
                 )}
 
@@ -139,6 +147,7 @@ const FormOrder = () => {
                         prevStep={prevStep}
                         updateData={updateData}
                         handleSubmit={handleSubmit}
+                        customerId={customerId}
                     />
                 )}
 

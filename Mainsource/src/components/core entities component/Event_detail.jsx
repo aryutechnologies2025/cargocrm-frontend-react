@@ -444,23 +444,23 @@ const Event_detail = () => {
     },
     {
       title: "Event Name",
-      data: "event_name",
+      data: "event_name" || "-",
     },
     {
       title: "Run Number",
-      data: "run_number",
+      data: "run_number" || "-",
     },
     {
       title: "Tracking Number",
-      data: "tracking_number",
+      data: "tracking_number" || "-",
     },
     {
       title: "Quantity",
-      data: "quantity",
+      data: "quantity" || "-",
     },
     {
       title: "Weight",
-      data: "weight",
+      data: "weight" || "-",
     },
     {
       title: "Event Date",
@@ -472,11 +472,11 @@ const Event_detail = () => {
     },
     {
       title: "Event Time",
-      data: "event_time",
+      data: "event_time" || "-",
     },
     {
       title: "Created By",
-      data: "created_by",
+      data: "created_by" || "-",
     },
      {
       title: "Status",

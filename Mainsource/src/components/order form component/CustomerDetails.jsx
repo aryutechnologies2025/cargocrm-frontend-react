@@ -1,18 +1,110 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axiosInstance from "../../api/axiosInstance";
+import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 
-const CustomerDetails = ({ nextStep, updateData }) => {
-
+const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
+  const id = customerId;
+  // const location = useLocation();
+  // const {path } = location.state || {};
+  // console.log("location.state:", location.state);
+  const [loading, setLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const [customer, setCustomer] = useState({
+    id:"",
     name: "",
+    email: "",
     phone: "",
     address: ""
   });
 
+  const validateAddForm = () => {
+    const errors = {};
 
-  const handleNext = () => {
-    updateData("customer", customer);
-    nextStep();
+    if (!customer.name?.trim()) {
+      errors.name = "Name is required";
+    }
+    if (!customer.phone?.trim()) {
+      errors.phone = "Phone is required";
+    }
+    if (!customer.email?.trim()) {
+      errors.email = "Email is required";
+    }
+    if (!customer.address?.trim()) {
+      errors.address = "Address is required";
+    }
+   
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
+
+   const fetchCustomer = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`api/customers/view-customerss/${id}`);
+
+      if (response.data?.success || response.data?.status) {
+        const apiData = response.data.data || [];
+        setCustomer({
+          id: apiData._id,
+         ...apiData});
+
+      } else {
+        setCustomer([]);
+      }
+     
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+     
+      toast.error("Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(()=>{
+    if(id){
+    fetchCustomer();
+    }
+  },[id]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateAddForm()) return;
+
+    try {
+      const formData = {
+        ...(customer.id && { id: customer.id }),
+        name: customer.name,
+        email:customer.email,
+        phone:customer.phone,
+        address:customer.address
+      };
+      
+      const response = await axiosInstance.post(
+        `api/customers/create-customerss`,
+        formData
+      );
+      console.log("first",response);
+
+      if (response.data?.status || response.data?.success) {
+        if(id){
+          toast.success("Customer updated successfully");
+        }else{
+        toast.success("Customer created successfully");
+
+        }
+        nextStep({
+          id: response.data.data._id ,});        
+      } else {
+        toast.error("Failed to create order");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Error creating order");
+    }
+  };
+
+
 
   return (
     <>
@@ -33,10 +125,17 @@ const CustomerDetails = ({ nextStep, updateData }) => {
               <input
                 type="text"
                 id="name"
+                value={customer.name}
                 placeholder="Enter Customer Name"
-                onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                onChange={(e) => {
+                  setCustomer({ ...customer, name: e.target.value });
+                  setFormErrors((prevFormErrors) => ({ ...prevFormErrors, name: "" }));
+                }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
+              {formErrors.name && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
+                      )}
             </div>
           </div>
           <div className="mt-2 md:mt-4 flex justify-between items-center ">
@@ -53,10 +152,18 @@ const CustomerDetails = ({ nextStep, updateData }) => {
               <input
                 type="number"
                 id="name"
+                value={customer.phone}
                 placeholder="Enter Phone Number"
-                onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+                onChange={(e) => {
+                  setCustomer({ ...customer, phone: e.target.value });
+                  setFormErrors((prevFormErrors) => ({ ...prevFormErrors, phone: "" }));
+                }}
+               
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
+              {formErrors.phone && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
+                      )}
             </div>
           </div>
           <div className="mt-2 md:mt-4 flex justify-between items-center ">
@@ -73,10 +180,18 @@ const CustomerDetails = ({ nextStep, updateData }) => {
               <input
                 type="email"
                 id="name"
+                value={customer.email}
                 placeholder="Enter Email"
-                onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                onChange={(e) => {
+                  setCustomer({ ...customer, email: e.target.value });
+                  setFormErrors((prevFormErrors) => ({ ...prevFormErrors, email: "" }));
+                }}
+                
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
+              {formErrors.email && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+                      )}
             </div>
           </div>
           <div className="mt-2 md:mt-4 flex justify-between items-center ">
@@ -93,15 +208,22 @@ const CustomerDetails = ({ nextStep, updateData }) => {
               <textarea
                 type="text"
                 id="name"
+                value={customer.address}
                 placeholder="Enter Address"
-                onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
+                onChange={(e) => {
+                  setCustomer({ ...customer, address: e.target.value });
+                  setFormErrors((prevFormErrors) => ({ ...prevFormErrors, address: "" }));
+                }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
+              {formErrors.address && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.address}</p>
+                      )}
             </div>
           </div>
           <div className="flex justify-end">
             <button
-              onClick={handleNext}
+              onClick={handleSubmit}
               className="btn-primary mt-4 px-4 py-2 bg-[#057fc4] hover:bg-[#2d93cf] rounded-md text-white"
             >
               Next

@@ -218,8 +218,8 @@ const OrderDetail = () => {
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`api/orders/view-orders`);
-
+      const response = await axiosInstance.get(`api/orders/all-order`);
+      console.log("Order API Response:", response.data);
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.data || [];
         setOrder(apiData);
@@ -308,6 +308,12 @@ const OrderDetail = () => {
       toast.error(err.response?.data?.message || "Error creating order");
     }
   };
+
+  const handleViewOrder = (path)=>{
+    navigate(`/form-order`, {
+      state: {path},
+    }); 
+  }
 
   // Reset add form
   const resetAddForm = () => {
@@ -463,55 +469,42 @@ const OrderDetail = () => {
     },
     {
       title: "Tracking Number",
-      data: null,
-      render: (row) => row.tracking_number || "-",
+      data: (row) =>  row.orders?.[0]?.tracking_number || "-",
     },
     {
       title: "Sender ID",
-      data: null,
-      render: (row) => {
-        if (!row.sender_id) return "-";
-        return typeof row.sender_id === "object"
-          ? row.sender_id?._id || row.sender_id?.name || "-"
-          : row.sender_id;
-      },
+      data: "customerName",
     },
     {
       title: "Beneficiary ID",
-      data: null,
-      render: (row) => {
-        if (!row.beneficiary_id) return "-";
-        return typeof row.beneficiary_id === "object"
-          ? row.beneficiary_id?._id || row.beneficiary_id?.name || "-"
-          : row.beneficiary_id;
-      },
+      data: (row) =>  row.beneficiaries?.[0]?.name || "-",
     },
     {
       title: "Cargo Mode",
       data: null,
-      render: (row) => row.cargo_mode || "-",
+      render: (row) => row.orders?.[0]?.cargo_mode || "-",
     },
     {
       title: "Packed",
       data: null,
-      render: (row) => row.packed || "-",
+      render: (row) => row.orders?.[0]?.packed || "-",
     },
-    {
-      title: "Created By",
-      data: null,
-      render: (row) => {
-        if (!row.created_by) return "-";
-        return typeof row.created_by === "object"
-          ? row.created_by?.name || row.created_by?._id || "-"
-          : row.created_by;
-      },
-    },
+    // {
+    //   title: "Created By",
+    //   data: null,
+    //   render: (row) => {
+    //     if (!row.created_by) return "-";
+    //     return typeof row.created_by === "object"
+    //       ? row.created_by?.name || row.created_by?._id || "-"
+    //       : row.created_by;
+    //   },
+    // },
     {
       title: "Created Date",
       data: null,
       render: (row) => {
-        if (!row.createdAt) return "-";
-        return new Date(row.createdAt).toLocaleDateString();
+        if (!row.orders?.[0]?.createdAt) return "-";
+        return new Date(row.orders?.[0]?.createdAt).toLocaleDateString();
       },
     },
     {
@@ -532,32 +525,7 @@ const OrderDetail = () => {
         );
       }
     },
-    {
-      title: "Status",
-      data: "status",
-      render: (data) => {
-        const isActive = String(data) === "1" || data === 1 || data === true;
-        const textColor = isActive ? "green" : "red";
-        const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
-
-        return `
-          <div style="
-            display:inline-block;
-            padding:4px 8px;
-            color:${textColor};
-            background-color:${bgColor};
-            border:1px solid ${bgColor};
-            border-radius:50px;
-            text-align:center;
-            width:100px;
-            font-size:10px;
-            font-weight:700;
-          ">
-            ${isActive ? "Active" : "Inactive"}
-          </div>
-        `;
-      },
-    },
+   
     {
       title: "Action",
       data: null,
@@ -580,9 +548,13 @@ const OrderDetail = () => {
                 >
                   <FaEye />
                 </button>
+               
                 <TfiPencilAlt
                   className="cursor-pointer text-gray-600 hover:text-blue-600"
-                  onClick={() => openEditModal(row)}
+                  // onClick={() => openEditModal(row)}
+                   onClick={() => {
+                 handleViewOrder(row);
+                  }}
                 />
                 <MdOutlineDeleteOutline
                   className="text-red-600 text-xl cursor-pointer hover:text-red-800"
@@ -1152,59 +1124,75 @@ const OrderDetail = () => {
               <div className="space-y-4 text-sm text-gray-700">
                 <div className="flex justify-between">
                   <span className="font-medium">Tracking No</span>
-                  <span>{viewOrder.tracking_number || "-"}</span>
+                  <span>{viewOrder.orders?.[0]?.tracking_number || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Sender ID</span>
-                  <span>
-                    {typeof viewOrder.sender_id === "object"
-                      ? viewOrder.sender_id?.name || viewOrder.sender_id?._id
-                      : viewOrder.sender_id || "-"}
-                  </span>
+                  <span>{viewOrder.customerName || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Beneficiary ID</span>
-                  <span>
-                    {typeof viewOrder.beneficiary_id === "object"
-                      ? viewOrder.beneficiary_id?.name || viewOrder.beneficiary_id?._id
-                      : viewOrder.beneficiary_id || "-"}
-                  </span>
+                 
+                  <span>{viewOrder.beneficiaries?.[0]?.name || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Cargo Mode</span>
-                  <span>{viewOrder.cargo_mode || "-"}</span>
+                  <span>{viewOrder.orders?.[0].cargo_mode || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Packed</span>
-                  <span>{viewOrder.packed || "-"}</span>
+                  <span>{viewOrder.orders?.[0].packed || "-"}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Created By</span>
-                  <span>
-                    {typeof viewOrder.created_by === "object"
-                      ? viewOrder.created_by?.name || viewOrder.created_by?._id
-                      : viewOrder.created_by || "-"}
-                  </span>
-                </div>
+                
                 <div className="flex justify-between">
                   <span className="font-medium">Created Date</span>
                   <span>
-                    {viewOrder.createdAt
-                      ? new Date(viewOrder.createdAt).toLocaleDateString()
+                    {viewOrder.orders?.[0].createdAt
+                      ? new Date(viewOrder.orders?.[0].createdAt).toLocaleDateString()
                       : "-"}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Status</span>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${viewOrder.status === 1 || viewOrder.status === "1"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-600"
-                      }`}
-                  >
-                    {viewOrder.status === 1 || viewOrder.status === "1" ? "Active" : "Inactive"}
-                  </span>
-                </div>
+
+                {/* PieceDetails */}
+                <div className="border-t pt-3 mt-3">
+                  <span className="font-medium block mb-2">Piece Details:</span>
+                  {viewOrder.parcels?.[0]?.piece_details &&
+                  viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
+                    viewOrder.parcels?.[0]?.piece_details.map((detail, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
+                      >
+                        <div className="font-semibold text-[#057fc4] mb-2">
+                          Piece {index + 1}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Weight:</span>
+                            <span className="font-medium">{detail.weight}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Length:</span>
+                            <span className="font-medium">{detail.length}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Width:</span>
+                            <span className="font-medium">{detail.width}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Height:</span>
+                            <span className="font-medium">{detail.height}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">
+                      No piece details available
+                    </p>
+                  )}
+                </div>  
+                
               </div>
             </div>
           </div>
