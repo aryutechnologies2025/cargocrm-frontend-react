@@ -162,6 +162,7 @@ th {
 td {
   text-align: center;
   border-bottom: 1px solid #e0e4ea;
+  font-size: 13px;
 }
 
 tbody {
@@ -201,7 +202,7 @@ tbody {
 }
 
 .dt-column-title{
-  font-size:medium;
+  font-size:14px;
   font-weight: 600;
 }
 .dt-orderable-asc {
