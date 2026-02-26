@@ -15,7 +15,9 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
     name: "",
     email: "",
     phone: "",
-    address: ""
+    address: "",
+    city:"",
+    country:"",
   });
 
   const validateAddForm = () => {
@@ -32,6 +34,12 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
     }
     if (!customer.address?.trim()) {
       errors.address = "Address is required";
+    }
+    if (!customer.city?.trim()) {
+      errors.city = "City is required";
+    }
+    if (!customer.country?.trim()) {
+      errors.country = "Country is required";
     }
    
 
@@ -78,7 +86,9 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
         name: customer.name,
         email:customer.email,
         phone:customer.phone,
-        address:customer.address
+        address:customer.address,
+        city:customer.city,
+        country:customer.country
       };
       
       const response = await axiosInstance.post(
@@ -218,6 +228,60 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
               />
               {formErrors.address && (
                         <p className="text-red-500 text-sm mt-1">{formErrors.address}</p>
+                      )}
+            </div>
+          </div>
+          <div className="mt-2 md:mt-4 flex justify-between items-center ">
+            <div className="">
+              <label
+                htmlFor="roleName"
+                className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+              >
+                City <span className="text-red-500">*</span>
+              </label>
+
+            </div>
+            <div className="w-[60%] md:w-[50%]">
+              <textarea
+                type="text"
+                id="city"
+                value={customer.city}
+                placeholder="Enter City"
+                onChange={(e) => {
+                  setCustomer({ ...customer, city: e.target.value });
+                  setFormErrors((prevFormErrors) => ({ ...prevFormErrors, city: "" }));
+                }}
+                className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
+              />
+              {formErrors.city && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.city}</p>
+                      )}
+            </div>
+          </div>
+          <div className="mt-2 md:mt-4 flex justify-between items-center ">
+            <div className="">
+              <label
+                htmlFor="roleName"
+                className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+              >
+                Country <span className="text-red-500">*</span>
+              </label>
+
+            </div>
+            <div className="w-[60%] md:w-[50%]">
+              <textarea
+                type="text"
+                id="country"
+                value={customer.country}
+                placeholder="Enter Country"
+                onChange={(e) => {
+                  setCustomer({ ...customer, country: e.target.value });
+                  setFormErrors((prevFormErrors) => ({ ...prevFormErrors, country: "" }));
+                }}
+                className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
+              />
+              {formErrors.country && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.country}</p>
                       )}
             </div>
           </div>

@@ -187,9 +187,9 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
                     key={index}
                     className="mb-6 p-2 border border-gray-200 rounded-lg"
                   >
-                    <h3 className="text-md font-semibold mb-3">
+                    {/* <h3 className="text-md font-semibold mb-3">
                       Piece {index + 1}
-                    </h3>
+                    </h3> */}
                     <div className="flex flex-wrap justify-between items-center gap-2">
                       <div className="w-full md:w-[22%]">
                         <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -249,13 +249,13 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
             </div>
           )}
 
-          <div className="mt-2 md:mt-4 flex justify-between items-center ">
+          <div className="mt-2 md:mt-4 flex flex-wrap  justify-between items-center ">
             <div className="">
               <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
                 Description <span className="text-red-500">*</span>
               </label>
             </div>
-            <div className="w-[60%] md:w-[50%]">
+            <div className="w-[100%] md:w-[80%] h-auto">
               <textarea
                 value={parcel.description}
                 placeholder="Enter Description"

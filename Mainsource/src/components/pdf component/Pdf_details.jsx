@@ -12,35 +12,36 @@ const Pdf_details = () => {
   const navigate = useNavigate();
   const {id} = location.state || {};
   console.log("location.state:", location.state);
-  console.log("orderId:", id);
+  const data = location.state || {};
+  console.log("orderId:", data);
   const [order, setOrder] = useState([]);
   const [loading, setLoading] = useState(false);
   const [setting, setSetting] = useState([]);
 
-  const fetchOrder = async () => {
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get(`api/orders/view-parcel/${id}`);
-      console.log("API:", response.data);
-      if (response.data?.success || response.data?.status) {
-        const apiData = response.data.data?.[0] || [];
-        setOrder(apiData);
-        setSetting(response.data?.settings?.[0] || []);
-      } else {
-        setOrder([]);
-      }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      setOrder([]);
-      toast.error("Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchOrder = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await axiosInstance.get(`api/orders/view-parcel/${id}`);
+  //     console.log("API:", response.data);
+  //     if (response.data?.success || response.data?.status) {
+  //       const apiData = response.data.data?.[0] || [];
+  //       setOrder(apiData);
+  //       setSetting(response.data?.settings?.[0] || []);
+  //     } else {
+  //       setOrder([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching orders:", error);
+  //     setOrder([]);
+  //     toast.error("Failed to fetch orders");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchOrder();
-  }, []);
+  // useEffect(() => {
+  //   fetchOrder();
+  // }, []);
 
 const downloadPDF = async () => {
   const element = pdfRef.current;
@@ -120,8 +121,8 @@ const emptyRows = Array.from({ length: 12 });
               <th className="text-start px-2 py-1">CUSTOMER</th>
             </tr>
             <tr className="flex flex-col">
-              <td className="text-start px-2 py-1">{order?.sender?.name}</td>
-              <td className="text-start px-2 py-1">{order?.sender?.address}</td>
+              <td className="text-start px-2 py-1">{data?.customerName || "-"}</td>
+              <td className="text-start px-2 py-1">{data?.customerAddress || "-"},{data?.customerCity || "-"},{data?.customerCountry || "-"}</td>
               {/* <td className="text-start px-2 py-1">Customer Address 2</td>
               <td className="text-start px-2 py-1">Customer Address 3</td> */}
             </tr>
@@ -132,8 +133,8 @@ const emptyRows = Array.from({ length: 12 });
               <th className="text-start px-2 py-1">BENEFICIARY</th>
             </tr>
             <tr className="flex flex-col">
-              <td className="text-start px-2 py-1">{order?.beneficiary?.name}</td>
-              <td className="text-start px-2 py-1">{order?.beneficiary?.address}</td>
+              <td className="text-start px-2 py-1">{data?.beneficiaries?.[0].name}</td>
+              <td className="text-start px-2 py-1"><span className="mr-1">{data?.beneficiaries?.[0].address},</span><span className="mr-1">{data?.beneficiaries?.[0].city},</span><span className="mr-1">{data?.beneficiaries?.[0].country}</span></td>
               {/* <td className="text-start px-2 py-1">Customer Address 2</td>
               <td className="text-start px-2 py-1">Customer Address 3</td> */}
             </tr>
@@ -143,9 +144,9 @@ const emptyRows = Array.from({ length: 12 });
 
         {/* TABLE */}
         <div className="flex gap-20 w-full border bg-[#e6f2fa] font-semibold p-2">
-          <div className="flex">TRACKING NUMBER: {order?.tracking_number}</div>
-          <div className="flex">PIECE NO: {order?.piece_number}</div>
-          <div className="flex">DESCRIPTION: {order?.description}</div>
+          <div className="flex">TRACKING NUMBER: {data?.orders?.[0].tracking_number}</div>
+          <div className="flex">PIECE NO: {data?.parcels?.[0].piece_number}</div>
+          <div className="flex">DESCRIPTION: {data?.parcels?.[0].description}</div>
           </div>
         <table className="w-full border text-center">
   <thead className="bg-[#e6f2fa]">
@@ -158,7 +159,7 @@ const emptyRows = Array.from({ length: 12 });
 
   <tbody>
     {/* Map through piece_details */}
-    {order?.piece_details?.map((piece, index) => (
+    {data?.parcels?.[0]?.piece_details?.map((piece, index) => (
       <tr key={piece._id || index}>
         <td className="border px-2 py-1 text-start">{index + 1}</td>
         <td className="border px-2 py-1 text-start">{piece.weight}KG</td>
@@ -196,7 +197,7 @@ const emptyRows = Array.from({ length: 12 });
         {/* terms and condition */}
         <div className="mt-6 ">
           <p className="font-semibold">Terms & Condition</p>
-          <p className="border w-full mt-2 p-7">{setting?.teamAndCondition}</p>
+          <p className="border w-full mt-2 p-7">{data?.settings?.teamAndCondition}</p>
         </div>
 
         {/* Signature */}
