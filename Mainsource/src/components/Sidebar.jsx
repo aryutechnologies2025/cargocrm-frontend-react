@@ -33,6 +33,10 @@ const Sidebar = () => {
   const [selectAnyOneClicked, setSelectAnyOneClicked] = useState(false);
   const [currentOpen, setCurrentOpen] = useState(null);
   const [buttonLoading, setButtonLoading] = useState(false);
+   const storedDetalis = localStorage.getItem("cargouser");
+  const parsedDetails = JSON.parse(storedDetalis);
+  const role = parsedDetails.role;
+  console.log("role", role);
   const toggleMenu = (menu) => {
     setCurrentOpen(currentOpen === menu ? null : menu);
   };
@@ -159,6 +163,7 @@ const Sidebar = () => {
                 }  `}
             >
               {/* dashboard */}
+              {role !== "Agent" && (
               <div
                 onClick={() => onClickSidebarMenu("Dashboard")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -170,6 +175,7 @@ const Sidebar = () => {
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
+              )}
 
               {/* order form
               <div
@@ -388,6 +394,7 @@ const Sidebar = () => {
               </div>
 
               {/* user */}
+              {role !== "Agent" && (
               <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
 
                 <div
@@ -457,6 +464,7 @@ const Sidebar = () => {
                   </div>
                 )}
               </div>
+              )}
 
               {/* Receipt */}
               {/* <div
@@ -575,6 +583,7 @@ const Sidebar = () => {
               </div> */}
 
               {/* contact us */}
+              {role !== "Agent" && (
               <div
                 onClick={() => onClickSidebarMenu("contact-us")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -586,8 +595,9 @@ const Sidebar = () => {
                 <MdContacts />
                 {!arrowClicked && <p className="text-sm">Contact Us</p>}
               </div>
-
+              )}
               {/* audit log */}
+              {role !== "Agent" && (
               <div
                 onClick={() => onClickSidebarMenu("audit-logs")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -599,12 +609,16 @@ const Sidebar = () => {
                 <TbLogs />
                 {!arrowClicked && <p className="text-sm">Audit Logs</p>}
               </div>
+              )}
 
             </div>
 
             <hr className="my-5 mx-4 border-gray-300" />
+            {/* setting */}
+            
             <div className="w-[95%] px-2">
               {/* settings */}
+              {role !== "Agent" && (
               <div onClick={() => onClickSidebarMenu("system-setting")} className="flex flex-col gap-6 ">
 
                 {[{ icon: <IoSettingsOutline />, label: "System Setting" }].map(
@@ -625,6 +639,7 @@ const Sidebar = () => {
                   )
                 )}
               </div>
+              )}
 
               {/* logout */}
               <div
@@ -640,6 +655,7 @@ const Sidebar = () => {
                 )}
               </div>
             </div>
+           
           </div>
 
           {/* User Section */}
