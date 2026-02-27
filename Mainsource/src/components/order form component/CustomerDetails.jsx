@@ -243,7 +243,7 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
 
             </div>
             <div className="w-[60%] md:w-[50%]">
-              <textarea
+              <input
                 type="text"
                 id="city"
                 value={customer.city}
@@ -270,7 +270,7 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
 
             </div>
             <div className="w-[60%] md:w-[50%]">
-              <textarea
+              <input
                 type="text"
                 id="country"
                 value={customer.country}

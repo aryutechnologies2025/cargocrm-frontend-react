@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import axiosInstance from "../../api/axiosInstance";
 
 const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
-    console.log("benid", customerId);
+  console.log("benid", customerId);
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [beneficiary, setBeneficiary] = useState({
@@ -37,7 +37,7 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
     if (!beneficiary.country?.trim()) {
       errors.country = "Country is required";
     }
-   
+
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -75,7 +75,7 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(!validateAddForm()) return;
+    if (!validateAddForm()) return;
 
     try {
       const formData = {
@@ -128,15 +128,15 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
                 type="text"
                 value={beneficiary.name}
                 placeholder="Enter Beneficiary Name"
-                onChange={(e) =>{
+                onChange={(e) => {
                   setBeneficiary({ ...beneficiary, name: e.target.value });
                   setFormErrors((prevFormErrors) => ({ ...prevFormErrors, name: "" }));
                 }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
               {formErrors.name && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
+              )}
             </div>
           </div>
           <div className="mt-2 md:mt-4 flex justify-between items-center ">
@@ -152,15 +152,15 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
                 type="email"
                 value={beneficiary.email}
                 placeholder="Enter Beneficiary Email"
-                onChange={(e) =>{
+                onChange={(e) => {
                   setBeneficiary({ ...beneficiary, email: e.target.value });
                   setFormErrors((prevFormErrors) => ({ ...prevFormErrors, email: "" }));
                 }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
               {formErrors.email && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+              )}
             </div>
           </div>
           <div className="mt-2 md:mt-4 flex justify-between items-center ">
@@ -176,15 +176,15 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
                 type="number"
                 value={beneficiary.phone}
                 placeholder="Enter Beneficiary Phone"
-                onChange={(e) =>{
+                onChange={(e) => {
                   setBeneficiary({ ...beneficiary, phone: e.target.value });
                   setFormErrors((prevFormErrors) => ({ ...prevFormErrors, phone: "" }));
                 }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
               {formErrors.phone && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
+              )}
             </div>
           </div>
 
@@ -197,19 +197,19 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
               </label>
             </div>
             <div className="w-[60%] md:w-[50%]">
-              <input
+              <textarea
                 type="text"
                 value={beneficiary.address}
                 placeholder="Enter Beneficiary Address"
-                onChange={(e) =>{
+                onChange={(e) => {
                   setBeneficiary({ ...beneficiary, address: e.target.value });
                   setFormErrors((prevFormErrors) => ({ ...prevFormErrors, address: "" }));
                 }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
               {formErrors.address && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.address}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.address}</p>
+              )}
             </div>
           </div>
 
@@ -226,15 +226,15 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
                 type="text"
                 value={beneficiary.city}
                 placeholder="Enter Beneficiary City"
-                onChange={(e) =>{
+                onChange={(e) => {
                   setBeneficiary({ ...beneficiary, city: e.target.value });
                   setFormErrors((prevFormErrors) => ({ ...prevFormErrors, city: "" }));
                 }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
               {formErrors.city && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.city}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.city}</p>
+              )}
             </div>
           </div>
 
@@ -251,20 +251,20 @@ const Beneficiary = ({ nextStep, prevStep, updateData, customerId }) => {
                 type="text"
                 value={beneficiary.country}
                 placeholder="Enter Beneficiary Country"
-                onChange={(e) =>{
+                onChange={(e) => {
                   setBeneficiary({ ...beneficiary, country: e.target.value });
                   setFormErrors((prevFormErrors) => ({ ...prevFormErrors, country: "" }));
                 }}
                 className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
               />
               {formErrors.country && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.country}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.country}</p>
+              )}
             </div>
           </div>
 
           {/* ... rest of the input fields (keep them as is) ... */}
-          
+
           <div className="flex justify-end gap-3 mt-4">
             <button
               className="btn-primary mt-4 px-4 py-2 bg-[#057fc4] hover:bg-[#2d93cf] rounded-md text-white"

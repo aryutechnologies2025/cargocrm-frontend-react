@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import { Dropdown } from "primereact/dropdown";
 import Swal from "sweetalert2";
 DataTable.use(DT);
+import { MultiSelect } from "primereact/multiselect";
 
 const Event_detail = () => {
   const navigate = useNavigate();
@@ -575,7 +576,7 @@ const Event_detail = () => {
             Dashboard
           </p>
           <p className="text-gray-500">{">"}</p>
-          <p className="text-sm md:text-md text-[#057fc4]">Event</p>
+          <p className="text-sm md:text-md text-[#057fc4]">Cargo Movement Event</p>
         </div>
 
         {/* Filters */}
@@ -713,7 +714,7 @@ const Event_detail = () => {
               </div>
 
               <div className="px-5 lg:px-14 py-2 md:py-10">
-                <p className="text-2xl md:text-3xl font-medium">Add Event</p>
+                <p className="text-2xl md:text-3xl font-medium">Add Cargo Movement</p>
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div>
@@ -732,6 +733,7 @@ const Event_detail = () => {
                       optionLabel="name"
                       optionValue="id"
                       placeholder="Select Event Name"
+                      filter
                       className="w-full border border-gray-300 rounded-lg"
                     />
                     {formErrors.eventName && (
@@ -759,6 +761,7 @@ const Event_detail = () => {
                       optionLabel="run_number"
                       optionValue="id"
                       placeholder="Select Run Number"
+                      filter
                       className="w-full border border-gray-300 rounded-lg"
                     />
                     {formErrors.runNo && (
@@ -786,6 +789,7 @@ const Event_detail = () => {
                       optionLabel="tracking_number"
                       optionValue="id"
                       placeholder="Select Tracking Number"
+                      filter
                       className="w-full border border-gray-300 rounded-lg"
                     />
                     {formErrors.trackingNo && (
@@ -904,7 +908,7 @@ const Event_detail = () => {
                   <div className="w-[60%] md:w-[50%]">
                     <div className="flex items-center">
                       <input
-                        type="checkbox"
+                        type="radio"
                         checked={eventMark === "public"}
                         onChange={(e) => {
                           setEventMark(e.target.checked ? "public" : "private");
@@ -919,7 +923,7 @@ const Event_detail = () => {
                         Public
                       </label>
                       <input
-                        type="checkbox"
+                        type="radio"
                         checked={eventMark === "private"}
                         onChange={(e) => {
                           setEventMark(e.target.checked ? "private" : "public");
