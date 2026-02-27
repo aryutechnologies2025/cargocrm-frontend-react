@@ -908,7 +908,7 @@ const Event_detail = () => {
                       filter
                       className="w-full border border-gray-300 rounded-lg"
                       disabled={isLoadingAutoFill}
-                      showClear
+                      showClear  
                     />
                     {/* {isLoadingAutoFill && (
                       <p className="text-blue-500 text-sm mt-1">Loading piece and weight data...</p>

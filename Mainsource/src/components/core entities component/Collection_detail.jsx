@@ -144,7 +144,7 @@ const Collection_detail = () => {
         toast.error("Failed to create order");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Error creating order");
+      toast.error(err.response?.data?.message );
     }
   };
 
@@ -519,6 +519,7 @@ const Collection_detail = () => {
                       optionLabel="name"
                       optionValue="id"
                       placeholder="Select sender ID"
+                      filter
                       className="w-full border border-gray-300 rounded-lg"
                     />
                     {formErrors.senderId && (

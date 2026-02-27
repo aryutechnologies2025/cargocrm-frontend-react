@@ -185,8 +185,27 @@ tbody {
   cursor: pointer;
 }
 
+.p-multiselect-panel .p-checkbox .p-checkbox-box {
+  border: 2px solid #c5c5c5 !important;  
+  border-radius: 4px;
+}
+
+/* Checked state */
+.p-multiselect-panel .p-checkbox.p-highlight .p-checkbox-box {
+  background-color: #c5c5c5 !important;
+  border-color: #c5c5c5 !important;
+}
+
+/* Hover state */
+.p-multiselect-panel .p-checkbox .p-checkbox-box:hover {
+  border-color: #c5c5c5 !important;
+}
+
+.p-checkbox-input{
+  border: 1px solid #454545;
+}
 .display {
-  white-space: nowrap; /* Prevent table content from wrapping */
+  white-space: nowrap; 
 }
 
 .p-column-header-content {
