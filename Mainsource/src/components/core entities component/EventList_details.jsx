@@ -44,6 +44,12 @@ const EventList_details = () => {
   const [editName, setEditName] = useState("");
   const [editStatus, setEditStatus] = useState("");
 
+  const resetAddForm = () => {
+    setName("");
+    setStatus("");
+    setFormErrors({});
+  };
+
   const validateAddForm = () => {
     let errors = {};
 
@@ -72,6 +78,7 @@ const EventList_details = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // view
   const fetchEventMasters = async () => {
     setLoading(true);
     try {
@@ -100,6 +107,7 @@ const EventList_details = () => {
     fetchEventMasters();
   }, []);
 
+  // create
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!validateAddForm()) return;
@@ -127,11 +135,24 @@ const EventList_details = () => {
     }
   };
 
+  const openEditModal = (row) => {
+    console.log("row", row);
+    const orderId = row._id || row.id;
+    console.log("order ID", orderId)
+    setSelectedEventMaster(orderId);
+    setEditName(row.name);
+    setEditStatus(row.status);
+    setIsEditModalOpen(true);
+    setTimeout(() => setIsAnimating(true), 10);
+  };
+
+
+  // update
   const handleUpdate = async () => {
     if (!validateEditForm()) return;
 
     // const payload = {
-    
+
     //   name: editName,
     //   status: editStatus,
     // };
@@ -140,7 +161,7 @@ const EventList_details = () => {
       const response = await axiosInstance.put(
         `api/eventmasters/edit-event-masters/${selectedEventMaster}`,
         {
-          
+
           name: editName,
           status: editStatus,
         },
@@ -154,10 +175,11 @@ const EventList_details = () => {
         toast.error("Failed to update order");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error updating order");
+      toast.error(error.response?.data?.message );
     }
   };
 
+  // delete
   const deleteEvent = async (orderId) => {
     if (!orderId) {
       toast.error("Invalid order ID");
@@ -180,12 +202,9 @@ const EventList_details = () => {
         `api/eventmasters/delete-event-masters/${orderId}`,
       );
 
-      if (response.data?.status === true || response.data?.success === true) {
         toast.success("Order deleted successfully");
-        fetchOrder();
-      } else {
-        toast.error(response.data?.message || "Failed to delete order");
-      }
+        fetchEventMasters();
+     
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Error deleting order");
@@ -199,6 +218,7 @@ const EventList_details = () => {
   };
 
   const openAddModal = () => {
+    resetAddForm();
     setIsAddModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
@@ -224,16 +244,6 @@ const EventList_details = () => {
     setTimeout(() => setIsAddModalOpen(false), 250);
   };
 
-  const openEditModal = (row) => {
-    console.log("row", row);
-    const orderId = row._id || row.id;
-    // console.log("order ID",orderId)
-    setSelectedEventMaster(orderId);
-    setEditName(row.name);
-    setEditStatus(row.status);
-    setIsEditModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
-  };
 
   const closeEditModal = () => {
     setIsAnimating(false);
@@ -323,7 +333,7 @@ const EventList_details = () => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteEvent(row._id);
+                      deleteEvent(row.id);
                     }}
                   />
                 </div>
@@ -455,9 +465,8 @@ const EventList_details = () => {
             <div className="absolute inset-0 " onClick={closeAddModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -556,9 +565,8 @@ const EventList_details = () => {
             <div className="absolute inset-0 " onClick={closeEditModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -675,15 +683,14 @@ const EventList_details = () => {
                   <span className="font-medium">Status</span>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium
-                                              ${
-                                                viewEventMaster.status === 1 ||
-                                                viewEventMaster.status === "1"
-                                                  ? "bg-green-100 text-green-700"
-                                                  : "bg-red-100 text-red-600"
-                                              }`}
+                                              ${viewEventMaster.status === 1 ||
+                        viewEventMaster.status === "1"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-600"
+                      }`}
                   >
                     {viewEventMaster.status === 1 ||
-                    viewEventMaster.status === "1"
+                      viewEventMaster.status === "1"
                       ? "Active"
                       : "Inactive"}
                   </span>
