@@ -123,7 +123,7 @@ const EventList_details = () => {
         toast.error("Failed to create order");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Error creating order");
+      toast.error(err.response?.data?.message);
     }
   };
 
@@ -227,6 +227,7 @@ const EventList_details = () => {
   const openEditModal = (row) => {
     console.log("row", row);
     const orderId = row._id || row.id;
+    // console.log("order ID",orderId)
     setSelectedEventMaster(orderId);
     setEditName(row.name);
     setEditStatus(row.status);
