@@ -58,13 +58,17 @@ const Event_detail = () => {
   const [eventId, setEventId] = useState("");
   const [eventMark, setEventMark] = useState("");
   const [runId, setRunId] = useState("");
-  const [trackingId, setTrackingId] = useState("");
+  const [trackingId, setTrackingId] = useState([]);
   const [quality, setQuality] = useState("");
   const [weight, setWeight] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventTime, setEventTime] = useState("");
   const [eventCreatedby, setEventCreatedby] = useState("");
   const [status, setStatus] = useState("");
+
+  // New state for tracking autofill
+  const [selectedTrackingNumbers, setSelectedTrackingNumbers] = useState([]);
+  const [isLoadingAutoFill, setIsLoadingAutoFill] = useState(false);
 
   // Edit form states
   const [editEventId, setEditEventId] = useState("");
@@ -91,6 +95,58 @@ const Event_detail = () => {
   const parsedDetails = JSON.parse(storedDetatis);
   const userid = parsedDetails ? parsedDetails.id : null;
 
+  const fetchPieceAndWeight = async (trackingNumbers) => {
+    if (!trackingNumbers || trackingNumbers.length === 0) {
+      setQuality("");
+      setWeight("");
+      return;
+    }
+
+    setIsLoadingAutoFill(true);
+    try {
+      const params = new URLSearchParams();
+      trackingNumbers.forEach(tn => params.append('tracking_numbers[]', tn));
+      
+      const response = await axiosInstance.get(
+        `api/orders/get-piece-and-weight-in-parcel?${params.toString()}`
+      );
+
+      if (response.data?.success && response.data?.data) {
+        const data = response.data.data;
+        setQuality(data.total_piece_number.toString());
+        setWeight(data.total_weight.toString());
+        
+        // toast.success(`Auto-filled: ${data.total_piece_number} pieces, ${data.total_weight} weight`);
+      } else {
+        toast.error("Failed to fetch piece and weight data");
+      }
+    } catch (error) {
+      console.error("Error fetching piece and weight:", error);
+      toast.error(error.response?.data?.message || "Error fetching piece and weight");
+    } finally {
+      setIsLoadingAutoFill(false);
+    }
+  };
+
+  const handleTrackingNumberChange = (e) => {
+    const selectedIds = e.value;
+    setTrackingId(selectedIds);
+    
+    const selectedTrackings = orderOption
+      .filter(option => selectedIds.includes(option.id))
+      .map(option => option.tracking_number);
+    
+    setSelectedTrackingNumbers(selectedTrackings);
+    
+    setQuality("");
+    setWeight("");
+    setFormErrors({ ...formErrors, trackingNo: "" });
+    
+    if (selectedTrackings.length > 0) {
+      fetchPieceAndWeight(selectedTrackings);
+    }
+  };
+
   const validateAddForm = () => {
     let errors = {};
 
@@ -100,8 +156,8 @@ const Event_detail = () => {
     if (!runId) {
       errors.runNo = "Run Number is required";
     }
-    if (!trackingId) {
-      errors.trackingNo = "Tracking Number is required";
+    if (!trackingId || trackingId.length === 0) {
+      errors.trackingNo = "At least one Tracking Number is required";
     }
     if (!quality) {
       errors.quality = "Quantity is required";
@@ -135,9 +191,9 @@ const Event_detail = () => {
     if (!editRunId) {
       errors.editRunId = "Run Number is required";
     }
-    if (!editTrackingId) {
-      errors.editTrackingId = "Tracking Number is required";
-    }
+    // if (!editTrackingId) {
+    //   errors.editTrackingId = "Tracking Number is required";
+    // }
     if (!editQuality) {
       errors.editQuality = "Quantity is required";
     }
@@ -167,6 +223,7 @@ const Event_detail = () => {
       const response = await axiosInstance.get(`api/events/view-events`);
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.events || [];
+        console.log("apiData",apiData);
         setEvent(apiData);
         setEventCreatedby(response.data.createdBy || "");
         setEventMastersOptions(response.data.eventMasters || []);
@@ -202,7 +259,7 @@ const Event_detail = () => {
       const payload = {
         event_name: eventId,
         run_number: runId,
-        tracking_number: trackingId,
+        tracking_number: trackingId, // This will be an array of IDs
         event: eventMark,
         quantity: quality,
         weight: weight,
@@ -237,7 +294,7 @@ const Event_detail = () => {
       const payload = {
         event_name: editEventId,
         run_number: editRunId,
-        tracking_number: editTrackingId,
+        // tracking_number: editTrackingId,
         event: editEventMark,
         quantity: editQuality,
         weight: editWeight,
@@ -394,7 +451,8 @@ const Event_detail = () => {
   const resetAddForm = () => {
     setEventId("");
     setRunId("");
-    setTrackingId("");
+    setTrackingId([]);
+    setSelectedTrackingNumbers([]);
     setQuality("");
     setWeight("");
     setEventDate("");
@@ -441,32 +499,40 @@ const Event_detail = () => {
       data: null,
       render: function (data, type, row, meta) {
         return meta.row + 1;
-      },
-    },
-    {
-      title: "Event Name",
-      data: "event_name" || "-",
-    },
-    {
-      title: "Run Number",
-      data: "run_number" || "-",
-    },
-    {
-      title: "Tracking Number",
-      data: "tracking_number" || "-",
-    },
-    {
-      title: "Quantity",
-      data: "quantity" || "-",
-    },
-    {
-      title: "Weight",
-      data: "weight" || "-",
-    },
-    {
-      title: "Event Date",
-      data: null,
-      render: (row) => {
+            },
+          },
+          {
+            title: "Event Name",
+            data: "event_name" || "-",
+          },
+          {
+            title: "Run Number",
+            data: "run_number" || "-",
+          },
+          {
+            title: "Tracking Number",
+            data: null,
+            render: (data, type, row) => {
+        if (!row.tracking_number || row.tracking_number.length === 0) {
+          return "-";
+        }
+        return row.tracking_number
+          .map(item => item.tracking_number)
+          .join(", ");
+            },
+          },
+          {
+            title: "Quantity",
+            data: "quantity" || "-",
+          },
+          {
+            title: "Weight",
+            data: "weight" || "-",
+          },
+          {
+            title: "Event Date",
+            data: null,
+            render: (row) => {
         if (!row.event_date) return "-";
         return new Date(row.event_date).toLocaleDateString();
       },
@@ -779,28 +845,42 @@ const Event_detail = () => {
                     </label>
                   </div>
                   <div className="w-[60%] md:w-[50%]">
-                    <Dropdown
+                    <MultiSelect
                       value={trackingId}
+                      onChange={handleTrackingNumberChange}
                       options={orderOption}
-                      onChange={(e) => {
-                        setTrackingId(e.value);
-                        setFormErrors({ ...formErrors, trackingNo: "" });
-                      }}
                       optionLabel="tracking_number"
                       optionValue="id"
                       placeholder="Select Tracking Number"
                       filter
                       className="w-full border border-gray-300 rounded-lg"
+                      disabled={isLoadingAutoFill}
+                      showClear
                     />
+                    {/* {isLoadingAutoFill && (
+                      <p className="text-blue-500 text-sm mt-1">Loading piece and weight data...</p>
+                    )} */}
                     {formErrors.trackingNo && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
                         {formErrors.trackingNo}
                       </p>
                     )}
+                    
+                    {/* Display selected tracking numbers */}
+                    {selectedTrackingNumbers.length > 0 && (
+                      <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-gray-600 font-medium">Selected Tracking Numbers:</p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {selectedTrackingNumbers.map((tn, index) => (
+                            <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {tn}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-               
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div>
@@ -816,8 +896,10 @@ const Event_detail = () => {
                         setQuality(e.target.value);
                         setFormErrors({ ...formErrors, quality: "" });
                       }}
-                      placeholder="Enter Quantity"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Piece Number"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoadingAutoFill ? 'bg-gray-100' : ''}`}
+                      disabled={isLoadingAutoFill}
+                      readOnly 
                     />
                     {formErrors.quality && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
@@ -841,8 +923,10 @@ const Event_detail = () => {
                         setWeight(e.target.value);
                         setFormErrors({ ...formErrors, weight: "" });
                       }}
-                      placeholder="Enter weight"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Weight"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoadingAutoFill ? 'bg-gray-100' : ''}`}
+                      disabled={isLoadingAutoFill}
+                      readOnly 
                     />
                     {formErrors.weight && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
@@ -899,7 +983,8 @@ const Event_detail = () => {
                     )}
                   </div>
                 </div>
-                 <div className="mt-2 md:mt-8 flex justify-between items-center">
+                
+                <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div>
                     <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
                       Event <span className="text-red-500">*</span>
@@ -909,32 +994,30 @@ const Event_detail = () => {
                     <div className="flex items-center">
                       <input
                         type="radio"
+                        name="eventMark"
+                        value="public"
                         checked={eventMark === "public"}
                         onChange={(e) => {
-                          setEventMark(e.target.checked ? "public" : "private");
+                          setEventMark(e.target.value);
                           setFormErrors({ ...formErrors, event: "" });
                         }}
                         className="mr-2"
                       />
-                      <label
-                        htmlFor="status"
-                        className="block text-[15px] md:text-md font-medium"
-                      >
+                      <label className="block text-[15px] md:text-md font-medium mr-4">
                         Public
                       </label>
                       <input
                         type="radio"
+                        name="eventMark"
+                        value="private"
                         checked={eventMark === "private"}
                         onChange={(e) => {
-                          setEventMark(e.target.checked ? "private" : "public");
+                          setEventMark(e.target.value);
                           setFormErrors({ ...formErrors, event: "" });
                         }}
-                        className="ml-2 mr-2"
+                        className="mr-2"
                       />
-                      <label
-                        htmlFor="status"
-                        className="block text-[15px] md:text-md font-medium"
-                      >
+                      <label className="block text-[15px] md:text-md font-medium">
                         Private
                       </label>
                     </div>
@@ -983,8 +1066,9 @@ const Event_detail = () => {
                   <button
                     className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-4 md:px-5 py-2 font-semibold rounded-full"
                     onClick={handleAddSubmit}
+                    disabled={isLoadingAutoFill}
                   >
-                    Submit
+                    {isLoadingAutoFill ? "Loading..." : "Submit"}
                   </button>
                 </div>
               </div>
@@ -1081,7 +1165,8 @@ const Event_detail = () => {
                         Tracking Number <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
-                        <Dropdown
+                        {/* <Dropdown
+                        disabled
                           value={editTrackingId}
                           options={orderOption}
                           onChange={(e) => {
@@ -1096,48 +1181,39 @@ const Event_detail = () => {
                           optionValue="id"
                           placeholder="Select Tracking Number"
                           className="w-full border border-gray-300 rounded-lg"
-                        />
-                        {formErrors.editTrackingId && (
+                        /> */}
+                        {/* {formErrors.editTrackingId && (
                           <p className="text-red-500 text-sm mt-1">
                             {formErrors.editTrackingId}
                           </p>
+                        )} */}
+                        
+                        {/* Display selected tracking numbers */}
+                        {Array.isArray(editTrackingNo) && editTrackingNo.length > 0 && (
+                          <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+                            <p className="text-xs text-gray-600 font-medium">Selected Tracking Numbers:</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {editTrackingNo.map((item, index) => (
+                                <span key={item._id || index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  {item.tracking_number}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Event Dropdown */}
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Event <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <select
-                          value={editEventMark}
-                          onChange={(e) => {
-                            setEditEventMark(e.target.value);
-                            setFormErrors({ ...formErrors, editEventMark: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select event type</option>
-                          <option value="public">Public</option>
-                          <option value="private">Private</option>
-                        </select>
-                        {formErrors.editEventMark && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {formErrors.editEventMark}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                    
 
-                    {/* Quantity Input */}
+                              {/* Quantity Input */}
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
                         Quantity <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
+                        disabled
                           type="number"
                           value={editQuality}
                           onChange={(e) => {
@@ -1162,6 +1238,7 @@ const Event_detail = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
+                        disabled
                           type="text"
                           value={editWeight}
                           onChange={(e) => {
@@ -1225,52 +1302,49 @@ const Event_detail = () => {
                       </div>
                     </div>
 
-                     <div className="mt-2 md:mt-8 flex justify-between items-center">
-                  <div>
-                    <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
-                      Event <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={editEventMark === "public"}
-                        onChange={(e) => {
-                          setEditEventMark(e.target.checked ? "public" : "private");
-                          setFormErrors({ ...formErrors, editEventMark: "" });
-                        }}
-                        className="mr-2"
-                      />
-                      <label
-                        htmlFor="status"
-                        className="block text-[15px] md:text-md font-medium"
-                      >
-                        Public
-                      </label>
-                      <input
-                        type="checkbox"
-                        checked={editEventMark === "private"}
-                        onChange={(e) => {
-                          setEditEventMark(e.target.checked ? "private" : "public");
-                          setFormErrors({ ...formErrors, editEventMark: "" });
-                        }}
-                        className="ml-2 mr-2"
-                      />
-                      <label
-                        htmlFor="status"
-                        className="block text-[15px] md:text-md font-medium"
-                      >
-                        Private
-                      </label>
-                    </div>
-                    {formErrors.event && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.event}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                    {/* Event Radio Buttons */}
+                              <div className="mt-8 flex justify-between items-center">
+                                <label className="block text-[15px] md:text-md font-medium mb-2">
+                                Event <span className="text-red-500">*</span>
+                                </label>
+                                <div className="w-[60%] md:w-[50%]">
+                                <div className="flex items-center">
+                                  <input
+                                  type="radio"
+                                  name="editEventMark"
+                                  value="public"
+                                  checked={editEventMark === "public"}
+                                  onChange={(e) => {
+                                    setEditEventMark(e.target.value);
+                                    setFormErrors({ ...formErrors, editEventMark: "" });
+                                  }}
+                                  className="mr-2"
+                                  />
+                                  <label className="block text-[15px] md:text-md font-medium mr-4">
+                                  Public
+                                  </label>
+                                  <input
+                                  type="radio"
+                                  name="editEventMark"
+                                  value="private"
+                                  checked={editEventMark === "private"}
+                                  onChange={(e) => {
+                                    setEditEventMark(e.target.value);
+                                    setFormErrors({ ...formErrors, editEventMark: "" });
+                                  }}
+                                  className="mr-2"
+                                  />
+                                  <label className="block text-[15px] md:text-md font-medium">
+                                  Private
+                                  </label>
+                                </div>
+                                {formErrors.editEventMark && (
+                                  <p className="text-red-500 text-sm mt-1">
+                                  {formErrors.editEventMark}
+                                  </p>
+                                )}
+                                </div>
+                              </div>
 
                     {/* Status Dropdown */}
                     <div className="mt-8 flex justify-between items-center">
