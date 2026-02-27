@@ -368,7 +368,7 @@ const Sidebar = () => {
                           setCurrentOpen("Event");
                         }}
                         className={`w-full text-left px-2 py-1 rounded-md transition
-            ${currentPath === "/event-list"
+            ${currentPath === "/event-master"
                             ? "text-[#057fc4]"
                             : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                           }`}

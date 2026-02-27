@@ -743,6 +743,7 @@ const openAddModal = () => {
                       optionLabel="name"
                       optionValue="id"
                       placeholder="Select role"
+                      filter
                       className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
 
