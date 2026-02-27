@@ -218,7 +218,11 @@ const OrderDetail = () => {
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`api/orders/all-order`);
+      const response = await axiosInstance.get(`api/orders/all-order`,{
+        params: {
+          created_by: userId,
+        },
+      });
       console.log("Order API Response:", response.data);
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.data || [];

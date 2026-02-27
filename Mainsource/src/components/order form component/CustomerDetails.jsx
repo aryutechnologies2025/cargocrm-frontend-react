@@ -6,6 +6,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
   const id = customerId;
   const navigate = useNavigate();
+   const storedDetalis = localStorage.getItem("cargouser");
+  const parsedDetails = JSON.parse(storedDetalis);
+  const createdBy = parsedDetails.id;
   // const location = useLocation();
   // const {path } = location.state || {};
   // console.log("location.state:", location.state);
@@ -19,6 +22,7 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
     address: "",
     city:"",
     country:"",
+    created_by:""
   });
 
   const validateAddForm = () => {
@@ -89,7 +93,8 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
         phone:customer.phone,
         address:customer.address,
         city:customer.city,
-        country:customer.country
+        country:customer.country,
+        created_by: createdBy
       };
       
       const response = await axiosInstance.post(

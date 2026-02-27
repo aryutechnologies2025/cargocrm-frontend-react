@@ -5,10 +5,14 @@ import { useNavigate } from 'react-router-dom';
 
 const OrderDetails = ({ prevStep, handleSubmit, customerId }) => {
   const [loading, setLoading] = useState(false);
+  const storedDetalis = localStorage.getItem("cargouser");
+  const parsedDetails = JSON.parse(storedDetalis);
+  const createdBy = parsedDetails.id;
   const [packed, setPacked] = useState({
     id: "",
     cargo_mode: "",
-    packed: ""
+    packed: "",
+    created_by:""
   });
   const navigate = useNavigate();
   const fetchOrder = async () => {
@@ -47,6 +51,7 @@ const OrderDetails = ({ prevStep, handleSubmit, customerId }) => {
         customerId: customerId,
         cargo_mode: packed.cargo_mode,
         packed: packed.packed,
+        created_by: createdBy
       };
 
       const response = await axiosInstance.post(
