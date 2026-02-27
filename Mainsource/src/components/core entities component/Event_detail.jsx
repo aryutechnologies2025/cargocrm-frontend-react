@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { TfiPencilAlt } from "react-icons/tfi";
 import ReactDOMServer from "react-dom/server";
@@ -32,6 +32,8 @@ const Event_detail = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewEvent, setViewEvent] = useState(null);
+  const [openTrackingId, setOpenTrackingId] = useState(null);
+  const popupRef = useRef(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
     Sno: true,
@@ -53,7 +55,7 @@ const Event_detail = () => {
   };
   const [dateFilter, setDateFilter] = useState(getToday());
   const [formErrors, setFormErrors] = useState({});
-  
+
   // Add form states
   const [eventId, setEventId] = useState("");
   const [eventMark, setEventMark] = useState("");
@@ -86,14 +88,48 @@ const Event_detail = () => {
 
   const [event, setEvent] = useState([]);
   const [EventMastersOptions, setEventMastersOptions] = useState([]);
-  console.log("test",EventMastersOptions);
+  console.log("test", EventMastersOptions);
   const [orderOption, setOrderOptions] = useState([]);
   const [containerOption, setContainerOptions] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   const storedDetatis = localStorage.getItem("cargouser");
   const parsedDetails = JSON.parse(storedDetatis);
   const userid = parsedDetails ? parsedDetails.id : null;
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setOpenTrackingId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      const wrapper = e.target.closest(".tracking-wrapper");
+
+      if (!wrapper) return;
+
+      const id = wrapper.getAttribute("data-id");
+
+      setOpenTrackingId(prev =>
+        prev === id ? null : id
+      );
+    };
+
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
 
   const fetchPieceAndWeight = async (trackingNumbers) => {
     if (!trackingNumbers || trackingNumbers.length === 0) {
@@ -106,7 +142,7 @@ const Event_detail = () => {
     try {
       const params = new URLSearchParams();
       trackingNumbers.forEach(tn => params.append('tracking_numbers[]', tn));
-      
+
       const response = await axiosInstance.get(
         `api/orders/get-piece-and-weight-in-parcel?${params.toString()}`
       );
@@ -115,7 +151,7 @@ const Event_detail = () => {
         const data = response.data.data;
         setQuality(data.total_piece_number.toString());
         setWeight(data.total_weight.toString());
-        
+
         // toast.success(`Auto-filled: ${data.total_piece_number} pieces, ${data.total_weight} weight`);
       } else {
         toast.error("Failed to fetch piece and weight data");
@@ -131,17 +167,17 @@ const Event_detail = () => {
   const handleTrackingNumberChange = (e) => {
     const selectedIds = e.value;
     setTrackingId(selectedIds);
-    
+
     const selectedTrackings = orderOption
       .filter(option => selectedIds.includes(option.id))
       .map(option => option.tracking_number);
-    
+
     setSelectedTrackingNumbers(selectedTrackings);
-    
+
     setQuality("");
     setWeight("");
     setFormErrors({ ...formErrors, trackingNo: "" });
-    
+
     if (selectedTrackings.length > 0) {
       fetchPieceAndWeight(selectedTrackings);
     }
@@ -223,7 +259,7 @@ const Event_detail = () => {
       const response = await axiosInstance.get(`api/events/view-events`);
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.events || [];
-        console.log("apiData",apiData);
+        console.log("apiData", apiData);
         setEvent(apiData);
         setEventCreatedby(response.data.createdBy || "");
         setEventMastersOptions(response.data.eventMasters || []);
@@ -254,7 +290,7 @@ const Event_detail = () => {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!validateAddForm()) return;
-    
+
     try {
       const payload = {
         event_name: eventId,
@@ -406,20 +442,20 @@ const Event_detail = () => {
   const openEditModal = (row) => {
     console.log("row", row);
     setSelectedEvent(row);
-    
+
     // Find the matching IDs from options
     const eventMasterOption = EventMastersOptions?.find(
       option => option.name === row.event_name
     );
-    
+
     const containerOption_item = containerOption?.find(
       option => option.run_number === row.run_number
     );
-    
+
     const orderOption_item = orderOption?.find(
       option => option.tracking_number === row.tracking_number
     );
-    
+
     // Set all edit fields with the row data
     setEditEventId(row?.event_id || "");
     setEditEventName(row.event_name || "");
@@ -433,7 +469,7 @@ const Event_detail = () => {
     setEditEventDate(row.event_date ? row.event_date.split('T')[0] : "");
     setEditEventTime(row.event_time || "");
     setEditStatus(row.status || "");
-    
+
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
@@ -499,40 +535,58 @@ const Event_detail = () => {
       data: null,
       render: function (data, type, row, meta) {
         return meta.row + 1;
-            },
-          },
-          {
-            title: "Event Name",
-            data: "event_name" || "-",
-          },
-          {
-            title: "Run Number",
-            data: "run_number" || "-",
-          },
-          {
-            title: "Tracking Number",
-            data: null,
-            render: (data, type, row) => {
-        if (!row.tracking_number || row.tracking_number.length === 0) {
-          return "-";
-        }
-        return row.tracking_number
-          .map(item => item.tracking_number)
-          .join(", ");
-            },
-          },
-          {
-            title: "Quantity",
-            data: "quantity" || "-",
-          },
-          {
-            title: "Weight",
-            data: "weight" || "-",
-          },
-          {
-            title: "Event Date",
-            data: null,
-            render: (row) => {
+      },
+    },
+    {
+      title: "Event Name",
+      data: "event_name" || "-",
+    },
+    {
+      title: "Run Number",
+      data: "run_number" || "-",
+    },
+    {
+      title: "Tracking Number",
+      data: null,
+      render: (data, type, row) => {
+
+        if (!row.tracking_number?.length) return "-";
+
+        const id = `eye-${row.id}`;
+
+        setTimeout(() => {
+          const container = document.getElementById(id);
+
+          if (container) {
+            if (!container._root) {
+              container._root = createRoot(container);
+            }
+
+            container._root.render(
+              <FaEye
+              className="p-1 size-5 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
+                style={{ cursor: "pointer", color: "#057fc4" }}
+                onClick={() => setOpenTrackingId(row.id)}
+              />
+            );
+          }
+        }, 0);
+
+        return `<div id="${id}" style="display:flex;justify-content:center;"></div>`;
+      },
+    },
+    {
+      title: "Quantity",
+      data: "quantity" || "-",
+    },
+    {
+      title: "Weight",
+      data: "weight" || "-",
+    },
+    {
+      title: "Event Date",
+      data: null,
+      render: (row) => {
         if (!row.event_date) return "-";
         return new Date(row.event_date).toLocaleDateString();
       },
@@ -545,7 +599,7 @@ const Event_detail = () => {
       title: "Created By",
       data: "created_by" || "-",
     },
-     {
+    {
       title: "Status",
       data: "status",
       render: (data) => {
@@ -767,9 +821,8 @@ const Event_detail = () => {
             <div className="absolute inset-0" onClick={closeAddModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -865,7 +918,7 @@ const Event_detail = () => {
                         {formErrors.trackingNo}
                       </p>
                     )}
-                    
+
                     {/* Display selected tracking numbers */}
                     {selectedTrackingNumbers.length > 0 && (
                       <div className="mt-2 p-2 bg-gray-50 rounded-lg">
@@ -899,7 +952,7 @@ const Event_detail = () => {
                       placeholder="Piece Number"
                       className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoadingAutoFill ? 'bg-gray-100' : ''}`}
                       disabled={isLoadingAutoFill}
-                      readOnly 
+                      readOnly
                     />
                     {formErrors.quality && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
@@ -926,7 +979,7 @@ const Event_detail = () => {
                       placeholder="Weight"
                       className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isLoadingAutoFill ? 'bg-gray-100' : ''}`}
                       disabled={isLoadingAutoFill}
-                      readOnly 
+                      readOnly
                     />
                     {formErrors.weight && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
@@ -983,7 +1036,7 @@ const Event_detail = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div>
                     <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
@@ -1082,9 +1135,8 @@ const Event_detail = () => {
             <div className="absolute inset-0" onClick={closeEditModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -1187,7 +1239,7 @@ const Event_detail = () => {
                             {formErrors.editTrackingId}
                           </p>
                         )} */}
-                        
+
                         {/* Display selected tracking numbers */}
                         {Array.isArray(editTrackingNo) && editTrackingNo.length > 0 && (
                           <div className="mt-2 p-2 bg-gray-50 rounded-lg">
@@ -1204,16 +1256,16 @@ const Event_detail = () => {
                       </div>
                     </div>
 
-                    
 
-                              {/* Quantity Input */}
+
+                    {/* Quantity Input */}
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
                         Quantity <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
-                        disabled
+                          disabled
                           type="number"
                           value={editQuality}
                           onChange={(e) => {
@@ -1238,7 +1290,7 @@ const Event_detail = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <input
-                        disabled
+                          disabled
                           type="text"
                           value={editWeight}
                           onChange={(e) => {
@@ -1303,48 +1355,48 @@ const Event_detail = () => {
                     </div>
 
                     {/* Event Radio Buttons */}
-                              <div className="mt-8 flex justify-between items-center">
-                                <label className="block text-[15px] md:text-md font-medium mb-2">
-                                Event <span className="text-red-500">*</span>
-                                </label>
-                                <div className="w-[60%] md:w-[50%]">
-                                <div className="flex items-center">
-                                  <input
-                                  type="radio"
-                                  name="editEventMark"
-                                  value="public"
-                                  checked={editEventMark === "public"}
-                                  onChange={(e) => {
-                                    setEditEventMark(e.target.value);
-                                    setFormErrors({ ...formErrors, editEventMark: "" });
-                                  }}
-                                  className="mr-2"
-                                  />
-                                  <label className="block text-[15px] md:text-md font-medium mr-4">
-                                  Public
-                                  </label>
-                                  <input
-                                  type="radio"
-                                  name="editEventMark"
-                                  value="private"
-                                  checked={editEventMark === "private"}
-                                  onChange={(e) => {
-                                    setEditEventMark(e.target.value);
-                                    setFormErrors({ ...formErrors, editEventMark: "" });
-                                  }}
-                                  className="mr-2"
-                                  />
-                                  <label className="block text-[15px] md:text-md font-medium">
-                                  Private
-                                  </label>
-                                </div>
-                                {formErrors.editEventMark && (
-                                  <p className="text-red-500 text-sm mt-1">
-                                  {formErrors.editEventMark}
-                                  </p>
-                                )}
-                                </div>
-                              </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Event <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            name="editEventMark"
+                            value="public"
+                            checked={editEventMark === "public"}
+                            onChange={(e) => {
+                              setEditEventMark(e.target.value);
+                              setFormErrors({ ...formErrors, editEventMark: "" });
+                            }}
+                            className="mr-2"
+                          />
+                          <label className="block text-[15px] md:text-md font-medium mr-4">
+                            Public
+                          </label>
+                          <input
+                            type="radio"
+                            name="editEventMark"
+                            value="private"
+                            checked={editEventMark === "private"}
+                            onChange={(e) => {
+                              setEditEventMark(e.target.value);
+                              setFormErrors({ ...formErrors, editEventMark: "" });
+                            }}
+                            className="mr-2"
+                          />
+                          <label className="block text-[15px] md:text-md font-medium">
+                            Private
+                          </label>
+                        </div>
+                        {formErrors.editEventMark && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editEventMark}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
                     {/* Status Dropdown */}
                     <div className="mt-8 flex justify-between items-center">
@@ -1419,9 +1471,21 @@ const Event_detail = () => {
                   <span>{viewEvent.run_number}</span>
                 </div>
 
-                <div className="flex justify-between">
+
+                <div className="flex justify-between items-start">
                   <span className="font-medium">Tracking No</span>
-                  <span>{viewEvent.tracking_number}</span>
+
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
+                    {Array.isArray(viewEvent.tracking_number) &&
+                      viewEvent.tracking_number.map((item, index) => (
+                        <span
+                          key={index}
+                          className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                        >
+                          {item.tracking_number}
+                        </span>
+                      ))}
+                  </div>
                 </div>
 
                 <div className="flex justify-between">
@@ -1457,17 +1521,45 @@ const Event_detail = () => {
                 <div className="flex justify-between">
                   <span className="font-medium">Status</span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      viewEvent.status === "1"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-600"
-                    }`}
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${viewEvent.status === "1"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-600"
+                      }`}
                   >
                     {viewEvent.status === "1" ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {openTrackingId && (
+          <div
+            ref={popupRef}
+            className="fixed bg-white shadow-lg border rounded-lg p-3 overflow-x-auto"
+            style={{
+              top: "40%",
+              left: "50%",
+              transform: "translate(-50%, -30%)",
+              zIndex: 9999,
+              minWidth: "250px"
+            }}
+          >
+            <div className="flex justify-between mb-2">
+              <b className="text-[#057fc4]">Tracking Numbers</b>
+
+              <IoIosCloseCircle
+                className="cursor-pointer hover:text-red-500 text-xl text-gray-500"
+                onClick={() => setOpenTrackingId(null)}
+              />
+            </div>
+
+            {event
+              .find(e => String(e.id) === String(openTrackingId))
+              ?.tracking_number.map((t, i) => (
+                <div key={i}>{t.tracking_number}</div>
+              ))}
           </div>
         )}
       </div>
