@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { toast } from "react-toastify";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
   const id = customerId;
+  const navigate = useNavigate();
   // const location = useLocation();
   // const {path } = location.state || {};
   // console.log("location.state:", location.state);
@@ -285,7 +286,13 @@ const CustomerDetails = ({ nextStep, updateData ,customerId}) => {
                       )}
             </div>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="btn-primary mt-4 px-4 py-2 bg-[#057fc4] hover:bg-[#2d93cf] rounded-md text-white"
+            >
+              Back
+            </button>
             <button
               onClick={handleSubmit}
               className="btn-primary mt-4 px-4 py-2 bg-[#057fc4] hover:bg-[#2d93cf] rounded-md text-white"
