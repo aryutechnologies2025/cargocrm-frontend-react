@@ -491,11 +491,36 @@ const OrderDetail = () => {
       data: null,
       render: (row) => row.orders?.[0]?.cargo_mode || "-",
     },
-    {
-      title: "Packed",
-      data: null,
-      render: (row) => row.orders?.[0]?.packed || "-",
-    },
+   {
+  title: "Packed",
+  data: null,
+  render: (row) => {
+    const packed = row.orders?.[0]?.packed;
+
+    const isActive = packed === 1 || packed === "1" || packed === "Yes";
+
+    const textColor = isActive ? "green" : "red";
+    const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
+
+    return `
+      <div style="
+        display:inline-block;
+        padding:4px 8px;
+        color:${textColor};
+        background-color:${bgColor};
+        border:1px solid ${bgColor};
+        border-radius:50px;
+        text-align:center;
+        width:100px;
+        font-size:10px;
+        font-weight:700;
+      ">
+        ${isActive ? "Yes" : "No"}
+      </div>
+    `;
+  },
+},
+  
     // {
     //   title: "Created By",
     //   data: null,
@@ -1133,6 +1158,7 @@ const OrderDetail = () => {
               <div className="space-y-4 text-sm text-gray-700 w-full gap-4">
                
                <div className="w-full ">
+                {/* customer */}
                 <div className="space-y-4 mb-2">
                 <h2 className="text-xl font-semibold mb-6 ">Customer Details</h2>
                 <div className="flex justify-between">
@@ -1155,6 +1181,7 @@ const OrderDetail = () => {
                 <hr></hr>
                 </div>
                 
+                {/* beneficiary */}
                 <div className="space-y-4 mb-2">
                 <h2 className="text-xl font-semibold mb-6 ">Beneficiary Details</h2>
                 <div className="flex justify-between">
@@ -1186,6 +1213,7 @@ const OrderDetail = () => {
                 </div>
                 </div>
                 
+                {/* parcel */}
                 <div className="w-full ">
                 <div className=" space-y-4 mb-2">
                 <h2 className="text-xl font-semibold mb-6 ">Parcel Details</h2>
@@ -1197,9 +1225,52 @@ const OrderDetail = () => {
                   <span className="font-medium">Description </span>
                   <span>{viewOrder.parcels?.[0]?.description || "-"}</span>
                 </div>
+
+                 {/* PieceDetails */}
+                <div className="pt-3 mt-3">
+                  <span className="font-medium block mb-2">Piece Details</span>
+                  {viewOrder.parcels?.[0]?.piece_details &&
+                  viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
+                    viewOrder.parcels?.[0]?.piece_details.map((detail, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
+                      >
+                        <div className="font-semibold text-[#057fc4] mb-2">
+                          Piece {index + 1}
+                        </div>
+                        <div className="grid grid-cols-4 gap-2 text-sm">
+                          <div className="flex justify-start gap-3">
+                            <span className="text-gray-600">Weight:</span>
+                            <span className="font-medium">{detail.weight}</span>
+                          </div>
+                          <div className="flex justify-start gap-3">
+                            <span className="text-gray-600">Length:</span>
+                            <span className="font-medium">{detail.length}</span>
+                          </div>
+                          <div className="flex justify-start gap-3">
+                            <span className="text-gray-600">Width:</span>
+                            <span className="font-medium">{detail.width}</span>
+                          </div>
+                          <div className="flex justify-start gap-3">
+                            <span className="text-gray-600">Height:</span>
+                            <span className="font-medium">{detail.height}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">
+                      No piece details available
+                    </p>
+                  )}
+                </div> 
                 <hr></hr>
                 </div>
+
+                
                  
+                 {/* order details */}
                  <div className="space-y-4 mb-2">
                 <h2 className="text-xl font-semibold mb-6 ">Order Details</h2>
                 <div className="flex justify-between">
@@ -1214,45 +1285,7 @@ const OrderDetail = () => {
                 </div>
                 </div>
             
-                {/* PieceDetails */}
-                <div className="border-t pt-3 mt-3">
-                  <span className="font-medium block mb-2">Piece Details:</span>
-                  {viewOrder.parcels?.[0]?.piece_details &&
-                  viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
-                    viewOrder.parcels?.[0]?.piece_details.map((detail, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
-                      >
-                        <div className="font-semibold text-[#057fc4] mb-2">
-                          Piece {index + 1}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Weight:</span>
-                            <span className="font-medium">{detail.weight}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Length:</span>
-                            <span className="font-medium">{detail.length}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Width:</span>
-                            <span className="font-medium">{detail.width}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Height:</span>
-                            <span className="font-medium">{detail.height}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 text-sm">
-                      No piece details available
-                    </p>
-                  )}
-                </div>  
+                
                 
               </div>
             </div>

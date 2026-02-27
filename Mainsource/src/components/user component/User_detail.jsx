@@ -332,7 +332,7 @@ const openViewModal = async (userId) => {
 
     console.log("VIEW RESPONSE:", response.data);
 
-    // 🔥 IMPORTANT: Handle multiple backend formats safely
+    // Handle multiple backend formats safely
     const data =
       response.data?.data ||
       response.data?.user ||

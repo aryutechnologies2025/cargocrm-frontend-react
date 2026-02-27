@@ -171,7 +171,7 @@ const Sidebar = () => {
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
 
-              {/* order form */}
+              {/* order form
               <div
                 onClick={() => onClickSidebarMenu("form-order")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -182,20 +182,9 @@ const Sidebar = () => {
               >
                 <GrStakeholder />
                 {!arrowClicked && <p className="text-sm">OrderForm</p>}
-              </div>
+              </div> */}
 
-              {/* run */}
-              <div
-                onClick={() => onClickSidebarMenu("Run")}
-                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
-                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/run"
-                    ? "bg-[#e6f2fa] text-[#057fc4]"
-                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                  }`}
-              >
-                <GoContainer />
-                {!arrowClicked && <p className="text-sm">Container Run</p>}
-              </div>
+              
 
 
               {/* order */}
@@ -312,6 +301,19 @@ const Sidebar = () => {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* run */}
+              <div
+                onClick={() => onClickSidebarMenu("Run")}
+                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/run"
+                    ? "bg-[#e6f2fa] text-[#057fc4]"
+                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                  }`}
+              >
+                <GoContainer />
+                {!arrowClicked && <p className="text-sm">Container Run</p>}
               </div>
 
               {/* events */}
@@ -457,7 +459,7 @@ const Sidebar = () => {
               </div>
 
               {/* Receipt */}
-              <div
+              {/* <div
                 onClick={() => onClickSidebarMenu("Receipt")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
                   } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/receipt"
@@ -467,7 +469,7 @@ const Sidebar = () => {
               >
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Receipt</p>}
-              </div>
+              </div> */}
 
 
               {/* Core entities */}
