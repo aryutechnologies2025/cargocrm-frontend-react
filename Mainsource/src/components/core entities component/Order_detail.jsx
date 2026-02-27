@@ -592,7 +592,7 @@ const OrderDetail = () => {
         <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
           <div className="flex flex-wrap items-end gap-3">
             {/* Beneficiary Filter */}
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-600 p-1">Beneficiary ID</label>
               <Dropdown
                 value={beneficiaryFilter}
@@ -603,10 +603,10 @@ const OrderDetail = () => {
                 placeholder="Select beneficiary"
                 className="w-full border border-gray-300 rounded-lg min-w-[140px]"
               />
-            </div>
+            </div> */}
 
             {/* Sender Filter */}
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-600 p-1">Sender ID</label>
               <Dropdown
                 value={senderFilter}
@@ -617,10 +617,10 @@ const OrderDetail = () => {
                 placeholder="Select sender ID"
                 className="w-full border border-gray-300 rounded-lg min-w-[140px]"
               />
-            </div>
+            </div> */}
 
             {/* Created By */}
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-600 p-1">Created By</label>
               <Dropdown
                 value={createdByFilter}
@@ -631,10 +631,10 @@ const OrderDetail = () => {
                 placeholder="Select creator"
                 className="w-full border border-gray-300 rounded-lg min-w-[140px]"
               />
-            </div>
+            </div> */}
 
             {/* Created Date */}
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-600 p-1">Created Date</label>
               <input
                 className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
@@ -642,10 +642,10 @@ const OrderDetail = () => {
                 value={createdDateFilter}
                 onChange={(e) => setCreatedDateFilter(e.target.value)}
               />
-            </div>
+            </div> */}
 
             {/* Status */}
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-600 p-1">Status</label>
               <select
                 className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
@@ -656,10 +656,10 @@ const OrderDetail = () => {
                 <option value="0">Active</option>
                 <option value="1">Inactive</option>
               </select>
-            </div>
+            </div> */}
 
             {/* Date */}
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-600 p-1">Date</label>
               <input
                 type="date"
@@ -667,17 +667,17 @@ const OrderDetail = () => {
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
               />
-            </div>
+            </div> */}
 
             {/* Reset */}
-            <div>
+            {/* <div>
               <button
                 onClick={resetFilters}
                 className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
               >
                 Reset
               </button>
-            </div>
+            </div> */}
 
             {/* Customize */}
             <div className="relative">
