@@ -20,7 +20,7 @@ const Login = () => {
     email: "",
     password: ""
   });
-  // const [captchaValue, setCaptchaValue] = useState(null);
+  const [captchaValue, setCaptchaValue] = useState(null);
   const [error, setError] = useState(null);
   const [formErrors, setFormErrors] = useState({});
 
