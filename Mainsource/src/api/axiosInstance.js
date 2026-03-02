@@ -46,7 +46,7 @@ import { API_URL } from "../Config";
 import { SECRET_KEY } from "../Config";
 
 // Add your secret key here (must match backend)
-const SECRET_KEY = SECRET_KEY;
+// const SECRET_KEYS = SECRET_KEY;
 
 // Decryption functio
 const decryptData = (encryptedData) => {
