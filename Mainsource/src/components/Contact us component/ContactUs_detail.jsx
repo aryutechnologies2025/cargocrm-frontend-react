@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { TfiPencilAlt } from "react-icons/tfi";
 import ReactDOMServer from "react-dom/server";
@@ -16,6 +16,7 @@ import { createRoot } from "react-dom/client";
 import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
 import { BiCustomize } from "react-icons/bi";
+import axiosInstance from "../../api/axiosInstance";
 
 DataTable.use(DT);
 
@@ -29,6 +30,8 @@ const ContactUs_detail = () => {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewContact, setViewContact] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [contact, setContact] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState({
     Sno: true,
     username: true,
@@ -62,6 +65,29 @@ const ContactUs_detail = () => {
   };
 
 
+  const fetchContact = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get(`api/contacts/view-messages`);
+        console.log("Order API Response:", response);
+          const apiData = response.data || [];
+          console.log("apiData", apiData);
+          setContact(apiData);
+      
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setContact([]);
+        toast.error("Failed to fetch orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    useEffect(()=>{
+      fetchContact();
+    },[]);
+
+
 
 
   const openAddModal = () => {
@@ -89,23 +115,34 @@ const ContactUs_detail = () => {
   const columns = [
     {
       title: "Sno",
-      data: "Sno",
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      }
     },
     {
-      title: "Username",
-      data: "username",
+      title: "First Name",
+      data: (data) => data.firstName || "",
     },
     {
-      title: "Action",
-      data: "action",
+      title: "Last Name",
+      data: (data) => data.lastName || "", 
     },
     {
-      title: "Date",
-      data: "date",
+      title: "Type",
+      data:  (data) => data.type || "",
     },
     {
-      title: "IP Address",
-      data: "ip_address",
+      title: "Email",
+      data:  (data) => data.email || "",
+    },
+    {
+      title: "Appointment Date",
+      data:  (data) => data.appointmentDate  || "-",
+    },
+    {
+      title: "Message",
+      data: (data) => data.message  || "-",
     },
     
     // {
@@ -286,7 +323,7 @@ const ContactUs_detail = () => {
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
-              data={data}
+              data={contact}
               columns={columns}
               options={{
                 paging: true,

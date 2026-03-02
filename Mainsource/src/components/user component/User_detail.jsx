@@ -332,7 +332,7 @@ const openViewModal = async (userId) => {
 
     console.log("VIEW RESPONSE:", response.data);
 
-    // 🔥 IMPORTANT: Handle multiple backend formats safely
+    // Handle multiple backend formats safely
     const data =
       response.data?.data ||
       response.data?.user ||
@@ -743,6 +743,7 @@ const openAddModal = () => {
                       optionLabel="name"
                       optionValue="id"
                       placeholder="Select role"
+                      filter
                       className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                     />
 

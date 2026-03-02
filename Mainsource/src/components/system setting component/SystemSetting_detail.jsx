@@ -1,459 +1,318 @@
-import React, { useState } from "react";
-import ReactDOM from "react-dom";
-import { TfiPencilAlt } from "react-icons/tfi";
-import ReactDOMServer from "react-dom/server";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import aryu_logo from "../../assets/aryu_logo.svg";
-import { createRoot } from "react-dom/client";
-import DataTable from "datatables.net-react";
-import DT from "datatables.net-dt";
-import "datatables.net-responsive-dt/css/responsive.dataTables.css";
-import Footer from "../Footer";
-import Mobile_Sidebar from "../Mobile_Sidebar";
-import { IoIosArrowForward } from "react-icons/io";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MdOutlineDeleteOutline } from "react-icons/md";
-DataTable.use(DT);
+import { toast } from "react-toastify";
+import axiosInstance from "../../api/axiosInstance";
+import Mobile_Sidebar from "../Mobile_Sidebar";
+import Footer from "../Footer";
 
 const SystemSetting_detail = () => {
   const navigate = useNavigate();
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [selectedSystem, setSelectedSystem] = useState(null);
-  const [faviconPreview, setFaviconPreview] = useState("");
-  const [logoPreview, setLogoPreview] = useState("");
-  const [settings, setSettings] = useState({
-    company: "",
-    name: "",
-    email: "",
-    phone_no: "",
-    website_url: "",
-    logo: null,
-    facebook: "",
-    instagram: "",
-    youtube: "",
-    linkedin: "",
-    terms_condition: "",
-    dateFormat: "dd/MM/yyyy"
-  });
+  const [setting, setSetting] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [teamAndCondition, setTeamAndCondition] = useState("");
+  const [dateFormat, setDateFormat] = useState("dd/MM/yyyy");
+  // Remove dateFormat and other fields since they're not in the backend model
 
-  const handleChange = (e) => {
-  const { name, value, type, files } = e.target;
+  const fetchSetting = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`api/settings/view-setting`);
+      console.log("response", response);
+      
+      // Check if response.data exists and has data
+      if (response.data && response.data.settings) {
+        const apiData = response.data.settings;
+        setSetting(apiData);
+        
+        // Only set teamAndCondition since that's the only field in the model
+        setTeamAndCondition(apiData.teamAndCondition || "");
+      } else if (response.data && response.data[0]) {
+        // Alternative response structure
+        const apiData = response.data[0];
+        setSetting(apiData);
+        setTeamAndCondition(apiData.teamAndCondition || "");
+      }
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      toast.error("Failed to fetch settings");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (type === "file") {
-    setSettings((prev) => ({
+  useEffect(() => {
+    fetchSetting();
+  }, []);
+
+  const handleDateFormatChange = (e) => {
+    const value = e.target.value;
+    setDateFormat(value);
+    setFormData(prev => ({
       ...prev,
-      [name]: files[0],
+      dateFormat: value
     }));
-  } else {
-    setSettings((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-};
-
-  const handleSaveSettings = () => {
-  console.log("Saved Settings:", settings);
-  alert("Settings Saved Successfully");
-};
-
-
-
-  // const roles = [
-  //   { id: 1, name: "Writer" },
-  //   { id: 2, name: "Reviewer" },
-  // ];
-
-  // Open and close modals
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
   };
 
-  const closeAddModal = () => {
-    setIsAnimating(false);
-    setErrors({});
-    setTimeout(() => setIsAddModalOpen(false), 250);
-  };
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      
+      // Create data object - only send teamAndCondition as per backend model
+      const submitData = {
+        teamAndCondition: teamAndCondition
+      };
 
-  const openEditModal = (row) => {
-    console.log("row", row);
-    setSelectedSystem(row);
-    setIsEditModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
-  };
-  const closeEditModal = () => {
-    setIsEditModalOpen(false);
-  };
+      console.log("Submitting data:", submitData);
 
-  const columns = [
-    {
-      title: "Sno",
-      data: "Sno",
-    },
-    {
-      title: "Company",
-      data: "company",
-    },
-    {
-      title: "Name",
-      data: "name",
-    },
-    {
-      title: "Email",
-      data: "email",
-    },
-    {
-      title: "Phone Number",
-      data: "phone_no",
-    },
-    {
-      title: "Website URL",
-      data: "website_url",
-    },
-    {
-      title: "Logo",
-      data: "logo",
-    },
-    {
-      title: "Instagram",
-      data: "instagram",
-    },
-    {
-      title: "Facebook",
-      data: "facebook",
-    },
-    {
-      title: "Youtube",
-      data: "youtube"
-    },
-    {
-      title: "Terms Condition",
-      data: "terms_condition",
-    },
-    {
-      title: "Status",
-      data: "status",
-      render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
-      },
-    },
-    {
-      title: "Action",
-      data: null,
-      render: (data, type, row) => {
-        const id = `actions-${row.sno || Math.random()}`;
-        setTimeout(() => {
-          const container = document.getElementById(id);
-          if (container) {
-            if (!container._root) {
-              container._root = createRoot(container);
-            }
-            container._root.render(
-              <div
-                className="action-container"
-                style={{
-                  display: "flex",
-                  gap: "15px",
-                  alignItems: "flex-end",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  className="modula-icon-edit flex gap-2"
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  <TfiPencilAlt
-                    className="cursor-pointer "
-                    onClick={() => {
-                      openEditModal(
-                        row._id,
-                        row.company,
-                        row.name,
-                        row.email,
-                        row.phone_no,
-                        row.website_url,
-                        row.logo,
-                        row.instagram,
-                        row.youtube,
-                        row.facebook,
-                        row.linkedin,
-                        row.terms_condition,
-                        row.status,
-                      );
-                    }}
-                  />
-                  <MdOutlineDeleteOutline
-                    className="text-red-600 text-xl cursor-pointer"
-                    onClick={() => {
-                      deleteRoles(row._id);
-                    }}
-                  />
-                </div>
-
-                {/* <div className="modula-icon-del" style={{
-                          color: "red"
-                        }}>
-                          <RiDeleteBin6Line
-                            onClick={() => handleDelete(row.id)}
-                          />
-                        </div> */}
-              </div>,
-              container
-            );
+      const response = await axiosInstance.post(
+        `api/settings/create-setting`,
+        submitData,
+        {
+          headers: {
+            'Content-Type': 'application/json' // Using JSON since no file uploads
           }
-        }, 0);
-        return `<div id="${id}"></div>`;
-      },
-    },
-  ];
+        }
+      );
 
+      console.log("Save response:", response);
 
+      if (response.data) {
+        toast.success(response.data.message || "Settings saved successfully");
+        fetchSetting(); // Refresh data
+      } else {
+        toast.error("Failed to save settings");
+      }
+    } catch (err) {
+      console.error("Error saving settings:", err);
+      
+      // Handle validation errors from backend
+      if (err.response?.data?.errors) {
+        const errorMessages = Object.values(err.response.data.errors).join(", ");
+        toast.error(errorMessages);
+      } else {
+        toast.error(err.response?.data?.message || "Failed to save settings");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
         <Mobile_Sidebar />
-        <div className="flex  gap-2 mt-2 md:mt-0 items-center">
+        <div className="flex gap-2 mt-2 md:mt-0 items-center">
           <p
-            className="text-sm text-gray-500"
+            className="text-sm text-gray-500 cursor-pointer"
             onClick={() => navigate("/dashboard")}
           >
             Dashboard
           </p>
-          <p>{">"}</p>
-
+          <span className="text-gray-500">›</span>
           <p className="text-sm md:text-md text-[#057fc4]">System Setting</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow p-3 md:p-6 mt-2 md:mt-4">
           <h2 className="text-2xl font-medium mb-6">System Setting</h2>
 
-          <div className="flex flex-wrap gap-y-5 gap-x-14 md:mt-5">
-
+          {loading && <div className="text-center py-4">Loading...</div>}
+<div className="flex flex-wrap gap-y-5 gap-x-14 md:mt-5">
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="adminemail"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Company
-              </label>
-              <input
-                type="text"
-                name="company"
-                value={settings.company}
-                // onChange={handleChange}
-                placeholder="Enter Email"
-                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="GST"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Name
               </label>
               <input
                 type="text"
+                id="name"
                 name="name"
-                value={settings.name}
-                // onChange={handleChange}
-                placeholder="Enter GST Number"
+                // value={formData.name}
+                // onChange={handleInputChange}
+                placeholder="Enter Name"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
               </label>
               <input
                 type="email"
+                id="email"
                 name="email"
-                value={settings.email}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                // value={formData.email}
+                // onChange={handleInputChange}
+                placeholder="Enter Email"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="phone_no" className="block text-sm font-medium text-gray-700">
                 Phone Number
               </label>
               <input
-                type="number"
-                name="number"
-                value={settings.phone_no}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                type="tel"
+                id="phone_no"
+                name="phone_no"
+                // value={formData.phone_no}
+                // onChange={handleInputChange}
+                placeholder="Enter Phone Number"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="website_url" className="block text-sm font-medium text-gray-700">
                 Website URL
               </label>
               <input
                 type="url"
-                name="website"
-                value={settings.website_url}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                id="website_url"
+                name="website_url"
+                // value={formData.website_url}
+                // onChange={handleInputChange}
+                placeholder="Enter Website URL"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="logo" className="block text-sm font-medium text-gray-700">
                 Logo
               </label>
               <input
                 type="file"
+                id="logo"
                 name="logo"
-                value={settings.logo}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                // onChange={handleInputChange}
+                accept="image/*"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="facebook" className="block text-sm font-medium text-gray-700">
                 Facebook
               </label>
               <input
                 type="text"
+                id="facebook"
                 name="facebook"
-                value={settings.facebook}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                // value={formData.facebook}
+                // onChange={handleInputChange}
+                placeholder="Enter Facebook URL"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="instagram" className="block text-sm font-medium text-gray-700">
                 Instagram
               </label>
               <input
                 type="text"
+                id="instagram"
                 name="instagram"
-                value={settings.instagram}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                // value={formData.instagram}
+                // onChange={handleInputChange}
+                placeholder="Enter Instagram URL"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="youtube" className="block text-sm font-medium text-gray-700">
                 Youtube
               </label>
               <input
                 type="text"
+                id="youtube"
                 name="youtube"
-                value={settings.youtube}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                // value={formData.youtube}
+                // onChange={handleInputChange}
+                placeholder="Enter YouTube URL"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
+            
             <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700">
                 LinkedIn
               </label>
               <input
                 type="text"
-                name="linkedIn"
-                value={settings.linkedin}
-                // onChange={handleChange}
-                placeholder="Enter Address"
-                className="border w-full border-gray-300 rounded-lg p-2 text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-2 w-full md:w-[40%]">
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Terms and condition
-              </label>
-              <textarea
-                type="text"
-                name="terms"
-                value={settings.terms_condition}
-                // onChange={handleChange}
-                placeholder="Enter Address"
+                id="linkedin"
+                name="linkedin"
+                // value={formData.linkedin}
+                // onChange={handleInputChange}
+                placeholder="Enter LinkedIn URL"
                 className="border w-full border-gray-300 rounded-lg p-2 text-sm"
               />
             </div>
           </div>
+
           {/* DATE FORMAT */}
           <div>
-
-            <hr className="border-t-2 border-gray mt-5  w-full"></hr>
-
-
+            <hr className="border-t-2 border-gray mt-5 w-full"></hr>
             <h3 className="text-lg font-medium mb-2 mt-5">Date Format</h3>
-            {["dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "MM/dd/yy"].map((format) => (
-  <div key={format} className="flex gap-2 mb-2">
-    <input
-      type="radio"
-      value={format}
-      checked={settings.dateFormat === format}
-      onChange={handleChange}
-      name="dateFormat"
-    />
-    <label>{format}</label>
-  </div>
-))}
-
+            {["dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "MM/dd/yy"].map(
+              (format) => (
+                <div key={format} className="flex gap-2 mb-2">
+                  <input
+                    type="radio"
+                    id={`format-${format}`}
+                    name="dateFormat"
+                    // value={format}
+                    checked={dateFormat === format}
+                    onChange={handleDateFormatChange}
+                  />
+                  <label htmlFor={`format-${format}`}>{format}</label>
+                </div>
+              ),
+            )}
           </div>
+
+          <hr className="border-t-2 border-gray mt-5 w-full"></hr>
+          {/* Only show the Terms and Condition field as per backend model */}
+          <div className="flex flex-col gap-2 mt-5 w-full md:w-[60%]">
+            <label htmlFor="teamAndCondition" className="block text-sm font-medium text-gray-700">
+              Terms and Condition
+            </label>
+            <textarea
+              id="teamAndCondition"
+              name="teamAndCondition"
+              value={teamAndCondition}
+              onChange={(e) => setTeamAndCondition(e.target.value)}
+              placeholder="Enter Terms and Conditions"
+              rows="6"
+              className="border w-full border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#067fc4] focus:border-transparent"
+            />
+           
+          </div>
+
+          {/* Display current setting if exists */}
+          {setting && setting._id && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Last updated:</span> {new Date(setting.updatedAt || setting.createdAt).toLocaleString()}
+              </p>
+            </div>
+          )}
 
           {/* SAVE BUTTON */}
           <div className="flex justify-end mt-6">
-  <button
-    onClick={handleSaveSettings}
-    className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-6 py-2 rounded-lg"
-  >
-    Save
-  </button>
-</div>
-
+            <button
+              onClick={handleSaveSettings}
+              disabled={loading}
+              className="bg-[#067fc4] hover:bg-[#2d93cf] text-white px-8 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+            >
+              {loading ? "Saving..." : "Save Settings"}
+            </button>
+          </div>
         </div>
-
-
-
-
       </div>
 
       <div>
@@ -464,5 +323,3 @@ const SystemSetting_detail = () => {
 };
 
 export default SystemSetting_detail;
-
-

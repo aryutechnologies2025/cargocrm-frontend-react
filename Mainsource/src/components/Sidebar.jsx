@@ -5,19 +5,11 @@ import {
 } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
-import { BsCalendar4 } from "react-icons/bs";
 import { IoPeopleOutline } from "react-icons/io5";
-import { CiDeliveryTruck, CiBoxList } from "react-icons/ci";
+import { CiBoxList } from "react-icons/ci";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdLogout } from "react-icons/md";
-import { BsCalendar2Check } from "react-icons/bs";
-import medics_logo from "../assets/medics_logo.svg";
-import { FaRegMessage } from "react-icons/fa6";
-import { GrMoney } from "react-icons/gr";
-import { HiOutlineHome } from "react-icons/hi";
-import { TbUrgent } from "react-icons/tb";
-import { FaRegUser } from "react-icons/fa";
 import cargoLord from "../assets/cargoLord_logo.png";
 import { MdOutlineCreditScore } from "react-icons/md";
 import { MdContacts } from "react-icons/md";
@@ -26,6 +18,10 @@ import axiosInstance from "../api/axiosInstance";
 import { API_URL } from "../Config";
 import { RiCustomerService2Line } from "react-icons/ri";
 import { MdOutlineHouseSiding } from "react-icons/md";
+import { MdEventAvailable } from "react-icons/md";
+import { LiaShoppingBasketSolid } from "react-icons/lia";
+import { GoContainer } from "react-icons/go";
+import { GrStakeholder } from "react-icons/gr";
 
 
 const Sidebar = () => {
@@ -37,6 +33,10 @@ const Sidebar = () => {
   const [selectAnyOneClicked, setSelectAnyOneClicked] = useState(false);
   const [currentOpen, setCurrentOpen] = useState(null);
   const [buttonLoading, setButtonLoading] = useState(false);
+   const storedDetalis = localStorage.getItem("cargouser");
+  const parsedDetails = JSON.parse(storedDetalis);
+  const role = parsedDetails.role;
+  console.log("role", role);
   const toggleMenu = (menu) => {
     setCurrentOpen(currentOpen === menu ? null : menu);
   };
@@ -163,6 +163,7 @@ const Sidebar = () => {
                 }  `}
             >
               {/* dashboard */}
+              {role !== "Agent" && (
               <div
                 onClick={() => onClickSidebarMenu("Dashboard")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -174,32 +175,23 @@ const Sidebar = () => {
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
+              )}
 
-              {/* customer */}
+              {/* order form
               <div
-                onClick={() => onClickSidebarMenu("Customer")}
+                onClick={() => onClickSidebarMenu("form-order")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
-                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/customer"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/form-order"
                     ? "bg-[#e6f2fa] text-[#057fc4]"
                     : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                   }`}
               >
-                <RiCustomerService2Line />
-                {!arrowClicked && <p className="text-sm">Customer</p>}
-              </div>
+                <GrStakeholder />
+                {!arrowClicked && <p className="text-sm">OrderForm</p>}
+              </div> */}
 
-              {/* beneficiary */}
-              <div
-                onClick={() => onClickSidebarMenu("Beneficiary")}
-                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
-                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/beneficiary"
-                    ? "bg-[#e6f2fa] text-[#057fc4]"
-                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
-                  }`}
-              >
-                <MdOutlineHouseSiding />
-                {!arrowClicked && <p className="text-sm">Beneficiary</p>}
-              </div>
+              
+
 
               {/* order */}
               <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
@@ -209,12 +201,12 @@ const Sidebar = () => {
                   className={`flex items-center w-full flex-grow
       ${arrowClicked ? "justify-center" : "justify-normal"}
       px-2 py-3 h-10 rounded-md gap-2 text-sm font-medium cursor-pointer
-      ${currentPath === "/parcel" || currentPath === "/order" || currentPath === "/collection"
+      ${currentPath === "/parcel" || currentPath === "/order" || currentPath === "/collection" || currentPath === "/customer" || currentPath === "/beneficiary"
                       ? "bg-[#e6f2fa] text-[#057fc4] hover:text-[#057fc4]"
                       : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                     }`}
                 >
-                  <IoPeopleOutline className="w-5" />
+                  <LiaShoppingBasketSolid className="w-5" />
 
                   {!arrowClicked && (
                     <div className="flex items-center gap- justify-between w-full">
@@ -222,6 +214,8 @@ const Sidebar = () => {
                       {currentOpen === "Order" ||
                         currentPath === "/parcel" ||
                         currentPath === "/order" ||
+                        currentPath === "/customer" ||
+                        currentPath === "/beneficiary" ||
                         currentPath === "/collection" ? (
                         <IoIosArrowUp />
                       ) : (
@@ -236,26 +230,41 @@ const Sidebar = () => {
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${currentOpen === "Order" ||
                       currentPath === "/parcel" ||
                       currentPath === "/order" ||
+                      currentPath === "/customer" ||
+                      currentPath === "/beneficiary" ||
                       currentPath === "/collection"
-                      ? "max-h-40 opacity-100 mt-1"
+                      ? "max-h-60 opacity-100 mt-1"
                       : "max-h-0 opacity-0"
                       }`}
                   >
                     <div className="flex gap-2 ms-8 flex-col text-sm font-medium text-gray-500">
 
-                      <button
+                      {/* <button
                         onClick={() => {
-                          navigate("/parcel");
+                          navigate("/customer");
                           setCurrentOpen("Order");
                         }}
                         className={`w-full text-left px-2 py-1 rounded-md transition
-            ${currentPath === "/parcel"
+            ${currentPath === "/customer"
                             ? "text-[#057fc4]"
                             : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                           }`}
                       >
-                        Parcel / Pieces
+                        Customer
                       </button>
+                      <button
+                        onClick={() => {
+                          navigate("/beneficiary");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/beneficiary"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Beneficiary
+                      </button> */}
                       <button
                         onClick={() => {
                           navigate("/order");
@@ -269,6 +278,19 @@ const Sidebar = () => {
                       >
                         Order List
                       </button>
+                      {/* <button
+                        onClick={() => {
+                          navigate("/parcel");
+                          setCurrentOpen("Order");
+                        }}
+                        className={`w-full text-left px-2 py-1 rounded-md transition
+            ${currentPath === "/parcel"
+                            ? "text-[#057fc4]"
+                            : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                          }`}
+                      >
+                        Parcel / Pieces
+                      </button> */}
                       <button
                         onClick={() => {
                           navigate("/collection");
@@ -287,6 +309,19 @@ const Sidebar = () => {
                 )}
               </div>
 
+              {/* run */}
+              <div
+                onClick={() => onClickSidebarMenu("Run")}
+                className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
+                  } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/run"
+                    ? "bg-[#e6f2fa] text-[#057fc4]"
+                    : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
+                  }`}
+              >
+                <GoContainer />
+                {!arrowClicked && <p className="text-sm">Container Run</p>}
+              </div>
+
               {/* events */}
               <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
 
@@ -300,14 +335,14 @@ const Sidebar = () => {
                       : "group text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                     }`}
                 >
-                  <IoPeopleOutline className="w-5" />
+                  <MdEventAvailable className="w-5" />
 
                   {!arrowClicked && (
                     <div className="flex items-center gap- justify-between w-full">
                       <span className="text-sm font-medium">Events</span>
                       {currentOpen === "Event" ||
                         currentPath === "/event-master" ||
-                        currentPath === "/event"  ? (
+                        currentPath === "/event" ? (
                         <IoIosArrowUp />
                       ) : (
                         <IoIosArrowDown />
@@ -320,7 +355,7 @@ const Sidebar = () => {
                   <div
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${currentOpen === "Event" ||
                       currentPath === "/event-master" ||
-                      currentPath === "/event" 
+                      currentPath === "/event"
                       ? "max-h-40 opacity-100 mt-1"
                       : "max-h-0 opacity-0"
                       }`}
@@ -333,7 +368,7 @@ const Sidebar = () => {
                           setCurrentOpen("Event");
                         }}
                         className={`w-full text-left px-2 py-1 rounded-md transition
-            ${currentPath === "/event-list"
+            ${currentPath === "/event-master"
                             ? "text-[#057fc4]"
                             : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                           }`}
@@ -351,7 +386,7 @@ const Sidebar = () => {
                             : "text-gray-500 hover:bg-[#e6f2fa] hover:text-[#057fc4]"
                           }`}
                       >
-                        Cargo(event)
+                        Cargo Movement
                       </button>
                     </div>
                   </div>
@@ -359,6 +394,7 @@ const Sidebar = () => {
               </div>
 
               {/* user */}
+              {role !== "Agent" && (
               <div className={`w-full ${arrowClicked ? "px-0" : "px-2"}`}>
 
                 <div
@@ -428,9 +464,10 @@ const Sidebar = () => {
                   </div>
                 )}
               </div>
+              )}
 
               {/* Receipt */}
-              <div
+              {/* <div
                 onClick={() => onClickSidebarMenu("Receipt")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
                   } px-2 py-3 rounded-md gap-2 text-sm font-medium cursor-pointer ${currentPath === "/receipt"
@@ -440,7 +477,7 @@ const Sidebar = () => {
               >
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Receipt</p>}
-              </div>
+              </div> */}
 
 
               {/* Core entities */}
@@ -546,6 +583,7 @@ const Sidebar = () => {
               </div> */}
 
               {/* contact us */}
+              {role !== "Agent" && (
               <div
                 onClick={() => onClickSidebarMenu("contact-us")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -557,8 +595,9 @@ const Sidebar = () => {
                 <MdContacts />
                 {!arrowClicked && <p className="text-sm">Contact Us</p>}
               </div>
-
+              )}
               {/* audit log */}
+              {role !== "Agent" && (
               <div
                 onClick={() => onClickSidebarMenu("audit-logs")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -570,12 +609,16 @@ const Sidebar = () => {
                 <TbLogs />
                 {!arrowClicked && <p className="text-sm">Audit Logs</p>}
               </div>
+              )}
 
             </div>
 
             <hr className="my-5 mx-4 border-gray-300" />
+            {/* setting */}
+            
             <div className="w-[95%] px-2">
               {/* settings */}
+              {role !== "Agent" && (
               <div onClick={() => onClickSidebarMenu("system-setting")} className="flex flex-col gap-6 ">
 
                 {[{ icon: <IoSettingsOutline />, label: "System Setting" }].map(
@@ -596,6 +639,7 @@ const Sidebar = () => {
                   )
                 )}
               </div>
+              )}
 
               {/* logout */}
               <div
@@ -611,6 +655,7 @@ const Sidebar = () => {
                 )}
               </div>
             </div>
+           
           </div>
 
           {/* User Section */}

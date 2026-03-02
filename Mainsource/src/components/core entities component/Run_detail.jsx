@@ -16,6 +16,9 @@ import { createRoot } from "react-dom/client";
 import { FaEye } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io"
 import { BiCustomize } from "react-icons/bi";
+import axiosInstance from "../../api/axiosInstance";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 DataTable.use(DT);
 
 const Run_detail = () => {
@@ -24,6 +27,8 @@ const Run_detail = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [totalRecords, setTotalRecords] = useState("");
   const [selectedRun, setSelectedRun] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewRun, setViewRun] = useState(null);
@@ -53,6 +58,8 @@ const Run_detail = () => {
   const [editMode, setEditMode] = useState("");
   const [editCreatedDate, setEditCreatedDate] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  const [EditingContainerId,setEditingContainerId] = useState(null);
+  const [runData,setRunData] = useState([]);
 
   const validateAddForm = () => {
     let errors = {};
@@ -62,9 +69,6 @@ const Run_detail = () => {
     }
     if (!mode.trim()) {
       errors.mode = "Mode is required";
-    }
-    if (!createdDate.trim()) {
-      errors.createdDate = "Created Date is required";
     }
     if (status === "") {
       errors.status = "Status is required";
@@ -77,15 +81,13 @@ const Run_detail = () => {
   const validateEditForm = () => {
     let errors = {};
 
-    if (!editRunNo.trim()) {
-      errors.editRunNo = "Run number is required";
-    }
+    // if (!editRunNo.trim()) {
+    //   errors.editRunNo = "Run number is required";
+    // }
     if (!editMode.trim()) {
       errors.editMode = "Mode is required";
     }
-    if (!editCreatedDate.trim()) {
-      errors.editCreatedDate = "Created Date is required";
-    }
+   
     if (editStatus === "") {
       errors.editStatus = "Status is required";
     }
@@ -94,40 +96,127 @@ const Run_detail = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddSubmit = () => {
-    if (!validateAddForm()) return;
+const fetchRun = async () => {
+    setLoading(true);
 
+    try {
+      const response = await axiosInstance.get("api/containerruns/view-containerruns");
+      console.log("run response:", response);
+
+      if (response?.data?.status === true || response?.data?.success === true) {
+        const apiDatas = response?.data?.data || [];
+ 
+ 
+        setRunData(apiDatas);
+        setTotalRecords(apiDatas.length);
+      } else {
+
+        setTotalRecords(0);
+      }
+    } catch (error) {
+      console.error("Fetch Run error:", error);
+
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(()=>{
+    fetchRun();
+  },[]);
+
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateAddForm()) return;
+    try{
     const payload = {
-      run_no: runNo,
+      run_number: runNo,
       mode: mode,
-      created_date: createdDate,
       status: status,
     };
 
-    console.log("Add Payload:", payload);
+   const response = await axiosInstance.post(
+        "api/containerruns/create-containerruns",
+        payload,
+      );
+    console.log("runData" , response);
 
-    //  Call your API here
-
-    closeAddModal();
+      if (response?.data?.status === true || response?.data?.success === true) {
+        toast.success("Container run created successfully");
+        fetchRun();
+        closeAddModal();
+        setRunNo("");
+        setMode("");
+        setStatus("");
+      } else {
+        toast.error(response?.data?.message || "Failed to create parcel");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Error creating parcel");
+    }
   };
 
-  const handleUpdate = () => {
-    if (!validateEditForm()) return;
-
+  const handleUpdate = async () => {
+    // if (!validateEditForm()) return;
+    try{
     const payload = {
       id: selectedRun._id,
-      run_no: editRunNo,
+      run_number: editRunNo,
       mode: editMode,
-      created_date: editCreatedDate,
       status: editStatus,
     };
 
-    console.log("Update Payload:", payload);
+    const response = await axiosInstance.put(
+        `api/containerruns/edit-containerruns/${EditingContainerId}`,
+        payload,
+      );
 
-    //  Call update API here
-
-    closeEditModal();
+      if (response.data?.success || response.data?.status) {
+        toast.success("Parcel updated successfully");
+        fetchRun();
+        closeEditModal();
+      } else {
+        toast.error("Failed to update parcel");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating parcel");
+    }
   };
+
+  const deleteRun = async (parcelId) => {
+      if (!parcelId) {
+        toast.error("Invalid Run ID");
+        return;
+      }
+  
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to delete this parcel?",
+        icon: "warning",
+        showCancelButton: true,
+        cancelButtonText: "Cancel",
+        confirmButtonText: "Yes, delete it!",
+      });
+  
+      if (!result.isConfirmed) return;
+  
+      try {
+        const response = await axiosInstance.delete(
+          `api/containerruns/delete-containerruns/${parcelId}`,
+        );
+  
+        if (response.data?.status === true || response.data?.success === true) {
+          toast.success("Container Run deleted successfully");
+          fetchRun();
+        } else {
+          toast.error(response.data?.message || "Failed to delete container Run");
+        }
+      } catch (error) {
+        console.error("Delete error:", error.response?.data || error);
+        toast.error("Error deleting container Run");
+      }
+    };
 
   const resetFilters = () => {
     setStatusFilter("");
@@ -186,7 +275,12 @@ const Run_detail = () => {
   };
 
   const openEditModal = (row) => {
+    console.log("row", row);
     setSelectedRun(row);
+    setEditingContainerId(row.id);
+    setEditMode(row.mode || "");
+    setEditStatus(row.status || "");
+    setEditRunNo(row.run_number);
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };
@@ -197,17 +291,16 @@ const Run_detail = () => {
   };
 
   const columns = [
-    {
+   {
       title: "Sno",
-      data: "Sno",
-    },
-    {
-      title: "Run ID",
-      data: "run_id",
+      data: null,
+      render: function (data, type, row, meta) {
+        return meta.row + 1;
+      }
     },
     {
       title: "Run Number",
-      data: "run_no",
+      data: "run_number",
     },
     {
       title: "Mode",
@@ -215,17 +308,37 @@ const Run_detail = () => {
     },
     {
       title: "Created Date",
-      data: "created_date",
+      data: null,
+      render: (row) => {
+        if (!row.createdAt) return "-";
+        const date = new Date(row.createdAt);
+        return date.toLocaleDateString();
+      },
     },
-    {
+     {
       title: "Status",
       data: "status",
       render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
+        const isActive = String(data) === "1" || data === 1 || data === true;
+        const textColor = isActive ? "green" : "red";
+        const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
+
+        return `
+          <div style="
+            display:inline-block;
+            padding:4px 8px;
+            color:${textColor};
+            background-color:${bgColor};
+            border:1px solid ${bgColor};
+            border-radius:50px;
+            text-align:center;
+            width:100px;
+            font-size:10px;
+            font-weight:700;
+          ">
+            ${isActive ? "Active" : "Inactive"}
+          </div>
+        `;
       },
     },
     {
@@ -274,7 +387,7 @@ const Run_detail = () => {
                   <MdOutlineDeleteOutline
                     className="text-red-600 text-xl cursor-pointer"
                     onClick={() => {
-                      deleteRoles(row._id);
+                      deleteRun(row.id);
                     }}
                   />
                 </div>
@@ -434,7 +547,7 @@ const Run_detail = () => {
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
-              data={data}
+              data={runData}
               columns={columns}
               options={{
                 paging: true,
@@ -490,6 +603,7 @@ const Run_detail = () => {
                         setRunNo(e.target.value);
                         setFormErrors({ ...formErrors, runNo: "" });
                       }}
+
                       placeholder="Enter run number"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -522,8 +636,8 @@ const Run_detail = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select cargo mode</option>
-                      <option value="1">Air</option>
-                      <option value="0">Sea</option>
+                      <option value="air">Air</option>
+                      <option value="sea">Sea</option>
                     </select>
                     {formErrors.mode && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
@@ -533,34 +647,7 @@ const Run_detail = () => {
                   </div>
                 </div>
 
-                <div className="mt-2 md:mt-8 flex justify-between items-center ">
-                  <div className="">
-                    <label
-                      htmlFor="roleName"
-                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
-                    >
-                      Created Date <span className="text-red-500">*</span>
-                    </label>
-
-                  </div>
-                  <div className="w-[60%] md:w-[50%]">
-                    <input
-                      type="date"
-                      value={createdDate}
-                      onChange={(e) => {
-                        setCreatedDate(e.target.value);
-                        setFormErrors({ ...formErrors, createdDate: "" }); // Validate role name dynamically
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {formErrors.createdDate && (
-                      <p className="text-red-500 text-sm mb-4 mt-1">
-                        {formErrors.createdDate}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
+              
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div className="">
                     <label
@@ -671,8 +758,8 @@ const Run_detail = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select cargo mode</option>
-                      <option value="1">Air</option>
-                      <option value="0">Sea</option>
+                      <option value="air">Air</option>
+                      <option value="sea">Sea</option>
                     </select>
                         {formErrors.editMode && (
                           <p className="text-red-500 text-sm">{formErrors.editMode}</p>
@@ -680,26 +767,7 @@ const Run_detail = () => {
                       </div>
                     </div>
 
-                    <div className="mt-8 flex justify-between items-center">
-                      <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Created Date <span className="text-red-500">*</span>
-                      </label>
-                      <div className="w-[60%] md:w-[50%]">
-                        <input
-                          type="date"
-                          placeholder="Enter created date"
-                          value={editCreatedDate}
-                          onChange={(e) => {
-                            setEditCreatedDate(e.target.value);
-                            setFormErrors({ ...formErrors, editCreatedDate: "" });
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {formErrors.editCreatedDate && (
-                          <p className="text-red-500 text-sm">{formErrors.editCreatedDate}</p>
-                        )}
-                      </div>
-                    </div>
+                 
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">Status <span className="text-red-500">*</span></label>
@@ -767,16 +835,12 @@ const Run_detail = () => {
 
               <div className="space-y-4 text-sm text-gray-700">
 
-                {/* run id */}
-                <div className="flex justify-between ">
-                  <span className="font-medium">Run ID</span>
-                  <span>{viewRun.run_id}</span>
-                </div>
-
+            
+              
                 {/* run no */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Run No</span>
-                  <span>{viewRun.run_no}</span>
+                  <span>{viewRun.run_number}</span>
                 </div>
 
                 {/* mode */}
@@ -788,7 +852,7 @@ const Run_detail = () => {
                 {/* created date */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Created Date</span>
-                  <span>{viewRun.created_date}</span>
+                  <span>{viewRun.createdAt}</span>
                 </div>
 
 
