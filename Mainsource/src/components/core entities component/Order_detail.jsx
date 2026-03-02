@@ -218,7 +218,7 @@ const OrderDetail = () => {
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`api/orders/all-order`,{
+      const response = await axiosInstance.get(`api/orders/all-order`, {
         params: {
           created_by: userId,
         },
@@ -313,15 +313,15 @@ const OrderDetail = () => {
     }
   };
 
-  const handleViewOrder = (path)=>{
+  const handleViewOrder = (path) => {
     navigate(`/form-order`, {
-      state: {path},
-    }); 
+      state: { path },
+    });
   }
-  const handleAddOrder = (path)=>{
+  const handleAddOrder = (path) => {
     navigate(`/form-order`, {
-      state: {path},
-    }); 
+      state: { path },
+    });
   }
 
 
@@ -478,35 +478,35 @@ const OrderDetail = () => {
         return meta.row + 1;
       }
     },
+    // {
+    //   title: "Tracking Number",
+    //   data: (row) =>  row.orders?.[0]?.tracking_number || "-",
+    // },
     {
-      title: "Tracking Number",
-      data: (row) =>  row.orders?.[0]?.tracking_number || "-",
+      title: "Sender",
+       data: (row) => row.orders?.[0]?.customerName || "-",
     },
     {
-      title: "Sender ID",
-      data: "customerName",
-    },
-    {
-      title: "Beneficiary ID",
-      data: (row) =>  row.beneficiaries?.[0]?.name || "-",
+      title: "Beneficiary",
+      data: (row) => row.beneficiaries?.[0]?.name || "-",
     },
     {
       title: "Cargo Mode",
       data: null,
       render: (row) => row.orders?.[0]?.cargo_mode || "-",
     },
-   {
-  title: "Packed",
-  data: null,
-  render: (row) => {
-    const packed = row.orders?.[0]?.packed;
+    {
+      title: "Packed",
+      data: null,
+      render: (row) => {
+        const packed = row.orders?.[0]?.packed;
 
-    const isActive = packed === 1 || packed === "1" || packed === "Yes";
+        const isActive = packed === 1 || packed === "1" || packed === "Yes";
 
-    const textColor = isActive ? "green" : "red";
-    const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
+        const textColor = isActive ? "green" : "red";
+        const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
 
-    return `
+        return `
       <div style="
         display:inline-block;
         padding:4px 8px;
@@ -522,9 +522,9 @@ const OrderDetail = () => {
         ${isActive ? "Yes" : "No"}
       </div>
     `;
-  },
-},
-  
+      },
+    },
+
     // {
     //   title: "Created By",
     //   data: null,
@@ -561,7 +561,7 @@ const OrderDetail = () => {
         );
       }
     },
-   
+
     {
       title: "Action",
       data: null,
@@ -584,12 +584,12 @@ const OrderDetail = () => {
                 >
                   <FaEye />
                 </button>
-               
+
                 <TfiPencilAlt
                   className="cursor-pointer text-gray-600 hover:text-blue-600"
                   // onClick={() => openEditModal(row)}
-                   onClick={() => {
-                 handleViewOrder(row);
+                  onClick={() => {
+                    handleViewOrder(row);
                   }}
                 />
                 <MdOutlineDeleteOutline
@@ -622,7 +622,7 @@ const OrderDetail = () => {
           <div className="flex flex-wrap items-end gap-3">
             {/* Beneficiary Filter */}
             <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Beneficiary ID</label>
+              <label className="text-sm font-medium text-gray-600 p-1">Beneficiary</label>
               <Dropdown
                 value={beneficiaryFilter}
                 options={beneficiaryOptions}
@@ -636,7 +636,7 @@ const OrderDetail = () => {
 
             {/* Sender Filter */}
             <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Sender ID</label>
+              <label className="text-sm font-medium text-gray-600 p-1">Sender</label>
               <Dropdown
                 value={senderFilter}
                 options={senderOptions}
@@ -746,8 +746,8 @@ const OrderDetail = () => {
             <div className="ml-auto">
               <button
                 onClick={() => {
-                 handleAddOrder();
-                  }}
+                  handleAddOrder();
+                }}
                 className="bg-[#057fc4] hover:bg-[#2d93cf] px-4 py-2 text-white rounded-xl"
               >
                 Add
@@ -1160,137 +1160,137 @@ const OrderDetail = () => {
               <h2 className="text-xl font-semibold mb-6 text-[#057fc4]">Order View</h2>
 
               <div className="space-y-4 text-sm text-gray-700 w-full gap-4">
-               
-               <div className="w-full ">
-                {/* customer */}
-                <div className="space-y-4 mb-2">
-                <h2 className="text-xl font-semibold mb-6 ">Customer Details</h2>
-                <div className="flex justify-between">
-                  <span className="font-medium">Customer Name</span>
-                  <span>{viewOrder.customerName || "-"}</span>
+
+                <div className="w-full ">
+                  {/* customer */}
+                  <div className="space-y-4 mb-2">
+                    <h2 className="text-xl font-semibold mb-6 ">Customer Details</h2>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Customer Name</span>
+                      <span>{viewOrder.customerName || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Email</span>
+                      <span>{viewOrder.customerEmail || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Phone Number</span>
+
+                      <span>{viewOrder.customerPhone || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Address</span>
+                      <span>{viewOrder.customerAddress || "-"}</span>
+                    </div>
+                    <hr></hr>
+                  </div>
+
+                  {/* beneficiary */}
+                  <div className="space-y-4 mb-2">
+                    <h2 className="text-xl font-semibold mb-6 ">Beneficiary Details</h2>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Beneficiary Name</span>
+                      <span>{viewOrder.beneficiaries?.[0]?.name || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Email</span>
+                      <span>{viewOrder.beneficiaries?.[0]?.email || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Phone Number</span>
+
+                      <span>{viewOrder.beneficiaries?.[0]?.phone || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Address</span>
+                      <span>{viewOrder.beneficiaries?.[0].address || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">City</span>
+                      <span>{viewOrder.beneficiaries?.[0].city || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Country</span>
+                      <span>{viewOrder.beneficiaries?.[0].country || "-"}</span>
+                    </div>
+                    <hr></hr>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Email</span>
-                  <span>{viewOrder.customerEmail || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Phone Number</span>
-                 
-                  <span>{viewOrder.customerPhone || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Address</span>
-                  <span>{viewOrder.customerAddress || "-"}</span>
-                </div>
-                <hr></hr>
-                </div>
-                
-                {/* beneficiary */}
-                <div className="space-y-4 mb-2">
-                <h2 className="text-xl font-semibold mb-6 ">Beneficiary Details</h2>
-                <div className="flex justify-between">
-                  <span className="font-medium">Beneficiary Name</span>
-                  <span>{viewOrder.beneficiaries?.[0]?.name || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Email</span>
-                  <span>{viewOrder.beneficiaries?.[0]?.email || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Phone Number</span>
-                 
-                  <span>{viewOrder.beneficiaries?.[0]?.phone || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Address</span>
-                  <span>{viewOrder.beneficiaries?.[0].address || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">City</span>
-                  <span>{viewOrder.beneficiaries?.[0].city || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Country</span>
-                  <span>{viewOrder.beneficiaries?.[0].country || "-"}</span>
-                </div>
-                <hr></hr>
-                </div>
-                </div>
-                
+
                 {/* parcel */}
                 <div className="w-full ">
-                <div className=" space-y-4 mb-2">
-                <h2 className="text-xl font-semibold mb-6 ">Parcel Details</h2>
-                <div className="flex justify-between">
-                  <span className="font-medium">Piece Number</span>
-                  <span>{viewOrder.parcels?.[0]?.piece_number || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Description </span>
-                  <span>{viewOrder.parcels?.[0]?.description || "-"}</span>
+                  <div className=" space-y-4 mb-2">
+                    <h2 className="text-xl font-semibold mb-6 ">Parcel Details</h2>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Piece Number</span>
+                      <span>{viewOrder.parcels?.[0]?.piece_number || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Description </span>
+                      <span>{viewOrder.parcels?.[0]?.description || "-"}</span>
+                    </div>
+
+                    {/* PieceDetails */}
+                    <div className="pt-3 mt-3">
+                      <span className="font-medium block mb-2">Piece Details</span>
+                      {viewOrder.parcels?.[0]?.piece_details &&
+                        viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
+                        viewOrder.parcels?.[0]?.piece_details.map((detail, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
+                          >
+                            <div className="font-semibold text-[#057fc4] mb-2">
+                              Piece {index + 1}
+                            </div>
+                            <div className="grid grid-cols-4 gap-2 text-sm">
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Weight:</span>
+                                <span className="font-medium">{detail.weight}</span>
+                              </div>
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Length:</span>
+                                <span className="font-medium">{detail.length}</span>
+                              </div>
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Width:</span>
+                                <span className="font-medium">{detail.width}</span>
+                              </div>
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Height:</span>
+                                <span className="font-medium">{detail.height}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 text-sm">
+                          No piece details available
+                        </p>
+                      )}
+                    </div>
+                    <hr></hr>
+                  </div>
+
+
+
+                  {/* order details */}
+                  <div className="space-y-4 mb-2">
+                    <h2 className="text-xl font-semibold mb-6 ">Order Details</h2>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Cargo Mode </span>
+                      <span>{viewOrder.orders?.[0]?.cargo_mode || "-"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Packed</span>
+                      <span>{viewOrder.orders?.[0]?.packed || "-"}</span>
+                    </div>
+                    <hr></hr>
+                  </div>
                 </div>
 
-                 {/* PieceDetails */}
-                <div className="pt-3 mt-3">
-                  <span className="font-medium block mb-2">Piece Details</span>
-                  {viewOrder.parcels?.[0]?.piece_details &&
-                  viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
-                    viewOrder.parcels?.[0]?.piece_details.map((detail, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
-                      >
-                        <div className="font-semibold text-[#057fc4] mb-2">
-                          Piece {index + 1}
-                        </div>
-                        <div className="grid grid-cols-4 gap-2 text-sm">
-                          <div className="flex justify-start gap-3">
-                            <span className="text-gray-600">Weight:</span>
-                            <span className="font-medium">{detail.weight}</span>
-                          </div>
-                          <div className="flex justify-start gap-3">
-                            <span className="text-gray-600">Length:</span>
-                            <span className="font-medium">{detail.length}</span>
-                          </div>
-                          <div className="flex justify-start gap-3">
-                            <span className="text-gray-600">Width:</span>
-                            <span className="font-medium">{detail.width}</span>
-                          </div>
-                          <div className="flex justify-start gap-3">
-                            <span className="text-gray-600">Height:</span>
-                            <span className="font-medium">{detail.height}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 text-sm">
-                      No piece details available
-                    </p>
-                  )}
-                </div> 
-                <hr></hr>
-                </div>
 
-                
-                 
-                 {/* order details */}
-                 <div className="space-y-4 mb-2">
-                <h2 className="text-xl font-semibold mb-6 ">Order Details</h2>
-                <div className="flex justify-between">
-                  <span className="font-medium">Cargo Mode </span>
-                  <span>{viewOrder.orders?.[0]?.cargo_mode || "-"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Packed</span>
-                  <span>{viewOrder.orders?.[0]?.packed || "-"}</span>
-                </div>
-                <hr></hr>
-                </div>
-                </div>
-            
-                
-                
+
               </div>
             </div>
           </div>

@@ -10,7 +10,7 @@ const Pdf_details = () => {
   const pdfRef = useRef();
   const location = useLocation();
   const navigate = useNavigate();
-  const {id} = location.state || {};
+  const { id } = location.state || {};
   console.log("location.state:", location.state);
   const data = location.state || {};
   console.log("orderId:", data);
@@ -43,44 +43,44 @@ const Pdf_details = () => {
   //   fetchOrder();
   // }, []);
 
-const downloadPDF = async () => {
-  const element = pdfRef.current;
+  const downloadPDF = async () => {
+    const element = pdfRef.current;
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-  });
+    const canvas = await html2canvas(element, {
+      scale: 2,
+    });
 
-  const imgData = canvas.toDataURL("image/png");
+    const imgData = canvas.toDataURL("image/png");
 
-  const pdf = new jsPDF("p", "mm", "a4");
+    const pdf = new jsPDF("p", "mm", "a4");
 
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight =
-    (canvas.height * pdfWidth) / canvas.width;
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight =
+      (canvas.height * pdfWidth) / canvas.width;
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-  pdf.save("Cargo_Receipt.pdf");
-};
-const emptyRows = Array.from({ length: 12 });
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save("Cargo_Receipt.pdf");
+  };
+  const emptyRows = Array.from({ length: 12 });
   return (
     <div className="p-6">
 
-      <div className="flex justify-between">
-      {/* DOWNLOAD BUTTON */}
-      <button
-        onClick={downloadPDF}
-        className="mb-4 bg-[#057fc4] text-white px-4 py-2 rounded"
-      >
-        Download PDF
-      </button>
-      <button
-        onClick={() =>
-            navigate(-1)
-          }
-        className="mb-4 bg-[#057fc4] text-white px-4 py-2 rounded"
-      >
-        Back
-      </button>
+      <div className="flex justify-center gap-3">
+        <button
+          onClick={downloadPDF}
+          className="mb-4 bg-[#057fc4] text-white px-4 py-2 rounded"
+        >
+          Download PDF
+        </button>
+      
+          <button
+            onClick={() =>
+              navigate(-1)
+            }
+            className="mb-4 bg-[#057fc4] text-white px-4 py-2 rounded"
+          >
+            Back
+          </button>
       </div>
 
       {/* PDF CONTENT */}
@@ -147,38 +147,38 @@ const emptyRows = Array.from({ length: 12 });
           <div className="flex">TRACKING NUMBER: {data?.orders?.[0].tracking_number}</div>
           <div className="flex">PIECE NO: {data?.parcels?.[0].piece_number}</div>
           <div className="flex">DESCRIPTION: {data?.parcels?.[0].description}</div>
-          </div>
+        </div>
         <table className="w-full border text-center">
-  <thead className="bg-[#e6f2fa]">
-    <tr className="text-start">
-      <th className="border text-start px-2 py-1">PIECE NUMBER</th>
-      <th className="border text-start px-2 py-1">WEIGHT</th>
-      <th className="border text-start px-2 py-1">DIMENSIONS</th>
-    </tr>
-  </thead>
+          <thead className="bg-[#e6f2fa]">
+            <tr className="text-start">
+              <th className="border text-start px-2 py-1">PIECE NUMBER</th>
+              <th className="border text-start px-2 py-1">WEIGHT</th>
+              <th className="border text-start px-2 py-1">DIMENSIONS</th>
+            </tr>
+          </thead>
 
-  <tbody>
-    {/* Map through piece_details */}
-    {data?.parcels?.[0]?.piece_details?.map((piece, index) => (
-      <tr key={piece._id || index}>
-        <td className="border px-2 py-1 text-start">{index + 1}</td>
-        <td className="border px-2 py-1 text-start">{piece.weight}KG</td>
-        <td className="border px-2 py-1 text-start">
-          {piece.length} x {piece.width} x {piece.height}
-        </td>
-      </tr>
-    ))}
-    
-    {/* Empty rows if needed */}
-    {/* {emptyRows.map((_, index) => (
+          <tbody>
+            {/* Map through piece_details */}
+            {data?.parcels?.[0]?.piece_details?.map((piece, index) => (
+              <tr key={piece._id || index}>
+                <td className="border px-2 py-1 text-start">{index + 1}</td>
+                <td className="border px-2 py-1 text-start">{piece.weight}KG</td>
+                <td className="border px-2 py-1 text-start">
+                  {piece.length} x {piece.width} x {piece.height}
+                </td>
+              </tr>
+            ))}
+
+            {/* Empty rows if needed */}
+            {/* {emptyRows.map((_, index) => (
       <tr key={`empty-${index}`}>
         <td className="border h-8"></td>
         <td className="border"></td>
         <td className="border"></td>
       </tr>
     ))} */}
-  </tbody>
-</table>
+          </tbody>
+        </table>
 
         {/* <div className="flex w-full border-r border-l">
           <div className="w-[70%] border-r">
