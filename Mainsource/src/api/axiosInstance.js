@@ -43,9 +43,10 @@
 import axios from "axios";
 import CryptoJS from "crypto-js";
 import { API_URL } from "../Config";
+import { SECRET_KEY } from "../Config";
 
 // Add your secret key here (must match backend)
-const SECRET_KEY = "7x!9@kL#2mN$5pQ&8rT*uY^3vW";
+const SECRET_KEY = SECRET_KEY;
 
 // Decryption function
 const decryptData = (encryptedData) => {

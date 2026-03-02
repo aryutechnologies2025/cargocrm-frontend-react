@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import Footer from "../components/Footer";
 import { API_URL } from "../Config";
-import { CAPCHA_URL } from "../Config";
+// import { CAPCHA_URL } from "../Config";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { FaEye } from "react-icons/fa";
@@ -20,7 +20,7 @@ const Login = () => {
     email: "",
     password: ""
   });
-  const [captchaValue, setCaptchaValue] = useState(null);
+  // const [captchaValue, setCaptchaValue] = useState(null);
   const [error, setError] = useState(null);
   const [formErrors, setFormErrors] = useState({});
 
@@ -47,10 +47,10 @@ const Login = () => {
   };
 
 
-  const handleCaptchaChange = (value) => {
-    setCaptchaValue(value);
-    // console.log("Captcha value:", value);
-  };
+  // const handleCaptchaChange = (value) => {
+  //   setCaptchaValue(value);
+  //   // console.log("Captcha value:", value);
+  // };
 
 
   // function onCLickLogin() {
@@ -67,13 +67,13 @@ const Login = () => {
     setError(null);
 
     // Validate username & password first
-    if (!validateLoginForm()) return;
+    // if (!validateLoginForm()) return;
 
-    // Check captcha
-    if (!captchaValue) {
-      setError("Please verify that you are not a robot.");
-      return;
-    }
+    // // Check captcha
+    // if (!captchaValue) {
+    //   setError("Please verify that you are not a robot.");
+    //   return;
+    // }
 
     try {
       const res = await axiosInstance.post(
@@ -182,13 +182,13 @@ const Login = () => {
                 </p>
               )}
             </div>
-            <ReCAPTCHA
+            {/* <ReCAPTCHA
               sitekey={CAPCHA_URL} //live
               onChange={handleCaptchaChange}
             />
             {error && (
               <p className="text-red-500 text-sm mt-2">{error}</p>
-            )}
+            )} */}
             <button
               onClick={onCLickLogin}
               className="font-bold mt-3 text-sm bg-gradient-to-r from-[#057fc4] to-[#1492db] px-5 py-2 md:px-14 md:py-4 rounded-lg text-white"
