@@ -15,7 +15,7 @@ const FormOrder = () => {
 
     const [formData, setFormData] = useState({
         customer: {},
-        beneficiary: {},
+        // beneficiary: {},
         parcel: {},
         order: {}
     });
@@ -75,9 +75,9 @@ const FormOrder = () => {
 
                     {[
                         { id: 1, label: "Customer Details" },
-                        { id: 2, label: "Beneficiary" },
-                        { id: 3, label: "Parcel Details" },
-                        { id: 4, label: "Order Details" },
+                        // { id: 2, label: "Beneficiary" },
+                        { id: 2, label: "Parcel Details" },
+                        { id: 3, label: "Order Details" },
                     ].map((item, index, arr) => (
                         <React.Fragment key={item.id}>
 
@@ -124,16 +124,16 @@ const FormOrder = () => {
                     />
                 )}
 
-                {step === 2 && (
+                {/* {step === 2 && (
                     <Beneficiary
                         nextStep={nextStep}
                         prevStep={prevStep}
                         updateData={updateData}
                         customerId={customerId}
                     />
-                )}
+                )} */}
 
-                {step === 3 && (
+                {step === 2 && (
                     <ParcelDetails
                         nextStep={nextStep}
                         prevStep={prevStep}
@@ -142,7 +142,7 @@ const FormOrder = () => {
                     />
                 )}
 
-                {step === 4 && (
+                {step === 3 && (
                     <OrderDetails
                         prevStep={prevStep}
                         updateData={updateData}
