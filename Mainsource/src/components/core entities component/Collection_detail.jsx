@@ -44,10 +44,16 @@ const Collection_detail = () => {
   const [orderId, setOrderId] = useState("");
   const [address, setAddress] = useState("");
   const [dateTime, setDateTime] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [postcode, setpostcode] = useState("");
   const [status, setStatus] = useState("");
   const [editOrderId, setEditOrderId] = useState("");
   const [editAddress, setEditAddress] = useState("");
   const [editDateTime, setEditDateTime] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [editCountry, setEditCountry] = useState("");
+  const [editPostcode, setEditPostcode] = useState("");
   const [editStatus, setEditStatus] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [collection, setCollection] = useState([]);
@@ -65,6 +71,15 @@ const Collection_detail = () => {
     // Address
     if (!address?.trim()) {
       errors.address = "Address is required";
+    } 
+    if (!city?.trim()) {
+      errors.city = "City is required";
+    } 
+    if (!country?.trim()) {
+      errors.country = "Country is required";
+    } 
+    if (!postcode?.trim()) {
+      errors.postcode = "Postcode is required";
     } 
 
     // Date & Time
@@ -87,6 +102,15 @@ const Collection_detail = () => {
     // Address
     if (!editAddress?.trim()) {
       errors.editAddress = "Address is required";
+    }
+    if (!editCity?.trim()) {
+      errors.editCity = "City is required";
+    }
+    if (!editCountry?.trim()) {
+      errors.editCountry = "Country is required";
+    }
+    if (!editPostcode?.trim()) {
+      errors.editPostcode = "Postcode is required";
     }
 
     // Date & Time
@@ -278,14 +302,29 @@ const Collection_detail = () => {
       render: (row) => row.tracking_number || "-",
     },
     {
-      title: "Collection Address",
+      title: "Address",
       data: null,
       render: (row) => row.address || "-",
     },
     {
-      title: "Collection Date&Time",
+      title: "Date&Time",
       data: null,
       render: (row) => row.date_time || "-",
+    },
+    {
+      title: "City",
+      data: null,
+      render: (row) => row.city || "-",
+    },
+    {
+      title: "Country",
+      data: null,
+      render: (row) => row.country || "-",
+    },
+    {
+      title: "Postcode",
+      data: null,
+      render: (row) => row.postcode || "-",
     },
     {
       title: "Status",
@@ -562,7 +601,7 @@ const Collection_detail = () => {
                       htmlFor="roleName"
                       className="block text-[15px] md:text-md font-medium mb-2 mt-3"
                     >
-                      Collection Address <span className="text-red-500">*</span>
+                     Address <span className="text-red-500">*</span>
                     </label>
                   </div>
                   <div className="w-[60%] md:w-[50%]">
@@ -606,6 +645,88 @@ const Collection_detail = () => {
                     {formErrors.dateTime && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
                         {formErrors.dateTime}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      City <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        setFormErrors({ ...formErrors, city: "" });
+                      }}
+                      placeholder="Enter city"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.city && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.city}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Country <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => {
+                        setCountry(e.target.value);
+                        setFormErrors({ ...formErrors, country: "" });
+                      }}
+                      placeholder="Enter country"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.country && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.country}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      PostCode <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="number"
+                      value={postcode}
+                      onChange={(e) => {
+                        setpostcode(e.target.value);
+                        setFormErrors({ ...formErrors, postcode: "" });
+                      }}
+                      placeholder="Enter postcode"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.postcode && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.postcode}
                       </p>
                     )}
                   </div>
@@ -681,7 +802,7 @@ const Collection_detail = () => {
                     </div>
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Collection Address{" "}
+                        Address{" "}
                         <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
@@ -720,6 +841,72 @@ const Collection_detail = () => {
                         {formErrors.editDateTime && (
                           <p className="text-red-500 text-sm">
                             {formErrors.editDateTime}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        City <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="text"
+                          placeholder="Enter city"
+                          value={editCity}
+                          onChange={(e) => {
+                            setEditCity(e.target.value);
+                            setFormErrors({ ...formErrors, editCity: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editCity && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editCity}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Country <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="text"
+                          placeholder="Enter country"
+                          value={editCountry}
+                          onChange={(e) => {
+                            setEditCountry(e.target.value);
+                            setFormErrors({ ...formErrors, editCountry: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editCountry && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editCountry}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Postcode <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="number"
+                          placeholder="Enter postcode"
+                          value={editPostcode}
+                          onChange={(e) => {
+                            setEditPostcode(e.target.value);
+                            setFormErrors({ ...formErrors, editPostcode: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editPostcode && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editPostcode}
                           </p>
                         )}
                       </div>
@@ -776,8 +963,23 @@ const Collection_detail = () => {
                 </div>
                 {/* date & time */}
                 <div className="flex justify-between ">
-                  <span className="font-medium">Order ID</span>
+                  <span className="font-medium">Date & Time</span>
                   <span>{viewCollection.date_time}</span>
+                </div>
+                {/* city */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">City</span>
+                  <span>{viewCollection.city}</span>
+                </div>
+                {/* country */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Country</span>
+                  <span>{viewCollection.country}</span>
+                </div>
+                {/* postcode */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">PostCode</span>
+                  <span>{viewCollection.postcode}</span>
                 </div>
               </div>
             </div>

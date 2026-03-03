@@ -29,7 +29,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   const [selectedBeneficiaryID, setSelectedBeneficiaryID] = useState(null);
   console.log("selectedBeneficiaryID", selectedBeneficiaryID)
   const [beneficiaryAutoFill, setBeneficiaryAutoFill] = useState({});
-console.log("beneficiaryAutoFill", beneficiaryAutoFill);
+  console.log("beneficiaryAutoFill", beneficiaryAutoFill);
   const [customer, setCustomer] = useState({
     id: "",
     name: "",
@@ -52,6 +52,8 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
     address: "",
     postcode: "",
   });
+
+ const [mode, setMode] = useState("new");
 
 
   const validateCustomerForm = () => {
@@ -79,7 +81,7 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
 
     if (!customer.email?.trim()) {
       errors.email = "Email is required";
-    } 
+    }
 
     if (!customer.address?.trim()) {
       errors.address = "Address is required";
@@ -128,7 +130,7 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
 
     if (!beneficiary.email?.trim()) {
       errors.email = "Beneficiary email is required";
-    } 
+    }
 
     if (!beneficiary.address?.trim()) {
       errors.address = "Beneficiary address is required";
@@ -196,6 +198,12 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
     fetchCustomerNames();
   }, []);
 
+  useEffect(() => {
+  if (customerId) {
+    setMode("new");
+  }
+}, [customerId]);
+
   const handleCustomerChange = async (e) => {
     const selected = e.value;
 
@@ -244,31 +252,31 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
     }
   };
 
-const fetchBeneficiaries = async () => {
-  try {
-    const response = await axiosInstance.get(
-      "/api/customers/get-beneficiary-details",
-      {
-        params: {
-          id: selectedBeneficiaryID,
-        },
-      }
-    );
+  const fetchBeneficiaries = async () => {
+    try {
+      const response = await axiosInstance.get(
+        "/api/customers/get-beneficiary-details",
+        {
+          params: {
+            id: selectedBeneficiaryID,
+          },
+        }
+      );
 
-    console.log("Response beneficiary:", response.data);
-    setBeneficiaryAutoFill(response.data.beneficiary);
-    return response.data;
-  } catch (error) {
-    console.error("Beneficiary dropdown error:", error?.response?.data || error.message);
-    throw error;
-  }
-};
+      console.log("Response beneficiary:", response.data);
+      setBeneficiaryAutoFill(response.data.beneficiary);
+      return response.data;
+    } catch (error) {
+      console.error("Beneficiary dropdown error:", error?.response?.data || error.message);
+      throw error;
+    }
+  };
 
-useEffect(()=>{
-  if(selectedBeneficiaryID){
-    fetchBeneficiaries();
-  }
-},[selectedBeneficiaryID]);
+  useEffect(() => {
+    if (selectedBeneficiaryID) {
+      fetchBeneficiaries();
+    }
+  }, [selectedBeneficiaryID]);
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -282,7 +290,7 @@ useEffect(()=>{
           ...apiData
         });
 
-        
+
         if (apiData.beneficiaryId) {
           fetchBeneficiary(apiData.beneficiaryId);
         }
@@ -347,6 +355,10 @@ useEffect(()=>{
       if (response.data?.status || response.data?.success) {
         const customerResponseData = response.data.data;
 
+        if (mode === "existing" && selectedCustomer) {
+          await handleBeneficiarySubmit(selectedCustomer.value);
+          return;
+        }
         // After customer is saved, save beneficiary
         await handleBeneficiarySubmit(customerResponseData._id);
 
@@ -384,12 +396,20 @@ useEffect(()=>{
         formData
       );
 
+
       if (response.data?.status || response.data?.success) {
         // Proceed to next step after both customer and beneficiary are saved
         nextStep({
           id: customerId,
           beneficiaryId: response.data.data._id
         });
+        if (mode === "existing" && selectedBeneficiary) {
+          nextStep({
+            id: customerId,
+            beneficiaryId: selectedBeneficiary.value
+          });
+          return;
+        }
       } else {
         toast.error("Failed to create beneficiary");
       }
@@ -417,8 +437,64 @@ useEffect(()=>{
             />
           </div>
         </div> */}
+        <div className="flex justify-between">
+          <div className="flex gap-8 mb-4">
+            
+
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="new"
+                checked={mode === "new"}
+                onChange={() => {
+                  setMode("new");
+
+                  setSelectedCustomer(null);
+                  setSelectedBeneficiary(null);
+
+                  setCustomer({
+                    id: "",
+                    name: "",
+                    email: "",
+                    phone: "",
+                    address: "",
+                    city: "",
+                    country: "",
+                    postcode: "",
+                  });
+
+                  setBeneficiary({
+                    id: "",
+                    name: "",
+                    phone: "",
+                    email: "",
+                    city: "",
+                    country: "",
+                    address: "",
+                    postcode: "",
+                  });
+                }}
+              />
+              New
+            </label>
+
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="existing"
+                checked={mode === "existing"}
+                onChange={() => {
+                  setMode("existing");
+                }}
+              />
+              Existing
+            </label>
+          </div>
+        </div>
+
 
         <div className="flex flex-wrap md:flex-nowrap w-full gap-3">
+
           {/* Customer Section */}
           <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#057fc4] rounded-xl shadow">
             <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Customer Details</h3>
@@ -426,29 +502,54 @@ useEffect(()=>{
             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
                 <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
-                  Customer Name <span className="text-red-500">*</span>
+                  Name <span className="text-red-500">*</span>
                 </label>
               </div>
               <div className="w-full md:w-[60%]">
-                {/* <input
-                  type="text"
-                  value={customer.name}
-                  placeholder="Enter Customer Name"
+                {mode === "existing" ? (
+                  <Dropdown
+                    value={selectedCustomer}
+                    options={customerOptions}
+                    onChange={handleCustomerChange}
+                    placeholder="Select Customer"
+                    className="w-full border rounded-lg"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={customer.name}
+                    placeholder="Enter Name"
+                    onChange={(e) => {
+                      setCustomer({ ...customer, name: e.target.value });
+                      setFormErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                )}
+              </div>
+            </div>
+
+
+
+            <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
+              <div className="w-full md:w-[40%]">
+                <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
+                  Email <span className="text-red-500">*</span>
+                </label>
+              </div>
+              <div className="w-full md:w-[60%]">
+                <input
+                  type="email"
+                  value={customer.email}
+                  placeholder="Enter Email"
                   onChange={(e) => {
-                    setCustomer({ ...customer, name: e.target.value });
-                    setFormErrors((prev) => ({ ...prev, name: "" }));
+                    setCustomer({ ...customer, email: e.target.value });
+                    setFormErrors((prev) => ({ ...prev, email: "" }));
                   }}
                   className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
-                /> */}
-                <Dropdown
-                  value={selectedCustomer}
-                  options={customerOptions}
-                  onChange={handleCustomerChange}
-                  placeholder="Select Customer"
-                  className="w-full border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
                 />
-                {formErrors.name && (
-                  <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
+                {formErrors.email && (
+                  <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
                 )}
               </div>
             </div>
@@ -472,29 +573,6 @@ useEffect(()=>{
                 />
                 {formErrors.phone && (
                   <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
-              <div className="w-full md:w-[40%]">
-                <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
-                  Email <span className="text-red-500">*</span>
-                </label>
-              </div>
-              <div className="w-full md:w-[60%]">
-                <input
-                  type="email"
-                  value={customer.email}
-                  placeholder="Enter Email"
-                  onChange={(e) => {
-                    setCustomer({ ...customer, email: e.target.value });
-                    setFormErrors((prev) => ({ ...prev, email: "" }));
-                  }}
-                  className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
-                />
-                {formErrors.email && (
-                  <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
                 )}
               </div>
             </div>
@@ -591,6 +669,7 @@ useEffect(()=>{
             </div>
           </div>
 
+
           {/* Beneficiary Section */}
           <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#057fc4] rounded-xl shadow">
             <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Beneficiary Details</h3>
@@ -598,29 +677,29 @@ useEffect(()=>{
             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
                 <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
-                  Beneficiary Name <span className="text-red-500">*</span>
+                  Name <span className="text-red-500">*</span>
                 </label>
               </div>
               <div className="w-full md:w-[60%]">
-                {/* <input
-                  type="text"
-                  value={beneficiary.name}
-                  placeholder="Enter Beneficiary Name"
-                  onChange={(e) => {
-                    setBeneficiary({ ...beneficiary, name: e.target.value });
-                    setBeneficiaryErrors((prev) => ({ ...prev, name: "" }));
-                  }}
-                  className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
-                /> */}
-                <Dropdown
-                  value={selectedBeneficiary}
-                  options={beneficiaryOptions}
-                  onChange={handleBeneficiaryChange}
-                  placeholder="Select Beneficiary"
-                  className="w-full  border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
-                />
-                {beneficiaryErrors.name && (
-                  <p className="text-red-500 text-sm mt-1">{beneficiaryErrors.name}</p>
+                {mode === "existing" ? (
+                  <Dropdown
+                    value={selectedBeneficiary}
+                    options={beneficiaryOptions}
+                    onChange={handleBeneficiaryChange}
+                    placeholder="Select Beneficiary"
+                    className="w-full border rounded-lg"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={beneficiary.name}
+                    placeholder="Enter Name"
+                    onChange={(e) => {
+                      setBeneficiary({ ...beneficiary, name: e.target.value });
+                      setBeneficiaryErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
                 )}
               </div>
             </div>
@@ -635,7 +714,7 @@ useEffect(()=>{
                 <input
                   type="email"
                   value={beneficiary.email || beneficiaryAutoFill?.email || ""}
-                  placeholder="Enter Beneficiary Email"
+                  placeholder="Enter Email"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, email: e.target.value });
                     setBeneficiaryErrors((prev) => ({ ...prev, email: "" }));
@@ -651,14 +730,14 @@ useEffect(()=>{
             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
                 <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
-                  Phone <span className="text-red-500">*</span>
+                  Phone Number <span className="text-red-500">*</span>
                 </label>
               </div>
               <div className="w-full md:w-[60%]">
                 <input
                   type="number"
                   value={beneficiary.phone || beneficiaryAutoFill?.phone || ""}
-                  placeholder="Enter Beneficiary Phone"
+                  placeholder="Enter Phone"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, phone: e.target.value });
                     setBeneficiaryErrors((prev) => ({ ...prev, phone: "" }));
@@ -680,7 +759,7 @@ useEffect(()=>{
               <div className="w-full md:w-[60%]">
                 <textarea
                   value={beneficiary.address || beneficiaryAutoFill?.address || ""}
-                  placeholder="Enter Beneficiary Address"
+                  placeholder="Enter Address"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, address: e.target.value });
                     setBeneficiaryErrors((prev) => ({ ...prev, address: "" }));
@@ -703,7 +782,7 @@ useEffect(()=>{
                 <input
                   type="text"
                   value={beneficiary.city || beneficiaryAutoFill?.city || ""}
-                  placeholder="Enter Beneficiary City"
+                  placeholder="Enter City"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, city: e.target.value });
                     setBeneficiaryErrors((prev) => ({ ...prev, city: "" }));
@@ -726,7 +805,7 @@ useEffect(()=>{
                 <input
                   type="text"
                   value={beneficiary.country || beneficiaryAutoFill?.country || ""}
-                  placeholder="Enter Beneficiary Country"
+                  placeholder="Enter Country"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, country: e.target.value });
                     setBeneficiaryErrors((prev) => ({ ...prev, country: "" }));
@@ -749,7 +828,7 @@ useEffect(()=>{
                 <input
                   type="number"
                   value={beneficiary.postcode || beneficiaryAutoFill?.postcode || ""}
-                  placeholder="Enter Beneficiary PostCode"
+                  placeholder="Enter PostCode"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, postcode: e.target.value });
                     setBeneficiaryErrors((prev) => ({ ...prev, postcode: "" }));
