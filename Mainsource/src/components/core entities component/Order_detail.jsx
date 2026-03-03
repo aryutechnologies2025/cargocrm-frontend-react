@@ -483,7 +483,7 @@ const OrderDetail = () => {
     // },
     {
       title: "Sender",
-       data: (row) => row.customerName || "-",
+      data: (row) => row.customerName || "-",
     },
     {
       title: "Beneficiary",
@@ -618,11 +618,11 @@ const OrderDetail = () => {
 
         {/* Filter Section */}
         <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
-          <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-wrap items-end gap-2">
             {/* Beneficiary Filter */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
               <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">Beneficiary</label>
-              <Dropdown
+              {/* <Dropdown
                 value={beneficiaryFilter}
                 options={beneficiaryOptions}
                 onChange={(e) => setBeneficiaryFilter(e.value)}
@@ -630,13 +630,20 @@ const OrderDetail = () => {
                 optionValue="id"
                 placeholder="Select beneficiary"
                 className="w-full border border-gray-300 rounded-lg min-w-[100px]"
+              /> */}
+              <input
+                type="text"
+                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                value={beneficiaryFilter}
+                onChange={(e) => setBeneficiaryFilter(e.value)}
+                placeholder="Enter Benificary"
               />
             </div>
 
             {/* Sender Filter */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
               <label className="text-sm font-medium text-gray-600 w-full md:w-[30%]">Sender</label>
-              <Dropdown
+              {/* <Dropdown
                 value={senderFilter}
                 options={senderOptions}
                 onChange={(e) => setSenderFilter(e.value)}
@@ -644,13 +651,20 @@ const OrderDetail = () => {
                 optionValue="id"
                 placeholder="Select sender ID"
                 className="w-full border border-gray-300 rounded-lg min-w-[140px]"
+              /> */}
+              <input
+                type="text"
+                className="mt-1 px-3 py-2 border rounded-lg w-full  focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                value={senderFilter}
+                onChange={(e) => setSenderFilter(e.value)}
+                placeholder="Enter Sender"
               />
             </div>
 
             {/* Created By */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">Created By</label>
-              <Dropdown
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">Created By</label>
+              {/* <Dropdown
                 value={createdByFilter}
                 options={senderOptions}
                 onChange={(e) => setCreatedByFilter(e.value)}
@@ -658,14 +672,21 @@ const OrderDetail = () => {
                 optionValue="id"
                 placeholder="Select creator"
                 className="w-full border border-gray-300 rounded-lg  md:min-w-[140px]"
+              /> */}
+              <input
+                type="text"
+                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                value={createdByFilter}
+                onChange={(e) => setCreatedByFilter(e.value)}
+                placeholder="Enter Created By"
               />
             </div>
 
             {/* Created Date */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[70%]">Created Date</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[60%]">Created Date</label>
               <input
-                className=" px-3 py-2 border rounded-lg w-full md:min-w-[140px]"
+                className=" px-3 py-2 border rounded-lg w-full  focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 type="date"
                 value={createdDateFilter}
                 onChange={(e) => setCreatedDateFilter(e.target.value)}
@@ -673,10 +694,10 @@ const OrderDetail = () => {
             </div>
 
             {/* Status */}
-            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[10%] gap-1">
+            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[15%] gap-1">
               <label className="text-sm font-medium text-gray-600">Status</label>
               <select
-                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[140px]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -691,17 +712,17 @@ const OrderDetail = () => {
               <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">From Date</label>
               <input
                 type="date"
-                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[160px]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
               />
             </div>
             {/* To Date */}
             <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[20%]">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">To Date</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[30%]">To Date</label>
               <input
                 type="date"
-                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[160px]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
               />
