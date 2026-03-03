@@ -4,18 +4,29 @@ import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
 
 const CustomerDetails = ({ nextStep, updateData, customerId }) => {
-  const id = customerId;
+  const [selectedCustomerID, setSelectedCustomerID] = useState(null);
+  console.log("selectedCustomerID", selectedCustomerID)
+  const id = customerId || selectedCustomerID;
   const navigate = useNavigate();
   const storedDetalis = localStorage.getItem("cargouser");
   const parsedDetails = JSON.parse(storedDetalis);
   const createdBy = parsedDetails.id;
-
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [beneficiaryErrors, setBeneficiaryErrors] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
+  const [customerOptions, setCustomerOptions] = useState([]);
+  console.log("customerOptions", customerOptions)
+  const [beneficiaryOptions, setBeneficiaryOptions] = useState([]);
+  console.log("beneficiaryOptions", beneficiaryOptions)
+
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  console.log("selectedCustomer", selectedCustomer)
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
+  console.log("selectedBeneficiary", selectedBeneficiary)
   const [customer, setCustomer] = useState({
     id: "",
     name: "",
@@ -100,7 +111,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   const validateBeneficiaryForm = () => {
     const errors = {};
 
-     const nameRegex = /^[A-Za-z\s]+$/;
+    const nameRegex = /^[A-Za-z\s]+$/;
     const phoneRegex = /^[0-9]{10}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const addressRegex = /^[A-Za-z0-9\s,.-]+$/;
@@ -153,10 +164,118 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
     return Object.keys(errors).length === 0;
   };
 
+
+  const fetchCustomerNames = async () => {
+    try {
+      const response = await axiosInstance.get(
+        "api/customers/get-customer-name"
+      );
+
+      console.log("response customer", response);
+
+      if (response.data?.success) {
+
+        const customer = response.data.customer;
+
+
+        const list = customer.map((data) => ({
+          label: data.name,
+          value: data._id,
+          data: data,
+        }));
+
+        // console.log("list", list);
+
+        setCustomerOptions(list);
+      }
+    } catch (error) {
+      console.log("Customer dropdown error", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomerNames();
+  }, []);
+
+  const handleCustomerChange = async (e) => {
+    const selected = e.value;
+
+    setSelectedCustomer(selected);
+    setSelectedCustomerID(selected.data.id)
+    const customerData = customerOptions.find(
+      (c) => c.value === selected
+    )?.data;
+
+    if (customerData) {
+      setCustomer({
+        id: customerData._id,
+        name: customerData.name,
+        email: customerData.email,
+        phone: customerData.phone,
+        address: customerData.address,
+        city: customerData.city,
+        country: customerData.country,
+        postcode: customerData.postcode,
+      });
+
+      fetchBeneficiaries(selected);
+    }
+  };
+
+  const handleBeneficiaryChange = (e) => {
+    const selected = e.value;
+    setSelectedBeneficiary(selected);
+
+    const beneficiaryData = beneficiaryOptions.find(
+      (b) => b.value === selected
+    )?.data;
+
+    if (beneficiaryData) {
+      setBeneficiary({
+        id: beneficiaryData._id,
+        name: beneficiaryData.name,
+        email: beneficiaryData.email,
+        phone: beneficiaryData.phone,
+        address: beneficiaryData.address,
+        city: beneficiaryData.city,
+        country: beneficiaryData.country,
+        postcode: beneficiaryData.postcode,
+      });
+    }
+  };
+
+  const fetchBeneficiaries = async (customerId) => {
+    try {
+      const response = await axiosInstance.get(
+        `api/customers/get-beneficiary-details/${customerId}`
+      );
+
+      console.log("response beneficiary", response);
+
+      if (response.data?.success || response.data?.status) {
+
+        const benificary = response.data.beneficiary;
+
+        console.log("decode data beneficiary", benificary);
+
+         const list = benificary.map((data) => ({
+          label: data.name,
+          value: data._id,
+          data: data,
+        }));
+       
+        console.log("list beneficiary", list)
+        setBeneficiaryOptions(list);
+      }
+    } catch (error) {
+      console.log("Beneficiary dropdown error", error);
+    }
+  };
+
   const fetchCustomer = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`api/customers/view-customerss/${id}`);
+      const response = await axiosInstance.get(`api/customers/view-customerss/${id || selectedCustomerID}`);
 
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.data || [];
@@ -165,7 +284,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
           ...apiData
         });
 
-        // If customer has associated beneficiary, fetch it
+        
         if (apiData.beneficiaryId) {
           fetchBeneficiary(apiData.beneficiaryId);
         }
@@ -285,7 +404,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
     <>
       <div className="p-4 gap-3 flex flex-col flex-wrap md:flex-nowrap w-full min-h-screen bg-white rounded-xl shadow">
 
-        <div className="flex justify-end">
+        {/* <div className="flex justify-end">
           <div className="relative w-full md:w-64">
             <FiSearch
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -299,7 +418,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
                focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="flex flex-wrap md:flex-nowrap w-full gap-3">
           {/* Customer Section */}
@@ -313,7 +432,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
                 </label>
               </div>
               <div className="w-full md:w-[60%]">
-                <input
+                {/* <input
                   type="text"
                   value={customer.name}
                   placeholder="Enter Customer Name"
@@ -322,6 +441,13 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
                     setFormErrors((prev) => ({ ...prev, name: "" }));
                   }}
                   className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
+                /> */}
+                <Dropdown
+                  value={selectedCustomer}
+                  options={customerOptions}
+                  onChange={handleCustomerChange}
+                  placeholder="Select Customer"
+                  className="w-full border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
                 />
                 {formErrors.name && (
                   <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
@@ -443,7 +569,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
               </div>
             </div>
 
-             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
+            <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
                 <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
                   PostCode <span className="text-red-500">*</span>
@@ -478,7 +604,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
                 </label>
               </div>
               <div className="w-full md:w-[60%]">
-                <input
+                {/* <input
                   type="text"
                   value={beneficiary.name}
                   placeholder="Enter Beneficiary Name"
@@ -487,6 +613,13 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
                     setBeneficiaryErrors((prev) => ({ ...prev, name: "" }));
                   }}
                   className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
+                /> */}
+                <Dropdown
+                  value={selectedBeneficiary}
+                  options={beneficiaryOptions}
+                  onChange={handleBeneficiaryChange}
+                  placeholder="Select Beneficiary"
+                  className="w-full  border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
                 />
                 {beneficiaryErrors.name && (
                   <p className="text-red-500 text-sm mt-1">{beneficiaryErrors.name}</p>

@@ -53,9 +53,14 @@ const EventList_details = () => {
   const validateAddForm = () => {
     let errors = {};
 
+     const nameRegex = /^[A-Za-z\s]+$/;
+
     if (!name.trim()) {
       errors.name = "Name is required";
+    } else if(!nameRegex.test(name)) {
+      errors.name = "Name must contain only alphabets"
     }
+
     if (status === "") {
       errors.status = "Status is required";
     }
@@ -67,9 +72,14 @@ const EventList_details = () => {
   const validateEditForm = () => {
     let errors = {};
 
+     const nameRegex = /^[A-Za-z\s]+$/;
+
     if (!editName.trim()) {
       errors.editName = "Name is required";
+    } else if(!nameRegex.test(editName)) {
+      errors.editName = "Name must contain only alphabets"
     }
+
     if (editStatus === "") {
       errors.editStatus = "Status is required";
     }
