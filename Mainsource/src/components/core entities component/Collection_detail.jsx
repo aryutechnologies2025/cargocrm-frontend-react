@@ -49,20 +49,25 @@ const Collection_detail = () => {
   const [editDateTime, setEditDateTime] = useState("");
   const [editStatus, setEditStatus] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-
   const [collection, setCollection] = useState([]);
   const [senderOptions, setSenderOptions] = useState([]);
   console.log("senderOptions", senderOptions);
+
   const validateAddForm = () => {
     let errors = {};
 
-    if (!senderId.trim()) {
+    // Order ID
+    if (!senderId?.trim()) {
       errors.senderId = "Order Id is required";
     }
-    if (!address.trim()) {
+
+    // Address
+    if (!address?.trim()) {
       errors.address = "Address is required";
-    }
-    if (!dateTime.trim()) {
+    } 
+
+    // Date & Time
+    if (!dateTime?.trim()) {
       errors.dateTime = "Date & Time is required";
     }
 
@@ -73,13 +78,18 @@ const Collection_detail = () => {
   const validateEditForm = () => {
     let errors = {};
 
-    if (!editOrderId.trim()) {
+    // Order ID
+    if (!editOrderId?.trim()) {
       errors.editOrderId = "Order Id is required";
     }
-    if (!editAddress.trim()) {
+
+    // Address
+    if (!editAddress?.trim()) {
       errors.editAddress = "Address is required";
     }
-    if (!editDateTime.trim()) {
+
+    // Date & Time
+    if (!editDateTime?.trim()) {
       errors.editDateTime = "Date & Time is required";
     }
 
@@ -144,7 +154,7 @@ const Collection_detail = () => {
         toast.error("Failed to create order");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message );
+      toast.error(err.response?.data?.message);
     }
   };
 
@@ -263,15 +273,18 @@ const Collection_detail = () => {
     },
     {
       title: "Order ID",
-      data: "tracking_number",
+      data: null,
+      render: (row) => row.tracking_number || "-",
     },
     {
       title: "Collection Address",
-      data: "address",
+      data: null,
+      render: (row) => row.address || "-",
     },
     {
       title: "Collection Date&Time",
-      data: "date_time",
+      data: null,
+      render: (row) => row.date_time || "-",
     },
     {
       title: "Status",
@@ -482,9 +495,8 @@ const Collection_detail = () => {
             <div className="absolute inset-0 " onClick={closeAddModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -611,9 +623,8 @@ const Collection_detail = () => {
             <div className="absolute inset-0 " onClick={closeEditModal}></div>
 
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg  transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full  mt-2 ms-2  border-2 transition-all duration-500 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
