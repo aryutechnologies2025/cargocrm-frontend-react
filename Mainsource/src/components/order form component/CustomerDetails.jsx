@@ -59,10 +59,10 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
 
     const nameRegex = /^[A-Za-z\s]+$/;
     const phoneRegex = /^[0-9]{10}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const addressRegex = /^[A-Za-z0-9\s,.-]+$/;
     const cityCountryRegex = /^[A-Za-z\s]+$/;
-    const postcodeRegex = /^[1-9][0-9]{5}$/;
+    // const postcodeRegex = /^[0-9]{10}$/;
 
 
     if (!customer.name?.trim()) {
@@ -79,9 +79,7 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
 
     if (!customer.email?.trim()) {
       errors.email = "Email is required";
-    } else if (!emailRegex.test(!customer.email)) {
-      errors.email = "Invalid email format"
-    }
+    } 
 
     if (!customer.address?.trim()) {
       errors.address = "Address is required";
@@ -101,11 +99,9 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
       errors.country = "Country must contain only alphabets"
     }
 
-    if (!customer.postcode?.trim()) {
-      errors.postcode = "PostCode is required";
-    } else if (!postcodeRegex.test(!customer.postcode)) {
-      errors.postcode = "Postcode must be in number"
-    }
+    // if (!customer.postcode?.trim()) {
+    //   errors.postcode = "PostCode is required";
+    // } 
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -116,10 +112,9 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
 
     const nameRegex = /^[A-Za-z\s]+$/;
     const phoneRegex = /^[0-9]{10}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const addressRegex = /^[A-Za-z0-9\s,.-]+$/;
     const cityCountryRegex = /^[A-Za-z\s]+$/;
-    const postcodeRegex = /^[1-9][0-9]{5}$/;
 
     if (!beneficiary.name?.trim()) {
       errors.name = "Beneficiary name is required";
@@ -129,15 +124,11 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
 
     if (!beneficiary.phone?.trim()) {
       errors.phone = "Beneficiary phone is required";
-    } else if (!phoneRegex.test(!beneficiary.phone)) {
-      errors.phone = "Phone must be 10 digits"
     }
 
     if (!beneficiary.email?.trim()) {
       errors.email = "Beneficiary email is required";
-    } else if (!emailRegex.test(!beneficiary.email)) {
-      errors.email = "Invalid email format"
-    }
+    } 
 
     if (!beneficiary.address?.trim()) {
       errors.address = "Beneficiary address is required";
@@ -157,11 +148,9 @@ console.log("beneficiaryAutoFill", beneficiaryAutoFill);
       errors.country = "Country must contain only alphabets"
     }
 
-    if (!beneficiary.postcode?.trim()) {
-      errors.postcode = "Beneficiary Postcode is required";
-    } else if (!postcodeRegex.test(!beneficiary.postcode)) {
-      errors.postcode = "Postcode must be in number"
-    }
+    // if (!beneficiary.postcode?.trim()) {
+    //   errors.postcode = "Beneficiary Postcode is required";
+    // }
 
     setBeneficiaryErrors(errors);
     return Object.keys(errors).length === 0;
@@ -595,9 +584,9 @@ useEffect(()=>{
                   }}
                   className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
                 />
-                {formErrors.postcode && (
+                {/* {formErrors.postcode && (
                   <p className="text-red-500 text-sm mt-1">{formErrors.postcode}</p>
-                )}
+                )} */}
               </div>
             </div>
           </div>
