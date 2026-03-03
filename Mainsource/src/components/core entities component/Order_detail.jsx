@@ -45,14 +45,15 @@ const OrderDetail = () => {
     createdAt: true,
     status: true,
   });
-  const [statusFilter, setStatusFilter] = useState("");
   const [senderOptions, setSenderOptions] = useState([]);
   const [beneficiaryOptions, setBeneficiaryOptions] = useState([]);
   const [beneficiaryFilter, setBeneficiaryFilter] = useState("");
   const [senderFilter, setSenderFilter] = useState("");
   const [createdByFilter, setCreatedByFilter] = useState("");
   const [createdDateFilter, setCreatedDateFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [fromDateFilter, setFromDateFilter] = useState("");
+  const [toDateFilter, setToDateFilter] = useState("");
 
   // Form states
   const [senderId, setSenderId] = useState("");
@@ -74,101 +75,11 @@ const OrderDetail = () => {
   const parsedDetails = storedDetails ? JSON.parse(storedDetails) : null;
   const userId = parsedDetails ? parsedDetails.id : null;
 
-  // Order Details Table Component
-  const OrderDetailsTable = ({ orderId, trackingOptions }) => {
-    const selectedOrders = trackingOptions?.filter(
-      (order) => order?.customerId?._id === orderId
-    ) || [];
-
-    if (!selectedOrders || selectedOrders.length === 0) return null;
-
-    const formatDate = (dateString) => {
-      if (!dateString) return "N/A";
-      return new Date(dateString).toLocaleDateString();
-    };
-
-    const renderStatus = (status) => {
-      const isActive = status === "1" || status === 1 || status === true;
-      return (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${isActive
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-600"
-            }`}
-        >
-          {isActive ? "Active" : "Inactive"}
-        </span>
-      );
-    };
-
-    return (
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          Order Details ({selectedOrders.length} orders)
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm border border-gray-200 rounded-lg">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                  Customer ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                  Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                  Email
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                  Phone No
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                  City
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                  Country
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b border-gray-200">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {selectedOrders.map((order, index) => (
-                <tr key={order._id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.customerId?.name || "N/A"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.name || "N/A"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.email || "N/A"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.phone || "N/A"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.city || "N/A"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {order.country || "N/A"}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                    {renderStatus(order.status)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
   // Validation functions
   const validateAddForm = () => {
     const errors = {};
+
+   
 
     if (!senderId?.trim()) {
       errors.senderId = "Sender ID is required";
@@ -214,27 +125,32 @@ const OrderDetail = () => {
   };
 
   // Fetch orders
-  const fetchOrder = async () => {
+
+  const fetchOrder = async (filters = {}) => {
     setLoading(true);
+
     try {
-      const response = await axiosInstance.get(`api/orders/all-order`, {
-        params: {
-          created_by: userId,
-        },
-      });
+      const params = {
+        created_by: userId,
+        ...filters, //  dynamic filters
+      };
+
+      const response = await axiosInstance.get(
+        "api/orders/all-order",
+        { params }
+      );
+
       console.log("Order API Response:", response.data);
+
       if (response.data?.success || response.data?.status) {
-        const apiData = response.data.data || [];
-        setOrder(apiData);
+        setOrder(response.data.data || []);
         setSenderOptions(response.data.customer || []);
       } else {
         setOrder([]);
         setSenderOptions([]);
       }
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      setOrder([]);
-      setSenderOptions([]);
+      console.error(error);
       toast.error("Failed to fetch orders");
     } finally {
       setLoading(false);
@@ -267,6 +183,35 @@ const OrderDetail = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFilterSubmit = () => {
+    const filters = {};
+
+    if (beneficiaryFilter)
+      filters.beneficiary_name = beneficiaryFilter;
+
+    if (senderFilter)
+      filters.customer_name = senderFilter;
+
+    if (createdByFilter)
+      filters.created_by_name = createdByFilter;
+
+    if (createdDateFilter)
+      filters.created_date = createdDateFilter;
+
+    // if (statusFilter !== "")
+    //   filters.status = statusFilter;
+
+    if (fromDateFilter)
+      filters.from_date = fromDateFilter;
+
+    if (toDateFilter)
+      filters.to_date = toDateFilter;
+
+    console.log("Applied Filters:", filters);
+
+    fetchOrder(filters); //  API call with filters
   };
 
   useEffect(() => {
@@ -331,7 +276,7 @@ const OrderDetail = () => {
     setBeneficiaryId("");
     setCargoMode("");
     setPacked("");
-    setStatus("");
+    // setStatus("");
     setFormErrors({});
   };
 
@@ -429,14 +374,18 @@ const OrderDetail = () => {
   };
 
   // Filter functions
+
   const resetFilters = () => {
-    setStatusFilter("");
-    setBeneficiaryFilter("");
-    setSenderFilter("");
-    setCreatedByFilter("");
-    setCreatedDateFilter("");
-    setDateFilter("");
-  };
+  setStatusFilter("");
+  setBeneficiaryFilter("");
+  setSenderFilter("");
+  setCreatedByFilter("");
+  setCreatedDateFilter("");
+  setFromDateFilter("");
+  setToDateFilter("");
+
+  fetchOrder(); 
+};
 
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
@@ -622,20 +571,11 @@ const OrderDetail = () => {
             {/* Beneficiary Filter */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
               <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">Beneficiary</label>
-              {/* <Dropdown
-                value={beneficiaryFilter}
-                options={beneficiaryOptions}
-                onChange={(e) => setBeneficiaryFilter(e.value)}
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Select beneficiary"
-                className="w-full border border-gray-300 rounded-lg min-w-[100px]"
-              /> */}
               <input
                 type="text"
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={beneficiaryFilter}
-                onChange={(e) => setBeneficiaryFilter(e.value)}
+                onChange={(e) => setBeneficiaryFilter(e.target.value)}
                 placeholder="Enter Benificary"
               />
             </div>
@@ -643,20 +583,11 @@ const OrderDetail = () => {
             {/* Sender Filter */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
               <label className="text-sm font-medium text-gray-600 w-full md:w-[30%]">Sender</label>
-              {/* <Dropdown
-                value={senderFilter}
-                options={senderOptions}
-                onChange={(e) => setSenderFilter(e.value)}
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Select sender ID"
-                className="w-full border border-gray-300 rounded-lg min-w-[140px]"
-              /> */}
               <input
                 type="text"
                 className="mt-1 px-3 py-2 border rounded-lg w-full  focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={senderFilter}
-                onChange={(e) => setSenderFilter(e.value)}
+                onChange={(e) => setSenderFilter(e.target.value)}
                 placeholder="Enter Sender"
               />
             </div>
@@ -664,20 +595,11 @@ const OrderDetail = () => {
             {/* Created By */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
               <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">Created By</label>
-              {/* <Dropdown
-                value={createdByFilter}
-                options={senderOptions}
-                onChange={(e) => setCreatedByFilter(e.value)}
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Select creator"
-                className="w-full border border-gray-300 rounded-lg  md:min-w-[140px]"
-              /> */}
               <input
                 type="text"
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={createdByFilter}
-                onChange={(e) => setCreatedByFilter(e.value)}
+                onChange={(e) => setCreatedByFilter(e.target.value)}
                 placeholder="Enter Created By"
               />
             </div>
@@ -694,7 +616,7 @@ const OrderDetail = () => {
             </div>
 
             {/* Status */}
-            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[15%] gap-1">
+            {/* <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[15%] gap-1">
               <label className="text-sm font-medium text-gray-600">Status</label>
               <select
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
@@ -702,31 +624,33 @@ const OrderDetail = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="">All Status</option>
-                <option value="0">Active</option>
-                <option value="1">Inactive</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
               </select>
-            </div>
+            </div> */}
 
             {/* From Date */}
-            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[20%]">
+            <div className="flex flex-wrap md:flex-nowrap items-center">
               <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">From Date</label>
               <input
                 type="date"
+                value={fromDateFilter}
+                onChange={(e) => setFromDateFilter(e.target.value)}
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
               />
             </div>
             {/* To Date */}
-            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[20%]">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[30%]">To Date</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center ">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">To Date</label>
               <input
                 type="date"
+                value={toDateFilter}
+                onChange={(e) => setToDateFilter(e.target.value)}
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
               />
             </div>
+
+
 
             {/* Reset */}
             <div>
@@ -737,13 +661,12 @@ const OrderDetail = () => {
                 Reset
               </button>
             </div>
-            <div>
-              <button
-                className="bg-[#057fc4] hover:bg-[#2d93cf] text-white px-4 py-2 rounded-lg"
-              >
-                Submit
-              </button>
-            </div>
+            <button
+              onClick={handleFilterSubmit}
+              className="bg-[#057fc4] hover:bg-[#2d93cf] text-white px-4 py-2 rounded-lg"
+            >
+              Submit
+            </button>
 
             {/* Customize */}
             <div className="relative">

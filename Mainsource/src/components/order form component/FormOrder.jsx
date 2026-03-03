@@ -56,7 +56,7 @@ const FormOrder = () => {
                     </p>
                     <p>{">"}</p>
 
-                    <p className="text-sm md:text-md text-[#057fc4]">Order From</p>
+                    <p className="text-sm md:text-md text-[#057fc4]">Order Form</p>
                 </div>
 
                 {/* STEP HEADER */}
