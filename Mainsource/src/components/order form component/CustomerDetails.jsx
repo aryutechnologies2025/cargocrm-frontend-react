@@ -497,7 +497,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
 
           {/* Customer Section */}
           <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#057fc4] rounded-xl shadow">
-            <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Customer Details</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Shipper Details</h3>
 
             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
@@ -672,7 +672,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
 
           {/* Beneficiary Section */}
           <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#057fc4] rounded-xl shadow">
-            <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Beneficiary Details</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Consingee Details</h3>
 
             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
