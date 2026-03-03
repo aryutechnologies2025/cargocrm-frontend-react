@@ -37,7 +37,6 @@ const OrderDetail = () => {
   const [viewOrder, setViewOrder] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
-    tracking_number: true,
     sender_id: true,
     beneficiary_id: true,
     cargo_mode: true,
@@ -650,7 +649,7 @@ const OrderDetail = () => {
 
             {/* Created By */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-32">Created By</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">Created By</label>
               <Dropdown
                 value={createdByFilter}
                 options={senderOptions}
@@ -658,15 +657,15 @@ const OrderDetail = () => {
                 optionLabel="name"
                 optionValue="id"
                 placeholder="Select creator"
-                className="w-full border border-gray-300 rounded-lg min-w-[140px]"
+                className="w-full border border-gray-300 rounded-lg  md:min-w-[140px]"
               />
             </div>
 
             {/* Created Date */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 ">Created Date</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[70%]">Created Date</label>
               <input
-                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[140px]"
+                className=" px-3 py-2 border rounded-lg w-full md:min-w-[140px]"
                 type="date"
                 value={createdDateFilter}
                 onChange={(e) => setCreatedDateFilter(e.target.value)}
@@ -674,7 +673,7 @@ const OrderDetail = () => {
             </div>
 
             {/* Status */}
-            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[20%]">
+            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[10%] gap-1">
               <label className="text-sm font-medium text-gray-600">Status</label>
               <select
                 className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[140px]"
@@ -688,21 +687,21 @@ const OrderDetail = () => {
             </div>
 
             {/* From Date */}
-            <div>
-              <label className="text-sm font-medium text-gray-600 p-1">From Date</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[20%]">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">From Date</label>
               <input
                 type="date"
-                className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[160px]"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
               />
             </div>
             {/* To Date */}
-            <div>
-              <label className="text-sm font-medium text-gray-600 p-1">To Date</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[20%]">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">To Date</label>
               <input
                 type="date"
-                className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[160px]"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
               />
@@ -715,6 +714,13 @@ const OrderDetail = () => {
                 className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
               >
                 Reset
+              </button>
+            </div>
+            <div>
+              <button
+                className="bg-[#057fc4] hover:bg-[#2d93cf] text-white px-4 py-2 rounded-lg"
+              >
+                Submit
               </button>
             </div>
 
