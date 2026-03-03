@@ -645,7 +645,7 @@ useEffect(()=>{
               <div className="w-full md:w-[60%]">
                 <input
                   type="email"
-                  value={beneficiary.email || beneficiaryAutoFill.email || ""}
+                  value={beneficiary.email || beneficiaryAutoFill?.email || ""}
                   placeholder="Enter Beneficiary Email"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, email: e.target.value });
@@ -668,7 +668,7 @@ useEffect(()=>{
               <div className="w-full md:w-[60%]">
                 <input
                   type="number"
-                  value={beneficiary.phone || beneficiaryAutoFill.phone || ""}
+                  value={beneficiary.phone || beneficiaryAutoFill?.phone || ""}
                   placeholder="Enter Beneficiary Phone"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, phone: e.target.value });
@@ -690,7 +690,7 @@ useEffect(()=>{
               </div>
               <div className="w-full md:w-[60%]">
                 <textarea
-                  value={beneficiary.address || beneficiaryAutoFill.address || ""}
+                  value={beneficiary.address || beneficiaryAutoFill?.address || ""}
                   placeholder="Enter Beneficiary Address"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, address: e.target.value });
@@ -713,7 +713,7 @@ useEffect(()=>{
               <div className="w-full md:w-[60%]">
                 <input
                   type="text"
-                  value={beneficiary.city || beneficiaryAutoFill.city || ""}
+                  value={beneficiary.city || beneficiaryAutoFill?.city || ""}
                   placeholder="Enter Beneficiary City"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, city: e.target.value });
@@ -736,7 +736,7 @@ useEffect(()=>{
               <div className="w-full md:w-[60%]">
                 <input
                   type="text"
-                  value={beneficiary.country || beneficiaryAutoFill.country || ""}
+                  value={beneficiary.country || beneficiaryAutoFill?.country || ""}
                   placeholder="Enter Beneficiary Country"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, country: e.target.value });
@@ -759,7 +759,7 @@ useEffect(()=>{
               <div className="w-full md:w-[60%]">
                 <input
                   type="number"
-                  value={beneficiary.postcode || beneficiaryAutoFill.postcode || ""}
+                  value={beneficiary.postcode || beneficiaryAutoFill?.postcode || ""}
                   placeholder="Enter Beneficiary PostCode"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, postcode: e.target.value });
