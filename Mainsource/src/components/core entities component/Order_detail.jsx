@@ -140,7 +140,6 @@ const OrderDetail = () => {
         { params }
       );
 
-      console.log("Order API Response:", response.data);
 
       if (response.data?.success || response.data?.status) {
         setOrder(response.data.data || []);
@@ -209,9 +208,8 @@ const OrderDetail = () => {
     if (toDateFilter)
       filters.to_date = toDateFilter;
 
-    console.log("Applied Filters:", filters);
 
-    fetchOrder(filters); //  API call with filters
+    fetchOrder(filters);
   };
 
   useEffect(() => {
@@ -455,7 +453,7 @@ const OrderDetail = () => {
         const bgColor = isActive ? "#e6fffa" : "#ffe5e5";
 
         return `
-      <div style="
+            <div style="
         display:inline-block;
         padding:4px 8px;
         color:${textColor};
@@ -466,12 +464,27 @@ const OrderDetail = () => {
         width:100px;
         font-size:10px;
         font-weight:700;
-      ">
+            ">
         ${isActive ? "Yes" : "No"}
-      </div>
-    `;
-      },
-    },
+            </div>
+          `;
+            },
+          },
+          {
+            title: "Quantity",
+            data: null,
+            render: (row) => row.parcels?.[0]?.piece_number || "-",
+          },
+          {
+            title: "Weight",
+            data: null,
+            render: (row) => {
+        const totalWeight = row.parcels?.[0]?.piece_details?.reduce((sums, piece, index) => {
+          return sums + (parseFloat(piece.weight) || 0);
+        }, 0) || 0;
+        return totalWeight || "0";
+            },
+          },
 
     // {
     //   title: "Created By",

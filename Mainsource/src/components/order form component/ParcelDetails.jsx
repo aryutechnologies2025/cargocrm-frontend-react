@@ -9,7 +9,14 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
     id: "",
     piece_number: "",
     description: "",
+    piece_details: [],
   });
+  
+  const [pieceData, setPieceData] = useState([]);
+  
+  console.log("parcel", parcel);
+  console.log("pieceData", pieceData);
+  
   const validateAddForm = () => {
     const errors = {};
 
@@ -20,14 +27,10 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
       errors.description = "Description is required";
     }
    
-    
-   
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  const [pieceData, setPieceData] = useState([]);
-
+  
   const handlePieceDataChange = (index, field, value) => {
     const updatedPieceData = [...pieceData];
     updatedPieceData[index] = {
@@ -44,12 +47,16 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
       
       if (response.data?.success || response.data?.status) {
         const apiData = response.data.data || [];
+        
+        // Set parcel data
         setParcel({
           id: apiData._id,
           piece_number: apiData.piece_number || "",
           description: apiData.description || "",
+          piece_details: apiData.piece_details || []
         });
 
+        // Set piece data from API
         if (apiData.piece_details && Array.isArray(apiData.piece_details)) {
           setPieceData(apiData.piece_details);
         }
@@ -66,10 +73,12 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
     if (customerId) {
       fetchParcel();
     } else {
+      // Reset when no customerId
       setParcel({
         id: "",
         piece_number: "",
         description: "",
+        piece_details: []
       });
       setPieceData([]);
     }
@@ -77,11 +86,13 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-     if (!validateAddForm()) return;
+    if (!validateAddForm()) return;
+    
     if(!pieceData.length) {
       toast.error("Please add at least one piece");
       return;
     }
+    
     if (parcel.piece_number && parseInt(parcel.piece_number) > 0) {
       const isValid = pieceData.every(piece => 
         piece.weight && piece.length && piece.width && piece.height
@@ -103,7 +114,7 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
     try {
       const formData = {
         ...(parcel.id && { id: parcel.id }),
-        customerId: customerId, // Use prop directly
+        customerId: customerId,
         piece_number: parcel.piece_number,
         piece_details: pieceDetails,
         description: parcel.description
@@ -119,7 +130,7 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
         
         updateData("parcel", response.data.data);
         nextStep({
-          id: customerId, // Pass back the customerId
+          id: customerId,
         });
       } else {
         toast.error("Failed to create parcel");
@@ -130,25 +141,80 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
   };
 
   const handleBack = () => {
-    prevStep({ id: customerId }); // Use customerId prop directly
+    prevStep({ id: customerId });
   };
 
-  // Handle piece number change
+  // Fixed: Handle piece number change without losing existing data
   const handlePieceNumberChange = (e) => {
     const value = e.target.value;
-    setParcel({ ...parcel, piece_number: value });
+    const newPieceNumber = parseInt(value) || 0;
     
-    const numPieces = parseInt(value) || 0;
-    const newPieceData = Array(numPieces)
-      .fill(null)
-      .map(() => ({
-        weight: "",
-        length: "",
-        width: "",
-        height: "",
-      }));
-    setPieceData(newPieceData);
+    // Update parcel state with new piece_number
+    setParcel(prev => ({ ...prev, piece_number: value }));
+    
+    if (newPieceNumber > 0) {
+      // Check if we have existing piece data from API or previous entries
+      if (parcel.id && parcel.piece_details && parcel.piece_details.length > 0) {
+        // This is an existing parcel with data
+        if (newPieceNumber > parcel.piece_details.length) {
+          // Need more pieces than existing - keep existing and add empty ones
+          const additionalPieces = Array(newPieceNumber - parcel.piece_details.length)
+            .fill(null)
+            .map(() => ({
+              weight: "",
+              length: "",
+              width: "",
+              height: "",
+            }));
+          setPieceData([...parcel.piece_details, ...additionalPieces]);
+        } else if (newPieceNumber < parcel.piece_details.length) {
+          // Need fewer pieces - keep first N pieces
+          setPieceData(parcel.piece_details.slice(0, newPieceNumber));
+        } else {
+          // Same number - keep all existing data
+          setPieceData(parcel.piece_details);
+        }
+      } else if (pieceData.length > 0) {
+        // We have some piece data but no parcel.id (maybe new parcel with some entries)
+        if (newPieceNumber > pieceData.length) {
+          // Add empty entries
+          const additionalPieces = Array(newPieceNumber - pieceData.length)
+            .fill(null)
+            .map(() => ({
+              weight: "",
+              length: "",
+              width: "",
+              height: "",
+            }));
+          setPieceData([...pieceData, ...additionalPieces]);
+        } else if (newPieceNumber < pieceData.length) {
+          // Remove extra pieces
+          setPieceData(pieceData.slice(0, newPieceNumber));
+        }
+      } else {
+        // No existing data, create empty entries
+        const newPieceData = Array(newPieceNumber)
+          .fill(null)
+          .map(() => ({
+            weight: "",
+            length: "",
+            width: "",
+            height: "",
+          }));
+        setPieceData(newPieceData);
+      }
+    } else {
+      // If piece number is 0 or invalid, clear piece data
+      setPieceData([]);
+    }
   };
+
+  // Add this effect to sync pieceData when parcel.piece_details changes
+  useEffect(() => {
+    if (parcel.id && parcel.piece_details && Array.isArray(parcel.piece_details) && parcel.piece_details.length > 0) {
+      setPieceData(parcel.piece_details);
+    }
+  }, [parcel.id, parcel.piece_details]);
 
   if (loading) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -174,12 +240,13 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {formErrors.piece_number && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.piece_number}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.piece_number}</p>
+              )}
             </div>
           </div>
 
-          {parcel.piece_number && parseInt(parcel.piece_number) > 0 && (
+          {/* Piece details section */}
+          {parseInt(parcel.piece_number) > 0 && (
             <div className="mt-4">
               {Array.from({ length: parseInt(parcel.piece_number) }).map(
                 (_, index) => (
@@ -187,9 +254,6 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
                     key={index}
                     className="mb-6 p-2 border border-gray-200 rounded-lg"
                   >
-                    {/* <h3 className="text-md font-semibold mb-3">
-                      Piece {index + 1}
-                    </h3> */}
                     <div className="flex flex-wrap justify-between items-center gap-2">
                       <div className="w-full md:w-[22%]">
                         <label className="block text-[15px] md:text-md font-medium mb-2">
@@ -249,7 +313,7 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
             </div>
           )}
 
-          <div className="mt-2 md:mt-4 flex flex-wrap  justify-between items-center ">
+          <div className="mt-2 md:mt-4 flex flex-wrap justify-between items-center ">
             <div className="">
               <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
                 Description <span className="text-red-500">*</span>
@@ -264,8 +328,8 @@ const ParcelDetails = ({ nextStep, prevStep, updateData, customerId }) => {
                 rows="3"
               />
               {formErrors.description && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
-                      )}
+                <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
+              )}
             </div>
           </div>
 
