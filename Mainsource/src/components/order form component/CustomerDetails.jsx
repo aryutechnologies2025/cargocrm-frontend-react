@@ -11,7 +11,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   const storedDetalis = localStorage.getItem("cargouser");
   const parsedDetails = JSON.parse(storedDetalis);
   const createdBy = parsedDetails.id;
-  
+
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [beneficiaryErrors, setBeneficiaryErrors] = useState({});
@@ -24,9 +24,10 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
     address: "",
     city: "",
     country: "",
+    postcode: "",
     created_by: ""
   });
-  
+
   const [beneficiary, setBeneficiary] = useState({
     id: "",
     name: "",
@@ -35,28 +36,61 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
     email: "",
     country: "",
     address: "",
+    postcode: "",
   });
+
 
   const validateCustomerForm = () => {
     const errors = {};
 
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const addressRegex = /^[A-Za-z0-9\s,.-]+$/;
+    const cityCountryRegex = /^[A-Za-z\s]+$/;
+    const postcodeRegex = /^[1-9][0-9]{5}$/;
+
+
     if (!customer.name?.trim()) {
       errors.name = "Name is required";
+    } else if (!nameRegex.test(customer.name)) {
+      errors.name = "Name must contain only alphabets"
     }
+
     if (!customer.phone?.trim()) {
       errors.phone = "Phone is required";
+    } else if (!phoneRegex.test(customer.phone)) {
+      errors.phone = "Phone must be 10 digits";
     }
+
     if (!customer.email?.trim()) {
       errors.email = "Email is required";
+    } else if (!emailRegex.test(!customer.email)) {
+      errors.email = "Invalid email format"
     }
+
     if (!customer.address?.trim()) {
       errors.address = "Address is required";
+    } else if (!addressRegex.test(!customer.address)) {
+      errors.address = "Invalid address format"
     }
+
     if (!customer.city?.trim()) {
       errors.city = "City is required";
+    } else if (!cityCountryRegex.test(!customer.city)) {
+      errors.city = "City must contain only alphabets"
     }
+
     if (!customer.country?.trim()) {
       errors.country = "Country is required";
+    } else if (!cityCountryRegex.test(!customer.country)) {
+      errors.country = "Country must contain only alphabets"
+    }
+
+    if (!customer.postcode?.trim()) {
+      errors.postcode = "PostCode is required";
+    } else if (!postcodeRegex.test(!customer.postcode)) {
+      errors.postcode = "Postcode must be in number"
     }
 
     setFormErrors(errors);
@@ -66,23 +100,53 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   const validateBeneficiaryForm = () => {
     const errors = {};
 
+     const nameRegex = /^[A-Za-z\s]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const addressRegex = /^[A-Za-z0-9\s,.-]+$/;
+    const cityCountryRegex = /^[A-Za-z\s]+$/;
+    const postcodeRegex = /^[1-9][0-9]{5}$/;
+
     if (!beneficiary.name?.trim()) {
       errors.name = "Beneficiary name is required";
+    } else if (!nameRegex.test(!beneficiary.name)) {
+      errors.name = "Name must contain only alphabets"
     }
+
     if (!beneficiary.phone?.trim()) {
       errors.phone = "Beneficiary phone is required";
+    } else if (!phoneRegex.test(!beneficiary.phone)) {
+      errors.phone = "Phone must be 10 digits"
     }
+
     if (!beneficiary.email?.trim()) {
       errors.email = "Beneficiary email is required";
+    } else if (!emailRegex.test(!beneficiary.email)) {
+      errors.email = "Invalid email format"
     }
+
     if (!beneficiary.address?.trim()) {
       errors.address = "Beneficiary address is required";
+    } else if (!addressRegex.test(!!beneficiary.address)) {
+      errors.address = "Invalid address format"
     }
+
     if (!beneficiary.city?.trim()) {
       errors.city = "Beneficiary city is required";
+    } else if (!cityCountryRegex.test(!beneficiary.city)) {
+      errors.city = "City must contain only alphabets"
     }
+
     if (!beneficiary.country?.trim()) {
       errors.country = "Beneficiary country is required";
+    } else if (!cityCountryRegex.test(!beneficiary.country)) {
+      errors.country = "Country must contain only alphabets"
+    }
+
+    if (!beneficiary.postcode?.trim()) {
+      errors.postcode = "Beneficiary Postcode is required";
+    } else if (!postcodeRegex.test(!beneficiary.postcode)) {
+      errors.postcode = "Postcode must be in number"
     }
 
     setBeneficiaryErrors(errors);
@@ -100,7 +164,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
           id: apiData._id,
           ...apiData
         });
-        
+
         // If customer has associated beneficiary, fetch it
         if (apiData.beneficiaryId) {
           fetchBeneficiary(apiData.beneficiaryId);
@@ -154,6 +218,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
         address: customer.address,
         city: customer.city,
         country: customer.country,
+        postcode: customer.postcode,
         created_by: createdBy
       };
 
@@ -164,10 +229,10 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
 
       if (response.data?.status || response.data?.success) {
         const customerResponseData = response.data.data;
-        
+
         // After customer is saved, save beneficiary
         await handleBeneficiarySubmit(customerResponseData._id);
-        
+
         if (id) {
           toast.success("Customer updated successfully");
         } else {
@@ -193,6 +258,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
         address: beneficiary.address,
         city: beneficiary.city,
         country: beneficiary.country,
+        postcode: beneficiary.postcode,
         customerId: customerId,
       };
 
@@ -218,7 +284,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   return (
     <>
       <div className="p-4 gap-3 flex flex-col flex-wrap md:flex-nowrap w-full min-h-screen bg-white rounded-xl shadow">
-        
+
         <div className="flex justify-end">
           <div className="relative w-full md:w-64">
             <FiSearch
@@ -237,9 +303,9 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
 
         <div className="flex flex-wrap md:flex-nowrap w-full gap-3">
           {/* Customer Section */}
-          <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#c1c1c1] rounded-xl shadow">
+          <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#057fc4] rounded-xl shadow">
             <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Customer Details</h3>
-            
+
             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
                 <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
@@ -376,12 +442,35 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
                 )}
               </div>
             </div>
+
+             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
+              <div className="w-full md:w-[40%]">
+                <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
+                  PostCode <span className="text-red-500">*</span>
+                </label>
+              </div>
+              <div className="w-full md:w-[60%]">
+                <input
+                  type="number"
+                  value={customer.postcode}
+                  placeholder="Enter PostCode"
+                  onChange={(e) => {
+                    setCustomer({ ...customer, postcode: e.target.value });
+                    setFormErrors((prev) => ({ ...prev, postcode: "" }));
+                  }}
+                  className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
+                />
+                {formErrors.postcode && (
+                  <p className="text-red-500 text-sm mt-1">{formErrors.postcode}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Beneficiary Section */}
-          <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#c1c1c1] rounded-xl shadow">
+          <div className="w-full md:w-[50%] h-1/2 p-4 border border-[#057fc4] rounded-xl shadow">
             <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Beneficiary Details</h3>
-            
+
             <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
               <div className="w-full md:w-[40%]">
                 <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
@@ -518,11 +607,34 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
                 )}
               </div>
             </div>
+
+            <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
+              <div className="w-full md:w-[40%]">
+                <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
+                  PostCode <span className="text-red-500">*</span>
+                </label>
+              </div>
+              <div className="w-full md:w-[60%]">
+                <input
+                  type="number"
+                  value={beneficiary.postcode}
+                  placeholder="Enter Beneficiary PostCode"
+                  onChange={(e) => {
+                    setBeneficiary({ ...beneficiary, postcode: e.target.value });
+                    setBeneficiaryErrors((prev) => ({ ...prev, postcode: "" }));
+                  }}
+                  className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
+                />
+                {beneficiaryErrors.postcode && (
+                  <p className="text-red-500 text-sm mt-1">{beneficiaryErrors.postcode}</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-4 mt-4 bg-white p-4 sticky bottom-4">
+        <div className="flex justify-end gap-4 mt-4 bg-white p-4 ">
           <button
             onClick={() => navigate(-1)}
             className="px-6 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"

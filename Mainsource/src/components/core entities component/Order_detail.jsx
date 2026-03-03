@@ -621,8 +621,8 @@ const OrderDetail = () => {
         <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
           <div className="flex flex-wrap items-end gap-3">
             {/* Beneficiary Filter */}
-            <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Beneficiary</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">Beneficiary</label>
               <Dropdown
                 value={beneficiaryFilter}
                 options={beneficiaryOptions}
@@ -630,13 +630,13 @@ const OrderDetail = () => {
                 optionLabel="name"
                 optionValue="id"
                 placeholder="Select beneficiary"
-                className="w-full border border-gray-300 rounded-lg min-w-[140px]"
+                className="w-full border border-gray-300 rounded-lg min-w-[100px]"
               />
             </div>
 
             {/* Sender Filter */}
-            <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Sender</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[30%]">Sender</label>
               <Dropdown
                 value={senderFilter}
                 options={senderOptions}
@@ -649,8 +649,8 @@ const OrderDetail = () => {
             </div>
 
             {/* Created By */}
-            <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Created By</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-32">Created By</label>
               <Dropdown
                 value={createdByFilter}
                 options={senderOptions}
@@ -663,10 +663,10 @@ const OrderDetail = () => {
             </div>
 
             {/* Created Date */}
-            <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Created Date</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center">
+              <label className="text-sm font-medium text-gray-600 ">Created Date</label>
               <input
-                className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[140px]"
                 type="date"
                 value={createdDateFilter}
                 onChange={(e) => setCreatedDateFilter(e.target.value)}
@@ -674,10 +674,10 @@ const OrderDetail = () => {
             </div>
 
             {/* Status */}
-            <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Status</label>
+            <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[20%]">
+              <label className="text-sm font-medium text-gray-600">Status</label>
               <select
-                className="mt-1 px-3 py-2 border rounded-lg min-w-[140px]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full md:min-w-[140px]"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -687,9 +687,19 @@ const OrderDetail = () => {
               </select>
             </div>
 
-            {/* Date */}
+            {/* From Date */}
             <div>
-              <label className="text-sm font-medium text-gray-600 p-1">Date</label>
+              <label className="text-sm font-medium text-gray-600 p-1">From Date</label>
+              <input
+                type="date"
+                className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+              />
+            </div>
+            {/* To Date */}
+            <div>
+              <label className="text-sm font-medium text-gray-600 p-1">To Date</label>
               <input
                 type="date"
                 className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
