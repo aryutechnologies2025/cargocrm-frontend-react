@@ -79,8 +79,6 @@ const OrderDetail = () => {
   const validateAddForm = () => {
     const errors = {};
 
-   
-
     if (!senderId?.trim()) {
       errors.senderId = "Sender ID is required";
     }
@@ -135,11 +133,9 @@ const OrderDetail = () => {
         ...filters, //  dynamic filters
       };
 
-      const response = await axiosInstance.get(
-        "api/orders/all-order",
-        { params }
-      );
-
+      const response = await axiosInstance.get("api/orders/all-order", {
+        params,
+      });
 
       if (response.data?.success || response.data?.status) {
         setOrder(response.data.data || []);
@@ -164,7 +160,7 @@ const OrderDetail = () => {
     try {
       const response = await axiosInstance.get(
         `api/orders/get-sender-by-beneficiary`,
-        { params: { customerId: senderId || editSenderId } }
+        { params: { customerId: senderId || editSenderId } },
       );
 
       let beneficiaryData = [];
@@ -187,27 +183,20 @@ const OrderDetail = () => {
   const handleFilterSubmit = () => {
     const filters = {};
 
-    if (beneficiaryFilter)
-      filters.beneficiary_name = beneficiaryFilter;
+    if (beneficiaryFilter) filters.beneficiary_name = beneficiaryFilter;
 
-    if (senderFilter)
-      filters.customer_name = senderFilter;
+    if (senderFilter) filters.customer_name = senderFilter;
 
-    if (createdByFilter)
-      filters.created_by_name = createdByFilter;
+    if (createdByFilter) filters.created_by_name = createdByFilter;
 
-    if (createdDateFilter)
-      filters.created_date = createdDateFilter;
+    if (createdDateFilter) filters.created_date = createdDateFilter;
 
     // if (statusFilter !== "")
     //   filters.status = statusFilter;
 
-    if (fromDateFilter)
-      filters.from_date = fromDateFilter;
+    if (fromDateFilter) filters.from_date = fromDateFilter;
 
-    if (toDateFilter)
-      filters.to_date = toDateFilter;
-
+    if (toDateFilter) filters.to_date = toDateFilter;
 
     fetchOrder(filters);
   };
@@ -234,12 +223,12 @@ const OrderDetail = () => {
         cargo_mode: cargoMode,
         packed: packed,
         status: Number(status),
-        created_by: userId
+        created_by: userId,
       };
 
       const response = await axiosInstance.post(
         `api/orders/create-orders`,
-        formData
+        formData,
       );
 
       if (response.data?.status || response.data?.success) {
@@ -259,14 +248,12 @@ const OrderDetail = () => {
     navigate(`/form-order`, {
       state: { path },
     });
-  }
+  };
   const handleAddOrder = (path) => {
     navigate(`/form-order`, {
       state: { path },
     });
-  }
-
-
+  };
 
   // Reset add form
   const resetAddForm = () => {
@@ -280,7 +267,6 @@ const OrderDetail = () => {
 
   // Open edit modal
   const openEditModal = async (row) => {
-
     const orderId = row._id || row.id;
     if (!orderId) {
       toast.error("Invalid order ID");
@@ -292,7 +278,9 @@ const OrderDetail = () => {
       setIsEditModalOpen(true);
       setIsAnimating(true);
 
-      const response = await axiosInstance.get(`api/orders/view-orders/${orderId}`);
+      const response = await axiosInstance.get(
+        `api/orders/view-orders/${orderId}`,
+      );
 
       if (response.data?.status === true || response.data?.success === true) {
         const data = response.data.data;
@@ -322,8 +310,8 @@ const OrderDetail = () => {
           cargo_mode: editCargoMode,
           packed: editPacked,
           status: Number(editStatus),
-          updated_by: userId
-        }
+          updated_by: userId,
+        },
       );
 
       if (response.data?.status || response.data?.success) {
@@ -357,7 +345,9 @@ const OrderDetail = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const response = await axiosInstance.delete(`api/orders/delete-orders/${orderId}`);
+      const response = await axiosInstance.delete(
+        `api/orders/delete-orders/${orderId}`,
+      );
 
       if (response.data?.status === true || response.data?.success === true) {
         toast.success("Order deleted successfully");
@@ -374,16 +364,16 @@ const OrderDetail = () => {
   // Filter functions
 
   const resetFilters = () => {
-  setStatusFilter("");
-  setBeneficiaryFilter("");
-  setSenderFilter("");
-  setCreatedByFilter("");
-  setCreatedDateFilter("");
-  setFromDateFilter("");
-  setToDateFilter("");
+    setStatusFilter("");
+    setBeneficiaryFilter("");
+    setSenderFilter("");
+    setCreatedByFilter("");
+    setCreatedDateFilter("");
+    setFromDateFilter("");
+    setToDateFilter("");
 
-  fetchOrder(); 
-};
+    fetchOrder();
+  };
 
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
@@ -422,7 +412,7 @@ const OrderDetail = () => {
       data: null,
       render: function (data, type, row, meta) {
         return meta.row + 1;
-      }
+      },
     },
     // {
     //   title: "Tracking Number",
@@ -468,23 +458,26 @@ const OrderDetail = () => {
         ${isActive ? "Yes" : "No"}
             </div>
           `;
-            },
-          },
-          {
-            title: "Quantity",
-            data: null,
-            render: (row) => row.parcels?.[0]?.piece_number || "-",
-          },
-          {
-            title: "Weight",
-            data: null,
-            render: (row) => {
-        const totalWeight = row.parcels?.[0]?.piece_details?.reduce((sums, piece, index) => {
-          return sums + (parseFloat(piece.weight) || 0);
-        }, 0) || 0;
+      },
+    },
+    {
+      title: "Quantity",
+      data: null,
+      render: (row) => row.parcels?.[0]?.piece_number || "-",
+    },
+    {
+      title: "Weight",
+      data: null,
+      render: (row) => {
+        const totalWeight =
+          row.parcels?.[0]?.piece_details?.reduce((sums, piece, index) => {
+            console.log(`Calculating weight for piece`, piece.weight);
+            console.log(`Calculating weight for sums`, sums);
+            return sums + (parseFloat(piece.weight) || 0);
+          }, 0) || 0;
         return totalWeight || "0";
-            },
-          },
+      },
+    },
 
     // {
     //   title: "Created By",
@@ -515,12 +508,10 @@ const OrderDetail = () => {
           <FcDownload
             size={22}
             className="cursor-pointer mx-auto block"
-            onClick={() =>
-              navigate("/pdf-download", { state: rowData })
-            }
-          />
+            onClick={() => navigate("/pdf-download", { state: rowData })}
+          />,
         );
-      }
+      },
     },
 
     {
@@ -557,7 +548,7 @@ const OrderDetail = () => {
                   className="text-red-600 text-xl cursor-pointer hover:text-red-800"
                   onClick={() => deleteOrder(row._id)}
                 />
-              </div>
+              </div>,
             );
           }
         }, 0);
@@ -571,7 +562,10 @@ const OrderDetail = () => {
       <div>
         <Mobile_Sidebar />
         <div className="flex gap-2 mt-2 md:mt-0 ms-5 items-center">
-          <p className="text-sm text-gray-500 cursor-pointer" onClick={() => navigate("/dashboard")}>
+          <p
+            className="text-sm text-gray-500 cursor-pointer"
+            onClick={() => navigate("/dashboard")}
+          >
             Dashboard
           </p>
           <IoIosArrowForward className="w-3 h-3 text-gray-400" />
@@ -583,7 +577,9 @@ const OrderDetail = () => {
           <div className="flex flex-wrap items-end gap-2">
             {/* Beneficiary Filter */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">Beneficiary</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">
+                Beneficiary
+              </label>
               <input
                 type="text"
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
@@ -595,7 +591,9 @@ const OrderDetail = () => {
 
             {/* Sender Filter */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[30%]">Sender</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[30%]">
+                Sender
+              </label>
               <input
                 type="text"
                 className="mt-1 px-3 py-2 border rounded-lg w-full  focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
@@ -607,7 +605,9 @@ const OrderDetail = () => {
 
             {/* Created By */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">Created By</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">
+                Created By
+              </label>
               <input
                 type="text"
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
@@ -619,7 +619,9 @@ const OrderDetail = () => {
 
             {/* Created Date */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[60%]">Created Date</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[60%]">
+                Created Date
+              </label>
               <input
                 className=" px-3 py-2 border rounded-lg w-full  focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 type="date"
@@ -644,7 +646,9 @@ const OrderDetail = () => {
 
             {/* From Date */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">From Date</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">
+                From Date
+              </label>
               <input
                 type="date"
                 value={fromDateFilter}
@@ -654,7 +658,9 @@ const OrderDetail = () => {
             </div>
             {/* To Date */}
             <div className="flex flex-wrap md:flex-nowrap items-center ">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">To Date</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">
+                To Date
+              </label>
               <input
                 type="date"
                 value={toDateFilter}
@@ -662,8 +668,6 @@ const OrderDetail = () => {
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
               />
             </div>
-
-
 
             {/* Reset */}
             <div>
@@ -708,7 +712,7 @@ const OrderDetail = () => {
                         checked={visibleColumns[col]}
                         onChange={() => toggleColumn(col)}
                       />
-                      {col.replace(/_/g, ' ')}
+                      {col.replace(/_/g, " ")}
                     </label>
                   ))}
                 </div>
@@ -754,8 +758,9 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeAddModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
+                isAnimating ? "translate-x-0" : "translate-x-full"
+              }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -787,7 +792,9 @@ const OrderDetail = () => {
                         className="w-full border border-gray-300 rounded-lg"
                       />
                       {formErrors.senderId && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.senderId}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors.senderId}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -821,7 +828,9 @@ const OrderDetail = () => {
                         className="w-full border border-gray-300 rounded-lg"
                       />
                       {formErrors.beneficiaryId && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.beneficiaryId}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors.beneficiaryId}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -845,7 +854,9 @@ const OrderDetail = () => {
                         <option value="Sea">Sea</option>
                       </select>
                       {formErrors.cargoMode && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.cargoMode}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors.cargoMode}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -887,7 +898,9 @@ const OrderDetail = () => {
                         </label>
                       </div>
                       {formErrors.packed && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.packed}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors.packed}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -911,7 +924,9 @@ const OrderDetail = () => {
                         <option value="1">Inactive</option>
                       </select>
                       {formErrors.status && (
-                        <p className="text-red-500 text-sm mt-1">{formErrors.status}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {formErrors.status}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -943,8 +958,9 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeEditModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
+                isAnimating ? "translate-x-0" : "translate-x-full"
+              }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -977,7 +993,9 @@ const OrderDetail = () => {
                           className="w-full border border-gray-300 rounded-lg"
                         />
                         {formErrors.editSenderId && (
-                          <p className="text-red-500 text-sm mt-1">{formErrors.editSenderId}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editSenderId}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -993,7 +1011,10 @@ const OrderDetail = () => {
                           options={beneficiaryOptions}
                           onChange={(e) => {
                             setEditBeneficiaryId(e.value);
-                            setFormErrors({ ...formErrors, editBeneficiaryId: "" });
+                            setFormErrors({
+                              ...formErrors,
+                              editBeneficiaryId: "",
+                            });
                           }}
                           optionLabel="name"
                           optionValue="_id"
@@ -1001,7 +1022,9 @@ const OrderDetail = () => {
                           className="w-full border border-gray-300 rounded-lg"
                         />
                         {formErrors.editBeneficiaryId && (
-                          <p className="text-red-500 text-sm mt-1">{formErrors.editBeneficiaryId}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editBeneficiaryId}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -1025,7 +1048,9 @@ const OrderDetail = () => {
                           <option value="Sea">Sea</option>
                         </select>
                         {formErrors.editCargoMode && (
-                          <p className="text-red-500 text-sm mt-1">{formErrors.editCargoMode}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editCargoMode}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -1045,7 +1070,10 @@ const OrderDetail = () => {
                               checked={editPacked === "Yes"}
                               onChange={(e) => {
                                 setEditPacked(e.target.value);
-                                setFormErrors({ ...formErrors, editPacked: "" });
+                                setFormErrors({
+                                  ...formErrors,
+                                  editPacked: "",
+                                });
                               }}
                               className="w-4 h-4 text-blue-600"
                             />
@@ -1059,7 +1087,10 @@ const OrderDetail = () => {
                               checked={editPacked === "No"}
                               onChange={(e) => {
                                 setEditPacked(e.target.value);
-                                setFormErrors({ ...formErrors, editPacked: "" });
+                                setFormErrors({
+                                  ...formErrors,
+                                  editPacked: "",
+                                });
                               }}
                               className="w-4 h-4 text-blue-600"
                             />
@@ -1067,7 +1098,9 @@ const OrderDetail = () => {
                           </label>
                         </div>
                         {formErrors.editPacked && (
-                          <p className="text-red-500 text-sm mt-1">{formErrors.editPacked}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editPacked}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -1091,7 +1124,9 @@ const OrderDetail = () => {
                           <option value="0">Inactive</option>
                         </select>
                         {formErrors.editStatus && (
-                          <p className="text-red-500 text-sm mt-1">{formErrors.editStatus}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {formErrors.editStatus}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -1130,14 +1165,17 @@ const OrderDetail = () => {
                 <IoIosCloseCircle size={28} />
               </button>
 
-              <h2 className="text-xl font-semibold mb-6 text-[#057fc4]">Order View</h2>
+              <h2 className="text-xl font-semibold mb-6 text-[#057fc4]">
+                Order View
+              </h2>
 
               <div className="space-y-4 text-sm text-gray-700 w-full gap-4">
-
                 <div className="w-full ">
                   {/* customer */}
                   <div className="space-y-4 mb-2">
-                    <h2 className="text-xl font-semibold mb-6 ">Customer Details</h2>
+                    <h2 className="text-xl font-semibold mb-6 ">
+                      Customer Details
+                    </h2>
                     <div className="flex justify-between">
                       <span className="font-medium">Customer Name</span>
                       <span>{viewOrder.customerName || "-"}</span>
@@ -1160,7 +1198,9 @@ const OrderDetail = () => {
 
                   {/* beneficiary */}
                   <div className="space-y-4 mb-2">
-                    <h2 className="text-xl font-semibold mb-6 ">Beneficiary Details</h2>
+                    <h2 className="text-xl font-semibold mb-6 ">
+                      Beneficiary Details
+                    </h2>
                     <div className="flex justify-between">
                       <span className="font-medium">Beneficiary Name</span>
                       <span>{viewOrder.beneficiaries?.[0]?.name || "-"}</span>
@@ -1193,7 +1233,9 @@ const OrderDetail = () => {
                 {/* parcel */}
                 <div className="w-full ">
                   <div className=" space-y-4 mb-2">
-                    <h2 className="text-xl font-semibold mb-6 ">Parcel Details</h2>
+                    <h2 className="text-xl font-semibold mb-6 ">
+                      Parcel Details
+                    </h2>
                     <div className="flex justify-between">
                       <span className="font-medium">Piece Number</span>
                       <span>{viewOrder.parcels?.[0]?.piece_number || "-"}</span>
@@ -1205,37 +1247,49 @@ const OrderDetail = () => {
 
                     {/* PieceDetails */}
                     <div className="pt-3 mt-3">
-                      <span className="font-medium block mb-2">Piece Details</span>
+                      <span className="font-medium block mb-2">
+                        Piece Details
+                      </span>
                       {viewOrder.parcels?.[0]?.piece_details &&
-                        viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
-                        viewOrder.parcels?.[0]?.piece_details.map((detail, index) => (
-                          <div
-                            key={index}
-                            className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
-                          >
-                            <div className="font-semibold text-[#057fc4] mb-2">
-                              Piece {index + 1}
+                      viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
+                        viewOrder.parcels?.[0]?.piece_details.map(
+                          (detail, index) => (
+                            <div
+                              key={index}
+                              className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
+                            >
+                              <div className="font-semibold text-[#057fc4] mb-2">
+                                Piece {index + 1}
+                              </div>
+                              <div className="grid grid-cols-4 gap-2 text-sm">
+                                <div className="flex justify-start gap-3">
+                                  <span className="text-gray-600">Weight:</span>
+                                  <span className="font-medium">
+                                    {detail.weight}
+                                  </span>
+                                </div>
+                                <div className="flex justify-start gap-3">
+                                  <span className="text-gray-600">Length:</span>
+                                  <span className="font-medium">
+                                    {detail.length}
+                                  </span>
+                                </div>
+                                <div className="flex justify-start gap-3">
+                                  <span className="text-gray-600">Width:</span>
+                                  <span className="font-medium">
+                                    {detail.width}
+                                  </span>
+                                </div>
+                                <div className="flex justify-start gap-3">
+                                  <span className="text-gray-600">Height:</span>
+                                  <span className="font-medium">
+                                    {detail.height}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="grid grid-cols-4 gap-2 text-sm">
-                              <div className="flex justify-start gap-3">
-                                <span className="text-gray-600">Weight:</span>
-                                <span className="font-medium">{detail.weight}</span>
-                              </div>
-                              <div className="flex justify-start gap-3">
-                                <span className="text-gray-600">Length:</span>
-                                <span className="font-medium">{detail.length}</span>
-                              </div>
-                              <div className="flex justify-start gap-3">
-                                <span className="text-gray-600">Width:</span>
-                                <span className="font-medium">{detail.width}</span>
-                              </div>
-                              <div className="flex justify-start gap-3">
-                                <span className="text-gray-600">Height:</span>
-                                <span className="font-medium">{detail.height}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))
+                          ),
+                        )
                       ) : (
                         <p className="text-gray-500 text-sm">
                           No piece details available
@@ -1245,11 +1299,11 @@ const OrderDetail = () => {
                     <hr></hr>
                   </div>
 
-
-
                   {/* order details */}
                   <div className="space-y-4 mb-2">
-                    <h2 className="text-xl font-semibold mb-6 ">Order Details</h2>
+                    <h2 className="text-xl font-semibold mb-6 ">
+                      Order Details
+                    </h2>
                     <div className="flex justify-between">
                       <span className="font-medium">Cargo Mode </span>
                       <span>{viewOrder.orders?.[0]?.cargo_mode || "-"}</span>
@@ -1261,9 +1315,6 @@ const OrderDetail = () => {
                     <hr></hr>
                   </div>
                 </div>
-
-
-
               </div>
             </div>
           </div>
