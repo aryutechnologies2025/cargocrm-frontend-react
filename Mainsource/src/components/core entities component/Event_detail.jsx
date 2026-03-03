@@ -146,6 +146,7 @@ const Event_detail = () => {
       const response = await axiosInstance.get(
         `api/orders/get-piece-and-weight-in-parcel?${params.toString()}`
       );
+      console.log("Auto-fill response:", response);
 
       if (response.data?.success && response.data?.data) {
         const data = response.data.data;

@@ -484,7 +484,7 @@ const OrderDetail = () => {
     // },
     {
       title: "Sender",
-       data: (row) => row.orders?.[0]?.customerName || "-",
+       data: (row) => row.customerName || "-",
     },
     {
       title: "Beneficiary",
