@@ -38,7 +38,8 @@ const Collection_detail = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
   };
-  const [dateFilter, setDateFilter] = useState(getToday());
+  const [fromDateFilter, setFromDateFilter] = useState(getToday());
+  const [toDateFilter, setToDateFilter] = useState(getToday());
   const [formErrors, setFormErrors] = useState({});
   const [orderId, setOrderId] = useState("");
   const [address, setAddress] = useState("");
@@ -218,8 +219,8 @@ const Collection_detail = () => {
 
   const resetFilters = () => {
     setStatusFilter("");
-    setDateFilter(""); // reset to today
-    // setDateFilter(getToday());
+    setFromDateFilter("");
+    setToDateFilter("");
   };
 
   const openAddModal = () => {
@@ -394,7 +395,8 @@ const Collection_detail = () => {
   const data = rawData.filter((item) => {
     return (
       (statusFilter ? String(item.status) === statusFilter : true) &&
-      (dateFilter ? item.date === dateFilter : true)
+      (fromDateFilter ? item.date === fromDateFilter : true) &&
+      (toDateFilter ? item.date === toDateFilter : true)
     );
   });
   return (
@@ -433,16 +435,28 @@ const Collection_detail = () => {
                 </select>
               </div>
 
-              {/* Date Filter */}
+              {/* From Date Filter */}
               <div className="gap-2">
                 <label className="text-sm font-medium text-gray-600 p-1">
-                  Date
+                  From Date
                 </label>
                 <input
                   type="date"
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  value={fromDateFilter}
+                  onChange={(e) => setFromDateFilter (e.target.value)}
+                />
+              </div>
+              {/*To Date Filter */}
+              <div className="gap-2">
+                <label className="text-sm font-medium text-gray-600 p-1">
+                  To Date
+                </label>
+                <input
+                  type="date"
+                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+                  value={toDateFilter}
+                  onChange={(e) => setToDateFilter(e.target.value)}
                 />
               </div>
 

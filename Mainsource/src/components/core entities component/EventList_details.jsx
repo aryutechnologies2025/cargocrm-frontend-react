@@ -622,8 +622,6 @@ const EventList_details = () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <select
-                          name="status"
-                          id="status"
                           value={editStatus}
                           onChange={(e) => {
                             setEditStatus(e.target.value);
@@ -631,7 +629,7 @@ const EventList_details = () => {
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option>Select status</option>
+                          <option value="">Select status</option>
                           <option value="1">Active</option>
                           <option value="0">InActive</option>
                         </select>
