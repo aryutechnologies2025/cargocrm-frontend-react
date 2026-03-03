@@ -26,7 +26,10 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   console.log("selectedCustomer", selectedCustomer)
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
-  console.log("selectedBeneficiary", selectedBeneficiary)
+  const [selectedBeneficiaryID, setSelectedBeneficiaryID] = useState(null);
+  console.log("selectedBeneficiaryID", selectedBeneficiaryID)
+  const [beneficiaryAutoFill, setBeneficiaryAutoFill] = useState({});
+console.log("beneficiaryAutoFill", beneficiaryAutoFill);
   const [customer, setCustomer] = useState({
     id: "",
     name: "",
@@ -176,9 +179,15 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
       if (response.data?.success) {
 
         const customer = response.data.customer;
+        const beneficiary = response.data.beneficiary;
 
 
         const list = customer.map((data) => ({
+          label: data.name,
+          value: data._id,
+          data: data,
+        }));
+        const Beneficiarylist = beneficiary.map((data) => ({
           label: data.name,
           value: data._id,
           data: data,
@@ -187,6 +196,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
         // console.log("list", list);
 
         setCustomerOptions(list);
+        setBeneficiaryOptions(Beneficiarylist);
       }
     } catch (error) {
       console.log("Customer dropdown error", error);
@@ -225,6 +235,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   const handleBeneficiaryChange = (e) => {
     const selected = e.value;
     setSelectedBeneficiary(selected);
+    setSelectedBeneficiaryID(selected.data.id)
 
     const beneficiaryData = beneficiaryOptions.find(
       (b) => b.value === selected
@@ -244,33 +255,31 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
     }
   };
 
-  const fetchBeneficiaries = async (customerId) => {
-    try {
-      const response = await axiosInstance.get(
-        `api/customers/get-beneficiary-details/${customerId}`
-      );
-
-      console.log("response beneficiary", response);
-
-      if (response.data?.success || response.data?.status) {
-
-        const benificary = response.data.beneficiary;
-
-        console.log("decode data beneficiary", benificary);
-
-         const list = benificary.map((data) => ({
-          label: data.name,
-          value: data._id,
-          data: data,
-        }));
-       
-        console.log("list beneficiary", list)
-        setBeneficiaryOptions(list);
+const fetchBeneficiaries = async () => {
+  try {
+    const response = await axiosInstance.get(
+      "/api/customers/get-beneficiary-details",
+      {
+        params: {
+          id: selectedBeneficiaryID,
+        },
       }
-    } catch (error) {
-      console.log("Beneficiary dropdown error", error);
-    }
-  };
+    );
+
+    console.log("Response beneficiary:", response.data);
+    setBeneficiaryAutoFill(response.data.beneficiary);
+    return response.data;
+  } catch (error) {
+    console.error("Beneficiary dropdown error:", error?.response?.data || error.message);
+    throw error;
+  }
+};
+
+useEffect(()=>{
+  if(selectedBeneficiaryID){
+    fetchBeneficiaries();
+  }
+},[selectedBeneficiaryID]);
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -636,7 +645,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
               <div className="w-full md:w-[60%]">
                 <input
                   type="email"
-                  value={beneficiary.email}
+                  value={beneficiary.email || beneficiaryAutoFill.email || ""}
                   placeholder="Enter Beneficiary Email"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, email: e.target.value });
@@ -659,7 +668,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
               <div className="w-full md:w-[60%]">
                 <input
                   type="number"
-                  value={beneficiary.phone}
+                  value={beneficiary.phone || beneficiaryAutoFill.phone || ""}
                   placeholder="Enter Beneficiary Phone"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, phone: e.target.value });
@@ -681,7 +690,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
               </div>
               <div className="w-full md:w-[60%]">
                 <textarea
-                  value={beneficiary.address}
+                  value={beneficiary.address || beneficiaryAutoFill.address || ""}
                   placeholder="Enter Beneficiary Address"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, address: e.target.value });
@@ -704,7 +713,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
               <div className="w-full md:w-[60%]">
                 <input
                   type="text"
-                  value={beneficiary.city}
+                  value={beneficiary.city || beneficiaryAutoFill.city || ""}
                   placeholder="Enter Beneficiary City"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, city: e.target.value });
@@ -727,7 +736,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
               <div className="w-full md:w-[60%]">
                 <input
                   type="text"
-                  value={beneficiary.country}
+                  value={beneficiary.country || beneficiaryAutoFill.country || ""}
                   placeholder="Enter Beneficiary Country"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, country: e.target.value });
@@ -750,7 +759,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
               <div className="w-full md:w-[60%]">
                 <input
                   type="number"
-                  value={beneficiary.postcode}
+                  value={beneficiary.postcode || beneficiaryAutoFill.postcode || ""}
                   placeholder="Enter Beneficiary PostCode"
                   onChange={(e) => {
                     setBeneficiary({ ...beneficiary, postcode: e.target.value });
