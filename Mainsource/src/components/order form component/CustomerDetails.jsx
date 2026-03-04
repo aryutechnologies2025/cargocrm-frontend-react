@@ -6,7 +6,8 @@ import { FiSearch } from "react-icons/fi";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 
-const CustomerDetails = ({ nextStep, updateData, customerId }) => {
+const CustomerDetails = ({ nextStep, updateData, customerId, isView }) => {
+  console.log("CustomerDetails props:", { nextStep, updateData, customerId, isView });
   const [selectedCustomerID, setSelectedCustomerID] = useState(null);
   console.log("selectedCustomerID", selectedCustomerID)
   const id = customerId || selectedCustomerID;
@@ -170,7 +171,6 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
       if (response.data?.success) {
 
         const customer = response.data.customer;
-        const beneficiary = response.data.beneficiary;
 
 
         const list = customer.map((data) => ({
@@ -178,16 +178,11 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
           value: data._id,
           data: data,
         }));
-        const Beneficiarylist = beneficiary.map((data) => ({
-          label: data.name,
-          value: data._id,
-          data: data,
-        }));
+       
 
         // console.log("list", list);
 
         setCustomerOptions(list);
-        setBeneficiaryOptions(Beneficiarylist);
       }
     } catch (error) {
       console.log("Customer dropdown error", error);
@@ -197,6 +192,43 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   useEffect(() => {
     fetchCustomerNames();
   }, []);
+  const fetchBeneficiaryNames = async (selectedCustomerID) => {
+    try {
+      const response = await axiosInstance.get(
+        "api/customers/get-beneficiary-name",{
+          params: {
+            id: selectedCustomerID
+          }
+        }
+      );
+
+      console.log("response beneficiary", response);
+
+      if (response.data?.success) {
+
+        const beneficiary = response.data.beneficiary;
+
+
+        const Beneficiarylist = beneficiary.map((data) => ({
+          label: data.name,
+          value: data._id,
+          data: data,
+        }));
+
+        // console.log("list", list);
+
+        setBeneficiaryOptions(Beneficiarylist);
+      }
+    } catch (error) {
+      console.log("Customer dropdown error", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedCustomerID) {
+      fetchBeneficiaryNames(selectedCustomerID);
+    }
+  }, [selectedCustomerID]);
 
   useEffect(() => {
   if (customerId) {
@@ -331,92 +363,195 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
   }, [id]);
 
   const handleCustomerSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateCustomerForm()) return;
+  e.preventDefault();
+  if (!validateCustomerForm()) return;
 
-    try {
-      const formData = {
-        ...(customer.id && { id: customer.id }),
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-        city: customer.city,
-        country: customer.country,
-        postcode: customer.postcode,
-        created_by: createdBy
-      };
+  try {
+    // // If mode is "existing" and a customer is selected, use the selected customer's ID
+    // if (mode === "existing" && selectedCustomer) {
+    //   const selectedCustomerId = selectedCustomer.value;
+      
+    //   // Create beneficiary with the selected customer ID
+    //   await handleBeneficiarySubmit(selectedCustomerId);
+    //   return;
+    // }
 
-      const response = await axiosInstance.post(
-        `api/customers/create-customerss`,
-        formData
-      );
+    // For "new" mode or when no customer is selected, create new customer
+    const formData = {
+      ...(customer.id && { id: customer.id }),
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      city: customer.city,
+      country: customer.country,
+      postcode: customer.postcode,
+      created_by: createdBy,
+      mode: mode
+    };
 
-      if (response.data?.status || response.data?.success) {
-        const customerResponseData = response.data.data;
+    const response = await axiosInstance.post(
+      `api/customers/create-customerss`,
+      formData
+    );
 
-        if (mode === "existing" && selectedCustomer) {
-          await handleBeneficiarySubmit(selectedCustomer.value);
-          return;
-        }
-        // After customer is saved, save beneficiary
-        await handleBeneficiarySubmit(customerResponseData._id);
+    console.log("response customer", response);
 
-        if (id) {
-          toast.success("Customer updated successfully");
-        } else {
-          toast.success("Customer created successfully");
-        }
+    if (response.data?.status || response.data?.success) {
+      const customerResponseData = response.data.data;
+      
+      // Create beneficiary with the newly created customer ID
+      await handleBeneficiarySubmit(customerResponseData._id);
+
+      if (id) {
+        toast.success("Customer updated successfully");
       } else {
-        toast.error("Failed to create customer");
+        toast.success("Customer created successfully");
       }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Error creating customer");
+    } else {
+      toast.error("Failed to create customer");
     }
-  };
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Error creating customer");
+  }
+};
 
-  const handleBeneficiarySubmit = async (customerId) => {
-    if (!validateBeneficiaryForm()) return;
+const handleBeneficiarySubmit = async (customerId) => {
+  if (!validateBeneficiaryForm()) return;
 
-    try {
-      const formData = {
-        ...(beneficiary.id && { id: beneficiary.id }),
-        name: beneficiary.name,
-        email: beneficiary.email,
-        phone: beneficiary.phone,
-        address: beneficiary.address,
-        city: beneficiary.city,
-        country: beneficiary.country,
-        postcode: beneficiary.postcode,
-        customerId: customerId,
-      };
+  try {
+    // Prepare beneficiary data
+    let beneficiaryData = {
+      name: beneficiary.name,
+      email: beneficiary.email,
+      phone: beneficiary.phone,
+      address: beneficiary.address,
+      city: beneficiary.city,
+      country: beneficiary.country,
+      postcode: beneficiary.postcode,
+      customerId: customerId,
+      mode: mode
+    };
 
-      const response = await axiosInstance.post(
-        `api/beneficiary/add-update-beneficiary`,
-        formData
-      );
-
-
-      if (response.data?.status || response.data?.success) {
-        // Proceed to next step after both customer and beneficiary are saved
-        nextStep({
-          id: customerId,
-          beneficiaryId: response.data.data._id
-        });
-        if (mode === "existing" && selectedBeneficiary) {
-          nextStep({
-            id: customerId,
-            beneficiaryId: selectedBeneficiary.value
-          });
-          return;
-        }
-      } else {
-        toast.error("Failed to create beneficiary");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Error creating beneficiary");
+    // If an existing beneficiary is selected in "existing" mode, include its ID
+    if (mode === "existing" && selectedBeneficiary) {
+      beneficiaryData.id = selectedBeneficiary.value;
+    } else if (beneficiary.id) {
+      beneficiaryData.id = beneficiary.id;
     }
-  };
+
+    const response = await axiosInstance.post(
+      `api/beneficiary/add-update-beneficiary`,
+      beneficiaryData
+    );
+    
+    console.log("Beneficiary add response:", response);
+
+    if (response.data?.status || response.data?.success) {
+      // Proceed to next step with customer ID and beneficiary ID
+      nextStep({
+        id: customerId,
+        beneficiaryId: response.data.data._id
+      });
+      
+      toast.success("Beneficiary saved successfully");
+    } else {
+      toast.error("Failed to create beneficiary");
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Error creating beneficiary");
+  }
+};
+
+  // const handleCustomerSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!validateCustomerForm()) return;
+
+  //   try {
+  //     const formData = {
+  //       ...(customer.id && { id: customer.id }),
+  //       name: customer.name,
+  //       email: customer.email,
+  //       phone: customer.phone,
+  //       address: customer.address,
+  //       city: customer.city,
+  //       country: customer.country,
+  //       postcode: customer.postcode,
+  //       created_by: createdBy,
+  //       mode: mode
+  //     };
+
+  //     const response = await axiosInstance.post(
+  //       `api/customers/create-customerss`,
+  //       formData
+  //     );
+
+  //     if (response.data?.status || response.data?.success) {
+  //       const customerResponseData = response.data.data;
+
+  //       if (mode === "existing" && selectedCustomer) {
+  //         await handleBeneficiarySubmit(selectedCustomer.value);
+  //         return;
+  //       }
+  //       // After customer is saved, save beneficiary
+  //       await handleBeneficiarySubmit(customerResponseData._id);
+
+  //       if (id) {
+  //         toast.success("Customer updated successfully");
+  //       } else {
+  //         toast.success("Customer created successfully");
+  //       }
+  //     } else {
+  //       toast.error("Failed to create customer");
+  //     }
+  //   } catch (err) {
+  //     toast.error(err.response?.data?.message || "Error creating customer");
+  //   }
+  // };
+
+  // const handleBeneficiarySubmit = async (customerId, customerResponseData) => {
+  //   if (!validateBeneficiaryForm()) return;
+
+  //   try {
+  //     const formData = {
+  //       ...(beneficiary.id && { id: beneficiary.id }),
+  //       name: beneficiary.name,
+  //       email: beneficiary.email,
+  //       phone: beneficiary.phone,
+  //       address: beneficiary.address,
+  //       city: beneficiary.city,
+  //       country: beneficiary.country,
+  //       postcode: beneficiary.postcode,
+  //       customerId: customerId || customerResponseData._id,
+  //     };
+
+  //     const response = await axiosInstance.post(
+  //       `api/beneficiary/add-update-beneficiary`,
+  //       formData
+  //     );
+  //     console.log("Beneficiary add response:", response);
+
+
+  //     if (response.data?.status || response.data?.success) {
+  //       // Proceed to next step after both customer and beneficiary are saved
+  //       nextStep({
+  //         id: customerId,
+  //         beneficiaryId: response.data.data._id
+  //       });
+  //       if (mode === "existing" && selectedBeneficiary) {
+  //         nextStep({
+  //           id: customerId,
+  //           beneficiaryId: selectedBeneficiary.value
+  //         });
+  //         return;
+  //       }
+  //     } else {
+  //       toast.error("Failed to create beneficiary");
+  //     }
+  //   } catch (err) {
+  //     toast.error(err.response?.data?.message || "Error creating beneficiary");
+  //   }
+  // };
 
   return (
     <>
@@ -437,6 +572,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
             />
           </div>
         </div> */}
+        {!isView && (
         <div className="flex justify-between">
           <div className="flex gap-8 mb-4">
             
@@ -491,6 +627,7 @@ const CustomerDetails = ({ nextStep, updateData, customerId }) => {
             </label>
           </div>
         </div>
+        )}
 
 
         <div className="flex flex-wrap md:flex-nowrap w-full gap-3">

@@ -103,10 +103,10 @@ const LoginLog_detail = () => {
         return meta.row + 1;
       }
     },
-        {
-            title: "User ID",
-            data: "_id",
-        },
+        // {
+        //     title: "User ID",
+        //     data: "_id",
+        // },
         {
             title: "User Name",
             data: "name",

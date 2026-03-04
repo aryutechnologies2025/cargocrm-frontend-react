@@ -9,7 +9,7 @@ const FormOrder = () => {
 
     const [step, setStep] = useState(1);
     const location = useLocation();
-      const {path } = location.state || {};
+      const {path, isView } = location.state || {};
       console.log("location.state:", location.state);
     const [customerId, setCustomerId] = useState(path?.customerId || null);
 
@@ -121,6 +121,7 @@ const FormOrder = () => {
                         nextStep={nextStep}
                         updateData={updateData}
                         customerId={customerId}
+                            isView={isView}
                     />
                 )}
 

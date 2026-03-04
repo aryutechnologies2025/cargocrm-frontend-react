@@ -160,12 +160,17 @@ const Collection_detail = () => {
         orderId: senderId,
         address: address,
         date_time: dateTime,
+        city: city,
+        country: country,
+        postcode: postcode,
       };
 
       const response = await axiosInstance.post(
         `api/collections/create-collection`,
         payload,
       );
+
+      console.log("collection res", response);
 
       if (response.data?.status || response.data?.success) {
         toast.success("Order created successfully");
@@ -192,6 +197,9 @@ const Collection_detail = () => {
           orderId: editOrderId,
           address: editAddress,
           date_time: editDateTime,
+          city: editCity,
+          country: editCountry,
+          postcode: editPostcode,
         },
       );
 
@@ -279,6 +287,9 @@ const Collection_detail = () => {
     setEditAddress(row.address);
     setEditDateTime(row.date_time);
     setEditOrderId(row.orderId?._id);
+    setEditCity(row.city);
+    setEditCountry(row.country);
+    setEditPostcode(row.postcode);
     setIsEditModalOpen(true);
     setTimeout(() => setIsAnimating(true), 10);
   };

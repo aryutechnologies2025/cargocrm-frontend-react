@@ -48,7 +48,7 @@ import { SECRET_KEY } from "../Config";
 // Add your secret key here (must match backend)
 // const SECRET_KEYS = SECRET_KEY;
 
-// Decryption functio
+// Decryption function
 const decryptData = (encryptedData) => {
   try {
     console.log("Attempting to decrypt:", encryptedData.substring(0, 50) + "...");
@@ -75,6 +75,7 @@ const axiosInstance = axios.create({
   },
 });
 
+
 // Add token to every request
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -83,6 +84,7 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
+    
   },
   (error) => Promise.reject(error)
 );
@@ -133,9 +135,12 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    
+      localStorage.removeItem("admin_token");
+      localStorage.removeItem("cargouser");
       localStorage.removeItem("admin_token_expires");
-    }
+      window.location.href = "/";
+    
     return Promise.reject(error);
   }
 );

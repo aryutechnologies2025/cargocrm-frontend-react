@@ -35,6 +35,9 @@ const Event_detail = () => {
   const [openTrackingId, setOpenTrackingId] = useState(null);
   const popupRef = useRef(null);
   const [showCustomize, setShowCustomize] = useState(false);
+  const multiSelectRef = useRef(null);
+  const [filterValue, setFilterValue] = useState("");
+  console.log("filterValue", filterValue);
   const [visibleColumns, setVisibleColumns] = useState({
     Sno: true,
     event_id: true,
@@ -177,6 +180,7 @@ const Event_detail = () => {
 
     setQuality("");
     setWeight("");
+    setFilterValue("");
     setFormErrors({ ...formErrors, trackingNo: "" });
 
     if (selectedTrackings.length > 0) {
@@ -685,6 +689,25 @@ const Event_detail = () => {
     },
   ];
 
+  
+
+const handleKeyDown = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    if (!filterValue) return;
+
+    const matchedOption = orderOption.find((option) =>
+      option.tracking_number.toLowerCase().includes(filterValue.toLowerCase())
+    );
+
+    if (matchedOption && !trackingId.includes(matchedOption.id)) {
+      const updated = [...trackingId, matchedOption.id];
+      setTrackingId(updated);
+    }
+
+  }
+};
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -899,7 +922,7 @@ const Event_detail = () => {
                     </label>
                   </div>
                   <div className="w-[60%] md:w-[50%]">
-                    <MultiSelect
+                    {/* <MultiSelect
                       value={trackingId}
                       onChange={handleTrackingNumberChange}
                       options={orderOption}
@@ -910,10 +933,24 @@ const Event_detail = () => {
                       className="w-full border border-gray-300 rounded-lg"
                       disabled={isLoadingAutoFill}
                       showClear  
-                    />
-                    {/* {isLoadingAutoFill && (
-                      <p className="text-blue-500 text-sm mt-1">Loading piece and weight data...</p>
-                    )} */}
+                    /> */}
+
+                 <MultiSelect
+  value={trackingId}
+  onChange={handleTrackingNumberChange}
+  options={orderOption}
+  optionLabel="tracking_number"
+  optionValue="id"
+  placeholder="Select Tracking Number"
+  filter
+  filterValue={filterValue}
+  onFilter={(e) => setFilterValue(e.filter)}
+  onKeyDown={handleKeyDown}
+  className="w-full border border-gray-300 rounded-lg"
+  disabled={isLoadingAutoFill}
+  showClear
+/>
+                  
                     {formErrors.trackingNo && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
                         {formErrors.trackingNo}

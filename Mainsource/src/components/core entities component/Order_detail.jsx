@@ -246,7 +246,7 @@ const OrderDetail = () => {
 
   const handleViewOrder = (path) => {
     navigate(`/form-order`, {
-      state: { path },
+      state: { path, isView: true },
     });
   };
   const handleAddOrder = (path) => {
@@ -604,21 +604,22 @@ const OrderDetail = () => {
             </div>
 
             {/* Created By */}
-            <div className="flex flex-wrap md:flex-nowrap items-center">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">
-                Created By
-              </label>
-              <input
-                type="text"
-                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
-                value={createdByFilter}
-                onChange={(e) => setCreatedByFilter(e.target.value)}
-                placeholder="Enter Created By"
-              />
-            </div>
+            {/* //<div className="flex flex-wrap md:flex-nowrap items-center">
+             // <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">
+              //  Created By
+             // </label>
+              //<input
+            
+               // type="text"
+               // className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                //value={createdByFilter}
+               // onChange={(e) => setCreatedByFilter(e.target.value)}
+                //placeholder="Enter Created By"
+             // />
+           // </div> */}
 
             {/* Created Date */}
-            <div className="flex flex-wrap md:flex-nowrap items-center">
+            {/* <div className="flex flex-wrap md:flex-nowrap items-center">
               <label className="text-sm font-medium text-gray-600 w-full md:w-[60%]">
                 Created Date
               </label>
@@ -628,7 +629,7 @@ const OrderDetail = () => {
                 value={createdDateFilter}
                 onChange={(e) => setCreatedDateFilter(e.target.value)}
               />
-            </div>
+            </div> */}
 
             {/* Status */}
             {/* <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[15%] gap-1">
@@ -1216,15 +1217,15 @@ const OrderDetail = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Address</span>
-                      <span>{viewOrder.beneficiaries?.[0].address || "-"}</span>
+                      <span>{viewOrder.beneficiaries?.[0]?.address || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">City</span>
-                      <span>{viewOrder.beneficiaries?.[0].city || "-"}</span>
+                      <span>{viewOrder.beneficiaries?.[0]?.city || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Country</span>
-                      <span>{viewOrder.beneficiaries?.[0].country || "-"}</span>
+                      <span>{viewOrder.beneficiaries?.[0]?.country || "-"}</span>
                     </div>
                     <hr></hr>
                   </div>
