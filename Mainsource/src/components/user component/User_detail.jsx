@@ -125,9 +125,9 @@ const User_detail = () => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
       errors.editEmail = "Enter a valid email address";
     }
-    if (!editPassword.trim()) {
-      errors.editPassword = "Password is required";
-    }
+    // if (!editPassword.trim()) {
+    //   errors.editPassword = "Password is required";
+    // }
     if (!editPhone.trim()) {
       errors.editPhone = "Phone Number is required";
     } else if (!/^[0-9]{10}$/.test(editPhone)) {
@@ -153,7 +153,7 @@ const User_detail = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.get("api/users/get-users");
-
+      console.log("Fetch Users Response:", response);
       if (response.data?.success) {
 
         const formattedUsers = response.data.users.map((user, index) => {
@@ -688,7 +688,7 @@ const openAddModal = () => {
           <div className="table-scroll-container">
             <DataTable
               key={data.length}
-              data={data}
+              data={users}
               columns={columns}
               options={{
                 paging: true,
@@ -1060,7 +1060,7 @@ const openAddModal = () => {
                       </div>
                     </div>
 
-                    <div className="mt-8 flex justify-between items-center">
+                    {/* <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
                         Password <span className="text-red-500">*</span>
                       </label>
@@ -1080,7 +1080,7 @@ const openAddModal = () => {
                           <p className="text-red-500 text-sm">{formErrors.editPassword}</p>
                         )}
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
