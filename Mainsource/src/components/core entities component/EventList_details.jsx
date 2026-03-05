@@ -43,6 +43,7 @@ const EventList_details = () => {
   const [status, setStatus] = useState("");
   const [editName, setEditName] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  
 
   const resetAddForm = () => {
     setName("");

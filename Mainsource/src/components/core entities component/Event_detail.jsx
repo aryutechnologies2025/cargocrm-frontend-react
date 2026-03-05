@@ -39,11 +39,8 @@ const Event_detail = () => {
   const [filterValue, setFilterValue] = useState("");
   console.log("filterValue", filterValue);
   const [visibleColumns, setVisibleColumns] = useState({
-    Sno: true,
-    event_id: true,
     event_name: true,
-    run_no: true,
-    tracking_no: true,
+    run_number: true,
     quantity: true,
     weight: true,
     event_date: true,
@@ -406,7 +403,6 @@ const Event_detail = () => {
       const newState = { ...prev, [key]: !prev[key] };
 
       const columnIndexMap = {
-        Sno: 0,
         event_id: 1,
         event_name: 2,
         run_no: 3,
@@ -416,7 +412,6 @@ const Event_detail = () => {
         event_date: 7,
         event_time: 8,
         created_by: 9,
-        status: 10,
       };
 
       const index = columnIndexMap[key];
@@ -427,6 +422,16 @@ const Event_detail = () => {
 
       return newState;
     });
+  };
+
+    const columnLabels = {
+    event_name: "Event Name",
+    run_number: "Run Number",
+    quantity: "Quantity",
+    weight: "Weight",
+    event_date: "Event Date",
+    event_time: "Event Time",
+    created_by: "Created By",
   };
 
   const openAddModal = () => {
@@ -569,7 +574,7 @@ const Event_detail = () => {
 
             container._root.render(
               <FaEye
-              className="p-1 size-5 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
+                className="p-1 size-5 bg-blue-50 text-[#057fc4] rounded-[10px] hover:bg-[#DFEBFF]"
                 style={{ cursor: "pointer", color: "#057fc4" }}
                 onClick={() => setOpenTrackingId(row.id)}
               />
@@ -689,25 +694,25 @@ const Event_detail = () => {
     },
   ];
 
-  
 
-const handleKeyDown = (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
 
-    if (!filterValue) return;
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
 
-    const matchedOption = orderOption.find((option) =>
-      option.tracking_number.toLowerCase().includes(filterValue.toLowerCase())
-    );
+      if (!filterValue) return;
 
-    if (matchedOption && !trackingId.includes(matchedOption.id)) {
-      const updated = [...trackingId, matchedOption.id];
-      setTrackingId(updated);
+      const matchedOption = orderOption.find((option) =>
+        option.tracking_number.toLowerCase().includes(filterValue.toLowerCase())
+      );
+
+      if (matchedOption && !trackingId.includes(matchedOption.id)) {
+        const updated = [...trackingId, matchedOption.id];
+        setTrackingId(updated);
+      }
+
     }
-
-  }
-};
+  };
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -799,7 +804,7 @@ const handleKeyDown = (e) => {
                             checked={visibleColumns[col]}
                             onChange={() => toggleColumn(col)}
                           />
-                          {col}
+                          {columnLabels[col]}
                         </label>
                       ))}
                     </div>
@@ -935,22 +940,22 @@ const handleKeyDown = (e) => {
                       showClear  
                     /> */}
 
-                 <MultiSelect
-  value={trackingId}
-  onChange={handleTrackingNumberChange}
-  options={orderOption}
-  optionLabel="tracking_number"
-  optionValue="id"
-  placeholder="Select Tracking Number"
-  filter
-  filterValue={filterValue}
-  onFilter={(e) => setFilterValue(e.filter)}
-  onKeyDown={handleKeyDown}
-  className="w-full border border-gray-300 rounded-lg"
-  disabled={isLoadingAutoFill}
-  showClear
-/>
-                  
+                    <MultiSelect
+                      value={trackingId}
+                      onChange={handleTrackingNumberChange}
+                      options={orderOption}
+                      optionLabel="tracking_number"
+                      optionValue="id"
+                      placeholder="Select Tracking Number"
+                      filter
+                      filterValue={filterValue}
+                      onFilter={(e) => setFilterValue(e.filter)}
+                      onKeyDown={handleKeyDown}
+                      className="w-full border border-gray-300 rounded-lg"
+                      disabled={isLoadingAutoFill}
+                      showClear
+                    />
+
                     {formErrors.trackingNo && (
                       <p className="text-red-500 text-sm mb-4 mt-1">
                         {formErrors.trackingNo}

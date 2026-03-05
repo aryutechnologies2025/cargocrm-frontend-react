@@ -37,21 +37,30 @@ const OrderDetail = () => {
   const [viewOrder, setViewOrder] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
-    sender_id: true,
-    beneficiary_id: true,
+    customerName: true,
+    beneficiaryName: true,
     cargo_mode: true,
     packed: true,
-    created_by: true,
+    piece_number: true,
+    weight: true,
     createdAt: true,
-    status: true,
   });
+  const columnLabels = {
+  customerName: "Sender",
+  beneficiaryName: "Beneficiary",
+  cargo_mode: "Cargo Mode",
+  packed: "Packed",
+  piece_number: "Quantity",
+  weight: "Weight",
+  createdAt: "Created Date",
+};
   const [senderOptions, setSenderOptions] = useState([]);
   const [beneficiaryOptions, setBeneficiaryOptions] = useState([]);
   const [beneficiaryFilter, setBeneficiaryFilter] = useState("");
   const [senderFilter, setSenderFilter] = useState("");
   const [createdByFilter, setCreatedByFilter] = useState("");
   const [createdDateFilter, setCreatedDateFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [cargoFilter, setCargoFilter] = useState("");
   const [fromDateFilter, setFromDateFilter] = useState("");
   const [toDateFilter, setToDateFilter] = useState("");
 
@@ -187,8 +196,7 @@ const OrderDetail = () => {
 
     if (createdDateFilter) filters.created_date = createdDateFilter;
 
-    // if (statusFilter !== "")
-    //   filters.status = statusFilter;
+    if (cargoFilter) filters.cargo_mode = cargoFilter;
 
     if (fromDateFilter) filters.from_date = fromDateFilter;
 
@@ -230,39 +238,6 @@ const OrderDetail = () => {
     setFormErrors({});
   };
 
-  // Open edit modal
-  const openEditModal = async (row) => {
-    const orderId = row._id || row.id;
-    if (!orderId) {
-      toast.error("Invalid order ID");
-      return;
-    }
-
-    try {
-      setEditingOrderId(orderId);
-      setIsEditModalOpen(true);
-      setIsAnimating(true);
-
-      const response = await axiosInstance.get(
-        `api/orders/view-orders/${orderId}`,
-      );
-
-      if (response.data?.status === true || response.data?.success === true) {
-        const data = response.data.data;
-
-        setEditSenderId(data.sender_id?._id);
-        setEditBeneficiaryId(data.beneficiary_id?._id);
-        setEditCargoMode(data.cargo_mode || row.cargo_mode);
-        setEditPacked(data.packed || row.packed);
-        setEditStatus(data.status?.toString() || row.status?.toString());
-      }
-    } catch (err) {
-      toast.error("Unable to fetch order details");
-      closeEditModal();
-    }
-  };
-
-
   // Delete order
   const deleteOrder = async (orderId) => {
     if (!orderId) {
@@ -299,9 +274,8 @@ const OrderDetail = () => {
   };
 
   // Filter functions
-
   const resetFilters = () => {
-    setStatusFilter("");
+    setCargoFilter("");
     setBeneficiaryFilter("");
     setSenderFilter("");
     setCreatedByFilter("");
@@ -312,9 +286,26 @@ const OrderDetail = () => {
     fetchOrder();
   };
 
-  const toggleColumn = (key) => {
+    const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
       const newState = { ...prev, [key]: !prev[key] };
+
+      const columnIndexMap = {
+        customerName: 1,
+        beneficiaryName: 2,
+        cargo_mode: 3,
+        packed: 4,
+        piece_number: 5,
+        weight: 6,
+        createdAt: 7,
+      };
+
+      const index = columnIndexMap[key];
+
+      if (window.contactTable && index !== undefined) {
+        window.contactTable.column(index).visible(newState[key]);
+      }
+
       return newState;
     });
   };
@@ -476,7 +467,6 @@ const OrderDetail = () => {
 
                 <TfiPencilAlt
                   className="cursor-pointer text-gray-600 hover:text-blue-600"
-                  // onClick={() => openEditModal(row)}
                   onClick={() => {
                     handleViewOrder(row._id || row.id);
                   }}
@@ -533,7 +523,7 @@ const OrderDetail = () => {
               </label>
               <input
                 type="text"
-                className="mt-1 px-3 py-2 border rounded-lg w-full  focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={senderFilter}
                 onChange={(e) => setSenderFilter(e.target.value)}
                 placeholder="Enter Sender"
@@ -541,19 +531,18 @@ const OrderDetail = () => {
             </div>
 
             {/* Created By */}
-            {/* //<div className="flex flex-wrap md:flex-nowrap items-center">
-             // <label className="text-sm font-medium text-gray-600 w-full md:w-[40%]">
-              //  Created By
-             // </label>
-              //<input
-            
-               // type="text"
-               // className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
-                //value={createdByFilter}
-               // onChange={(e) => setCreatedByFilter(e.target.value)}
-                //placeholder="Enter Created By"
-             // />
-           // </div> */}
+            <div className="flex flex-wrap md:flex-nowrap items-center gap-1">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[70%]">
+                Created By
+              </label>
+              <input
+                type="date"
+                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                value={createdByFilter}
+                onChange={(e) => setCreatedByFilter(e.target.value)}
+                placeholder="Enter Created By"
+              />
+            </div>
 
             {/* Created Date */}
             {/* <div className="flex flex-wrap md:flex-nowrap items-center">
@@ -568,19 +557,19 @@ const OrderDetail = () => {
               />
             </div> */}
 
-            {/* Status */}
-            {/* <div className="flex flex-wrap md:flex-nowrap items-center w-full md:w-[15%] gap-1">
-              <label className="text-sm font-medium text-gray-600">Status</label>
+            {/* cargo air */}
+            <div className="flex flex-wrap md:flex-nowrap items-center gap-1">
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">Cargo Mode</label>
               <select
-                className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                className="mt-1 px-1 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                value={cargoFilter}
+                onChange={(e) => setCargoFilter(e.target.value)}
               >
-                <option value="">All Status</option>
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
+                <option value="">Select Cargo Mode</option>
+                <option value="Air">Air</option>
+                <option value="Sea">Sea</option>
               </select>
-            </div> */}
+            </div>
 
             {/* From Date */}
             <div className="flex flex-wrap md:flex-nowrap items-center">
@@ -650,7 +639,7 @@ const OrderDetail = () => {
                         checked={visibleColumns[col]}
                         onChange={() => toggleColumn(col)}
                       />
-                      {col.replace(/_/g, " ")}
+                      {columnLabels[col]}
                     </label>
                   ))}
                 </div>
@@ -696,9 +685,8 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeAddModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -896,9 +884,8 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeEditModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
-                isAnimating ? "translate-x-0" : "translate-x-full"
-              }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
+                }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -1189,7 +1176,7 @@ const OrderDetail = () => {
                         Piece Details
                       </span>
                       {viewOrder.piece_details &&
-                      viewOrder.piece_details.length > 0 ? (
+                        viewOrder.piece_details.length > 0 ? (
                         viewOrder.piece_details.map(
                           (detail, index) => (
                             <div

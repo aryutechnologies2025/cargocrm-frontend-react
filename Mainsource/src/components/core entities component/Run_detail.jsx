@@ -34,8 +34,6 @@ const Run_detail = () => {
   const [viewRun, setViewRun] = useState(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
-    Sno: true,
-    run_id: true,
     run_no: true,
     mode: true,
     created_date: true,
@@ -58,8 +56,8 @@ const Run_detail = () => {
   const [editMode, setEditMode] = useState("");
   const [editCreatedDate, setEditCreatedDate] = useState("");
   const [editStatus, setEditStatus] = useState("");
-  const [EditingContainerId,setEditingContainerId] = useState(null);
-  const [runData,setRunData] = useState([]);
+  const [EditingContainerId, setEditingContainerId] = useState(null);
+  const [runData, setRunData] = useState([]);
 
   const validateAddForm = () => {
     let errors = {};
@@ -87,7 +85,7 @@ const Run_detail = () => {
     if (!editMode.trim()) {
       errors.editMode = "Mode is required";
     }
-   
+
     if (editStatus === "") {
       errors.editStatus = "Status is required";
     }
@@ -96,7 +94,7 @@ const Run_detail = () => {
     return Object.keys(errors).length === 0;
   };
 
-const fetchRun = async () => {
+  const fetchRun = async () => {
     setLoading(true);
 
     try {
@@ -105,8 +103,8 @@ const fetchRun = async () => {
 
       if (response?.data?.status === true || response?.data?.success === true) {
         const apiDatas = response?.data?.data || [];
- 
- 
+
+
         setRunData(apiDatas);
         setTotalRecords(apiDatas.length);
       } else {
@@ -122,25 +120,25 @@ const fetchRun = async () => {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchRun();
-  },[]);
+  }, []);
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!validateAddForm()) return;
-    try{
-    const payload = {
-      run_number: runNo,
-      mode: mode,
-      status: status,
-    };
+    try {
+      const payload = {
+        run_number: runNo,
+        mode: mode,
+        status: status,
+      };
 
-   const response = await axiosInstance.post(
+      const response = await axiosInstance.post(
         "api/containerruns/create-containerruns",
         payload,
       );
-    console.log("runData" , response);
+      console.log("runData", response);
 
       if (response?.data?.status === true || response?.data?.success === true) {
         toast.success("Container run created successfully");
@@ -159,15 +157,15 @@ const fetchRun = async () => {
 
   const handleUpdate = async () => {
     // if (!validateEditForm()) return;
-    try{
-    const payload = {
-      id: selectedRun._id,
-      run_number: editRunNo,
-      mode: editMode,
-      status: editStatus,
-    };
+    try {
+      const payload = {
+        id: selectedRun._id,
+        run_number: editRunNo,
+        mode: editMode,
+        status: editStatus,
+      };
 
-    const response = await axiosInstance.put(
+      const response = await axiosInstance.put(
         `api/containerruns/edit-containerruns/${EditingContainerId}`,
         payload,
       );
@@ -185,38 +183,38 @@ const fetchRun = async () => {
   };
 
   const deleteRun = async (parcelId) => {
-      if (!parcelId) {
-        toast.error("Invalid Run ID");
-        return;
+    if (!parcelId) {
+      toast.error("Invalid Run ID");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete this parcel?",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await axiosInstance.delete(
+        `api/containerruns/delete-containerruns/${parcelId}`,
+      );
+
+      if (response.data?.status === true || response.data?.success === true) {
+        toast.success("Container Run deleted successfully");
+        fetchRun();
+      } else {
+        toast.error(response.data?.message || "Failed to delete container Run");
       }
-  
-      const result = await Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to delete this parcel?",
-        icon: "warning",
-        showCancelButton: true,
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Yes, delete it!",
-      });
-  
-      if (!result.isConfirmed) return;
-  
-      try {
-        const response = await axiosInstance.delete(
-          `api/containerruns/delete-containerruns/${parcelId}`,
-        );
-  
-        if (response.data?.status === true || response.data?.success === true) {
-          toast.success("Container Run deleted successfully");
-          fetchRun();
-        } else {
-          toast.error(response.data?.message || "Failed to delete container Run");
-        }
-      } catch (error) {
-        console.error("Delete error:", error.response?.data || error);
-        toast.error("Error deleting container Run");
-      }
-    };
+    } catch (error) {
+      console.error("Delete error:", error.response?.data || error);
+      toast.error("Error deleting container Run");
+    }
+  };
 
   const resetFilters = () => {
     setStatusFilter("");
@@ -230,12 +228,10 @@ const fetchRun = async () => {
       const newState = { ...prev, [key]: !prev[key] };
 
       const columnIndexMap = {
-        Sno: 0,
-        run_id: 1,
-        run_no: 2,
-        mode: 3,
-        created_date: 4,
-        status: 5,
+        run_no: 1,
+        mode: 2,
+        created_date: 3,
+        status: 4,
       };
 
       const index = columnIndexMap[key];
@@ -291,7 +287,7 @@ const fetchRun = async () => {
   };
 
   const columns = [
-   {
+    {
       title: "Sno",
       data: null,
       render: function (data, type, row, meta) {
@@ -315,7 +311,7 @@ const fetchRun = async () => {
         return date.toLocaleDateString();
       },
     },
-     {
+    {
       title: "Status",
       data: "status",
       render: (data) => {
@@ -434,7 +430,7 @@ const fetchRun = async () => {
           </p>
           <p>{">"}</p>
 
-          <p className="text-sm md:text-md text-[#057fc4]">Run</p>
+          <p className="text-sm md:text-md text-[#057fc4]">Container Run</p>
         </div>
         {/* Filters */}
         <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
@@ -484,49 +480,50 @@ const fetchRun = async () => {
               </div>
 
               {/* Reset */}
-              <div className="flex items-end">
+              <div className="flex items-end gap-2 ">
                 <button
                   onClick={resetFilters}
                   className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
                 >
                   Reset
                 </button>
-              </div>
+                {/* customize */}
+                <div className="flex justify-start items-center ">
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowCustomize(!showCustomize)}
+                      className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                    >
+                      <BiCustomize className="text-[#046fac]" />Customize
+                    </button>
 
-              {/* customize */}
-              <div className="flex justify-start items-center  ">
-                <div className="relative">
-                  <button
-                    onClick={() => setShowCustomize(!showCustomize)}
-                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-                  >
-                    <BiCustomize className="text-[#046fac]" />Customize
-                  </button>
+                    {showCustomize && (
+                      <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-medium  text-sm">Customize Columns</p>
+                          <button onClick={() => setShowCustomize(false)}>✕</button>
+                        </div>
 
-                  {showCustomize && (
-                    <div className="absolute right-0 left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="font-medium  text-sm">Customize Columns</p>
-                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                        {Object.keys(visibleColumns).map((col) => (
+                          <label
+                            key={col}
+                            className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={visibleColumns[col]}
+                              onChange={() => toggleColumn(col)}
+                            />
+                            {col}
+                          </label>
+                        ))}
                       </div>
-
-                      {Object.keys(visibleColumns).map((col) => (
-                        <label
-                          key={col}
-                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={visibleColumns[col]}
-                            onChange={() => toggleColumn(col)}
-                          />
-                          {col}
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
+
+
 
             </div>
 
@@ -647,7 +644,7 @@ const fetchRun = async () => {
                   </div>
                 </div>
 
-              
+
                 <div className="mt-2 md:mt-8 flex justify-between items-center">
                   <div className="">
                     <label
@@ -750,24 +747,24 @@ const fetchRun = async () => {
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <select
-                      value={editMode}
-                      onChange={(e) => {
-                        setEditMode(e.target.value);
-                        setFormErrors({ ...formErrors, editMode: "" }); // Validate status dynamically
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select cargo mode</option>
-                      <option value="air">Air</option>
-                      <option value="sea">Sea</option>
-                    </select>
+                          value={editMode}
+                          onChange={(e) => {
+                            setEditMode(e.target.value);
+                            setFormErrors({ ...formErrors, editMode: "" }); // Validate status dynamically
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select cargo mode</option>
+                          <option value="air">Air</option>
+                          <option value="sea">Sea</option>
+                        </select>
                         {formErrors.editMode && (
                           <p className="text-red-500 text-sm">{formErrors.editMode}</p>
                         )}
                       </div>
                     </div>
 
-                 
+
 
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">Status <span className="text-red-500">*</span></label>
@@ -835,8 +832,8 @@ const fetchRun = async () => {
 
               <div className="space-y-4 text-sm text-gray-700">
 
-            
-              
+
+
                 {/* run no */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Run No</span>
