@@ -21,7 +21,8 @@ const Login = () => {
     password: ""
   });
   // const [captchaValue, setCaptchaValue] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
+  console.log("error", error);
   const [formErrors, setFormErrors] = useState({});
 
   const validateLoginForm = () => {
@@ -64,22 +65,10 @@ const Login = () => {
 
   const onCLickLogin = async (e) => {
     e.preventDefault();
-    setError(null);
-
-    // Validate username & password first
-    // if (!validateLoginForm()) return;
-
-    // // Check captcha
-    // if (!captchaValue) {
-    //   setError("Please verify that you are not a robot.");
-    //   return;
-    // }
+    setError("");
 
     try {
-      const res = await axiosInstance.post(
-        `${API_URL}/api/auth/login`,
-        formData
-      );
+      const res = await axiosInstance.post(`${API_URL}/api/auth/login`, formData);
 
       if (res.data.success) {
         localStorage.setItem("cargouser", JSON.stringify(res.data.user));
@@ -87,13 +76,22 @@ const Login = () => {
         localStorage.setItem("loginTime", Date.now());
 
         navigate("/dashboard", { replace: true });
+      } else {
+        setError(res.data.message || "Invalid email or password");
       }
+
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Something went wrong";
+
+      setError(message);
     }
   };
 
   const handleChange = (e) => {
+    setError("");
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -148,11 +146,7 @@ const Login = () => {
                 />
               </div>
 
-              {formErrors.email && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.email}
-                </p>
-              )}
+
             </div>
 
             <div className="md:w-[400px] mb-3">
@@ -176,11 +170,7 @@ const Login = () => {
                 </span>
               </div>
 
-              {formErrors.password && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.password}
-                </p>
-              )}
+
             </div>
             {/* <ReCAPTCHA
               sitekey={CAPCHA_URL} //live
@@ -189,6 +179,12 @@ const Login = () => {
             {error && (
               <p className="text-red-500 text-sm mt-2">{error}</p>
             )} */}
+
+            {error && (
+              <p className="text-red-500 text-sm mt-1">
+                {error}
+              </p>
+            )}
             <button
               onClick={onCLickLogin}
               className="font-bold mt-3 text-sm bg-gradient-to-r from-[#057fc4] to-[#1492db] px-5 py-2 md:px-14 md:py-4 rounded-lg text-white"
