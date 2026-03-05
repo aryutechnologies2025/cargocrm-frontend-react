@@ -133,16 +133,12 @@ const OrderDetail = () => {
         ...filters, //  dynamic filters
       };
 
-      const response = await axiosInstance.get("api/orders/all-order", {
-        params,
-      });
+      const response = await axiosInstance.get("api/customers/view-customers");
 
       if (response.data?.success || response.data?.status) {
         setOrder(response.data.data || []);
-        setSenderOptions(response.data.customer || []);
       } else {
         setOrder([]);
-        setSenderOptions([]);
       }
     } catch (error) {
       console.error(error);
@@ -211,42 +207,11 @@ const OrderDetail = () => {
     fetchOrder();
   }, []);
 
-  // Create order
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateAddForm()) return;
 
-    try {
-      const formData = {
-        sender_id: senderId,
-        beneficiary_id: beneficiaryId,
-        cargo_mode: cargoMode,
-        packed: packed,
-        status: Number(status),
-        created_by: userId,
-      };
-
-      const response = await axiosInstance.post(
-        `api/orders/create-orders`,
-        formData,
-      );
-
-      if (response.data?.status || response.data?.success) {
-        toast.success("Order created successfully");
-        await fetchOrder();
-        closeAddModal();
-        resetAddForm();
-      } else {
-        toast.error("Failed to create order");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Error creating order");
-    }
-  };
 
   const handleViewOrder = (path) => {
-    navigate(`/form-order`, {
-      state: { path, isView: true },
+    navigate(`/customer`, {
+      state: { path },
     });
   };
   const handleAddOrder = (path) => {
@@ -297,34 +262,6 @@ const OrderDetail = () => {
     }
   };
 
-  // Update order
-  const handleUpdate = async () => {
-    // if (!validateEditForm()) return;
-
-    try {
-      const response = await axiosInstance.put(
-        `api/orders/edit-orders/${editingOrderId}`,
-        {
-          sender_id: editSenderId,
-          beneficiary_id: editBeneficiaryId,
-          cargo_mode: editCargoMode,
-          packed: editPacked,
-          status: Number(editStatus),
-          updated_by: userId,
-        },
-      );
-
-      if (response.data?.status || response.data?.success) {
-        toast.success("Order updated successfully");
-        await fetchOrder();
-        closeEditModal();
-      } else {
-        toast.error("Failed to update order");
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error updating order");
-    }
-  };
 
   // Delete order
   const deleteOrder = async (orderId) => {
@@ -346,7 +283,7 @@ const OrderDetail = () => {
 
     try {
       const response = await axiosInstance.delete(
-        `api/orders/delete-orders/${orderId}`,
+        `api/customers/delete-customers/${orderId}`,
       );
 
       if (response.data?.status === true || response.data?.success === true) {
@@ -424,18 +361,18 @@ const OrderDetail = () => {
     },
     {
       title: "Beneficiary",
-      data: (row) => row.beneficiaries?.[0]?.name || "-",
+      data: (row) => row.beneficiaryName || "-",
     },
     {
       title: "Cargo Mode",
       data: null,
-      render: (row) => row.orders?.[0]?.cargo_mode || "-",
+      render: (row) => row.cargo_mode || "-",
     },
     {
       title: "Packed",
       data: null,
       render: (row) => {
-        const packed = row.orders?.[0]?.packed;
+        const packed = row.packed;
 
         const isActive = packed === 1 || packed === "1" || packed === "Yes";
 
@@ -463,14 +400,14 @@ const OrderDetail = () => {
     {
       title: "Quantity",
       data: null,
-      render: (row) => row.parcels?.[0]?.piece_number || "-",
+      render: (row) => row.piece_number || "-",
     },
     {
       title: "Weight",
       data: null,
       render: (row) => {
         const totalWeight =
-          row.parcels?.[0]?.piece_details?.reduce((sums, piece, index) => {
+          row.piece_details?.reduce((sums, piece, index) => {
             console.log(`Calculating weight for piece`, piece.weight);
             console.log(`Calculating weight for sums`, sums);
             return sums + (parseFloat(piece.weight) || 0);
@@ -493,8 +430,8 @@ const OrderDetail = () => {
       title: "Created Date",
       data: null,
       render: (row) => {
-        if (!row.orders?.[0]?.createdAt) return "-";
-        return new Date(row.orders?.[0]?.createdAt).toLocaleDateString();
+        if (!row.createdAt) return "-";
+        return new Date(row.createdAt).toLocaleDateString();
       },
     },
     {
@@ -541,7 +478,7 @@ const OrderDetail = () => {
                   className="cursor-pointer text-gray-600 hover:text-blue-600"
                   // onClick={() => openEditModal(row)}
                   onClick={() => {
-                    handleViewOrder(row);
+                    handleViewOrder(row._id || row.id);
                   }}
                 />
                 <MdOutlineDeleteOutline
@@ -1204,28 +1141,28 @@ const OrderDetail = () => {
                     </h2>
                     <div className="flex justify-between">
                       <span className="font-medium">Beneficiary Name</span>
-                      <span>{viewOrder.beneficiaries?.[0]?.name || "-"}</span>
+                      <span>{viewOrder.beneficiaryName || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Email</span>
-                      <span>{viewOrder.beneficiaries?.[0]?.email || "-"}</span>
+                      <span>{viewOrder.beneficiaryEmail || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Phone Number</span>
 
-                      <span>{viewOrder.beneficiaries?.[0]?.phone || "-"}</span>
+                      <span>{viewOrder.beneficiaryPhone || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Address</span>
-                      <span>{viewOrder.beneficiaries?.[0]?.address || "-"}</span>
+                      <span>{viewOrder.beneficiaryAddress || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">City</span>
-                      <span>{viewOrder.beneficiaries?.[0]?.city || "-"}</span>
+                      <span>{viewOrder.beneficiaryCity || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Country</span>
-                      <span>{viewOrder.beneficiaries?.[0]?.country || "-"}</span>
+                      <span>{viewOrder.beneficiaryCountry || "-"}</span>
                     </div>
                     <hr></hr>
                   </div>
@@ -1239,11 +1176,11 @@ const OrderDetail = () => {
                     </h2>
                     <div className="flex justify-between">
                       <span className="font-medium">Piece Number</span>
-                      <span>{viewOrder.parcels?.[0]?.piece_number || "-"}</span>
+                      <span>{viewOrder.piece_number || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Description </span>
-                      <span>{viewOrder.parcels?.[0]?.description || "-"}</span>
+                      <span>{viewOrder.description || "-"}</span>
                     </div>
 
                     {/* PieceDetails */}
@@ -1251,9 +1188,9 @@ const OrderDetail = () => {
                       <span className="font-medium block mb-2">
                         Piece Details
                       </span>
-                      {viewOrder.parcels?.[0]?.piece_details &&
-                      viewOrder.parcels?.[0]?.piece_details.length > 0 ? (
-                        viewOrder.parcels?.[0]?.piece_details.map(
+                      {viewOrder.piece_details &&
+                      viewOrder.piece_details.length > 0 ? (
+                        viewOrder.piece_details.map(
                           (detail, index) => (
                             <div
                               key={index}
@@ -1307,11 +1244,11 @@ const OrderDetail = () => {
                     </h2>
                     <div className="flex justify-between">
                       <span className="font-medium">Cargo Mode </span>
-                      <span>{viewOrder.orders?.[0]?.cargo_mode || "-"}</span>
+                      <span>{viewOrder.cargo_mode || "-"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Packed</span>
-                      <span>{viewOrder.orders?.[0]?.packed || "-"}</span>
+                      <span>{viewOrder.packed || "-"}</span>
                     </div>
                     <hr></hr>
                   </div>

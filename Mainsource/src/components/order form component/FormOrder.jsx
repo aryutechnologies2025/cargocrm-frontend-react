@@ -71,20 +71,17 @@ const FormOrder = () => {
       </div> */}
 
                 {/* STEP HEADER */}
-                <div className="flex items-center justify-between mb-8 mt-5 px-5">
+                {/* <div className="flex items-center justify-between mb-8 mt-5 px-5">
 
                     {[
                         { id: 1, label: "Customer Details" },
-                        // { id: 2, label: "Beneficiary" },
                         { id: 2, label: "Parcel Details" },
                         { id: 3, label: "Order Details" },
                     ].map((item, index, arr) => (
                         <React.Fragment key={item.id}>
 
-                            {/* STEP */}
                             <div className="flex flex-col items-center flex-1">
 
-                                {/* Circle */}
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold
                                        ${step >= item.id
@@ -95,7 +92,6 @@ const FormOrder = () => {
                                     {item.id}
                                 </div>
 
-                                {/* Title */}
                                 <p
                                     className={`mt-2 text-xs md:text-sm text-center font-medium
                                      ${step >= item.id ? "text-[#057fc4]" : "text-gray-400"
@@ -105,7 +101,6 @@ const FormOrder = () => {
                                 </p>
                             </div>
 
-                            {/* LINE BETWEEN STEPS */}
                             {index !== arr.length - 1 && (
                                 <div className={`flex-1 h-[2px]
                            ${step > item.id ? "bg-[#057fc4]" : "bg-gray-300"}`}
@@ -113,7 +108,7 @@ const FormOrder = () => {
                             )}
                         </React.Fragment>
                     ))}
-                </div>
+                </div> */}
 
                 {/* STEP BODY */}
                 {step === 1 && (
