@@ -41,6 +41,19 @@ const Collection_detail = () => {
   const [fromDateFilter, setFromDateFilter] = useState(getToday());
   const [toDateFilter, setToDateFilter] = useState(getToday());
   const [formErrors, setFormErrors] = useState({});
+  const [showCustomize, setShowCustomize] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState({
+    tracking_number: true,
+    email: true,
+    phone_no: true,
+    alter_phone: true,
+    address: true,
+    city: true,
+    country: true,
+    postcode: true,
+    notes: true,
+    status: true,
+  });
   const [orderId, setOrderId] = useState("");
   const [address, setAddress] = useState("");
   const [dateTime, setDateTime] = useState("");
@@ -195,6 +208,46 @@ const Collection_detail = () => {
     fetchCollection();
   }, []);
 
+  const toggleColumn = (key) => {
+    setVisibleColumns((prev) => {
+      const newState = { ...prev, [key]: !prev[key] };
+
+      const columnIndexMap = {
+        tracking_number: 1,
+        email: 2,
+        phone_no: 3,
+        alter_phone: 4,
+        address: 5,
+        city: 6,
+        country: 7,
+        postcode: 8,
+        notes: 9,
+        status: 10,
+      };
+
+      const index = columnIndexMap[key];
+
+      if (window.contactTable && index !== undefined) {
+        window.contactTable.column(index).visible(newState[key]);
+      }
+
+      return newState;
+    });
+  };
+
+  const columnLabels = {
+    tracking_number: "order ID",
+    email: "Email",
+    phone_no: "Phone No",
+    alter_phone: "Alter Phone No",
+    address: "Address",
+    city: "City",
+    country: "Country",
+    postcode: "Postcode",
+    notes: "Notes",
+    status: "Status",
+  };
+
   const handleAddSubmit = async () => {
     if (!validateAddForm()) return;
     try {
@@ -244,7 +297,7 @@ const Collection_detail = () => {
         {
           orderId: editOrderId,
           email: editEmail,
-          phone: editPhone,
+          phone_no: editPhone,
           alter_phone: editPhoneAlter,
           collection_for: editCollectionFor,
           notes: editNotes,
@@ -339,7 +392,7 @@ const Collection_detail = () => {
     console.log("row", row);
     setSelectedId(row.id);
     setEditEmail(row.email);
-    setEditPhone(row.phone);
+    setEditPhone(row.phone_no);
     setEditPhoneAlter(row.alter_phone);
     setEditCollectionFor(row.collection_for);
     setEditNotes(row.notes);
@@ -380,7 +433,7 @@ const Collection_detail = () => {
     {
       title: "Phone No",
       data: null,
-      render: (row) => row.phone || "-",
+      render: (row) => row.phone_no || "-",
     },
     {
       title: "Alter Phone No",
@@ -388,19 +441,9 @@ const Collection_detail = () => {
       render: (row) => row.alter_phone || "-",
     },
     {
-      title: "Collection ",
-      data: null,
-      render: (row) => row.collection_for || "-",
-    },
-    {
       title: "Address",
       data: null,
       render: (row) => row.address || "-",
-    },
-    {
-      title: "Date&Time",
-      data: null,
-      render: (row) => row.date_time || "-",
     },
     {
       title: "City",
@@ -559,7 +602,7 @@ const Collection_detail = () => {
           </p>
           <p>{">"}</p>
 
-          <p className="text-sm md:text-md text-[#057fc4]">Event Master</p>
+          <p className="text-sm md:text-md text-[#057fc4]">Collection</p>
         </div>
         {/* Filters */}
         <div className="bg-white rounded-xl p-5 mb-3 mt-3 shadow-sm">
@@ -608,14 +651,48 @@ const Collection_detail = () => {
               </div>
 
               {/* Reset */}
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
                 <button
                   onClick={resetFilters}
                   className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
                 >
                   Reset
                 </button>
+                {/* Customize */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCustomize(!showCustomize)}
+                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                  >
+                    <BiCustomize className="text-[#046fac]" />
+                    Customize
+                  </button>
+
+                  {showCustomize && (
+                    <div className="absolute mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-medium text-sm">Customize Columns</p>
+                        <button onClick={() => setShowCustomize(false)}>✕</button>
+                      </div>
+
+                      {Object.keys(visibleColumns).map((col) => (
+                        <label
+                          key={col}
+                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[col]}
+                            onChange={() => toggleColumn(col)}
+                          />
+                          {columnLabels[col]}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+
             </div>
 
             {/* Right Side Add Button */}
@@ -650,6 +727,7 @@ const Collection_detail = () => {
           </div>
         </div>
 
+        {/* Add modal */}
         {isAddModalOpen && (
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm bg-opacity-50 z-50">
             {/* Overlay */}
