@@ -4,11 +4,12 @@ import Beneficiary from "./Beneficiary";
 import ParcelDetails from "./ParcelDetails";
 import OrderDetails from "./OrderDetails";
 import Mobile_Sidebar from "../Mobile_Sidebar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 const FormOrder = () => {
 
     const [step, setStep] = useState(1);
     const location = useLocation();
+    const navigate = useNavigate();
       const {path, isView } = location.state || {};
       console.log("location.state:", location.state);
     const [customerId, setCustomerId] = useState(path?.customerId || null);
@@ -58,8 +59,9 @@ const FormOrder = () => {
 
                     <p className="text-sm md:text-md text-[#057fc4]">Order Form</p>
                 </div>
-                <div>
+                <div className="flex justify-between items-center">
                     <p className="ms-5 mt-5 font-semibold text-2xl text-[#057fc4]">Order Form </p>
+                    <button onClick={() =>navigate(-1)} className="mb-4 bg-[#057fc4] text-white px-4 py-2 rounded-2xl">Back</button>
                 </div>
 
                 {/* STEP HEADER */}

@@ -3,17 +3,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import axiosInstance from "../../api/axiosInstance";
 import { useLocation } from "react-router-dom";
+import Mobile_Sidebar from "../Mobile_Sidebar";
 const Customer_detail = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { path} = location.state || {};
+  const { path } = location.state || {};
   console.log("Received ID from location.state:", location.state);
   const id = path || {};
   console.log("Extracted ID:", id);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [formErrors, setFormErrors] = useState({});
-  
+
   const storedDetalis = localStorage.getItem("cargouser");
   const parsedDetails = JSON.parse(storedDetalis);
   const createdBy = parsedDetails.id;
@@ -26,7 +27,7 @@ const Customer_detail = () => {
     customerCity: "",
     customerCountry: "",
     customerPostcode: "",
-    
+
     beneficiaryName: "",
     beneficiaryEmail: "",
     beneficiaryPhone: "",
@@ -34,14 +35,14 @@ const Customer_detail = () => {
     beneficiaryCity: "",
     beneficiaryCountry: "",
     beneficiaryPostcode: "",
-    
+
     piece_number: "",
     description: "",
     piece_details: [],
     tracking_number: "",
     cargo_mode: "",
     packed: "",
-    
+
     created_by: createdBy,
     tracking_number: ""
   });
@@ -158,7 +159,7 @@ const Customer_detail = () => {
           customerCity: data.customerCity || "",
           customerCountry: data.customerCountry || "",
           customerPostcode: data.customerPostcode || "",
-          
+
           beneficiaryName: data.beneficiaryName || "",
           beneficiaryEmail: data.beneficiaryEmail || "",
           beneficiaryPhone: data.beneficiaryPhone || "",
@@ -166,14 +167,14 @@ const Customer_detail = () => {
           beneficiaryCity: data.beneficiaryCity || "",
           beneficiaryCountry: data.beneficiaryCountry || "",
           beneficiaryPostcode: data.beneficiaryPostcode || "",
-          
+
           piece_number: data.piece_number || "",
           description: data.description || "",
           piece_details: data.piece_details || [],
-          
+
           cargo_mode: data.cargo_mode || "",
           packed: data.packed || "",
-          
+
           created_by: data.created_by || createdBy,
           tracking_number: data.tracking_number || ""
         });
@@ -197,15 +198,15 @@ const Customer_detail = () => {
   useEffect(() => {
     if (id) {
       fetchCustomerData();
-    } 
+    }
   }, [id]);
 
   const handlePieceNumberChange = (e) => {
     const value = e.target.value;
     const newPieceNumber = parseInt(value) || 0;
-    
+
     setFormData(prev => ({ ...prev, piece_number: value }));
-    
+
     if (newPieceNumber > 0) {
       if (formData.piece_details && formData.piece_details.length > 0) {
         if (newPieceNumber > formData.piece_details.length) {
@@ -276,7 +277,7 @@ const Customer_detail = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const updatedFormData = {
       ...formData,
       piece_details: pieceData
@@ -286,10 +287,10 @@ const Customer_detail = () => {
     if (!validateForm()) return;
 
     if (parseInt(formData.piece_number) > 0) {
-      const isValid = pieceData.every(piece => 
+      const isValid = pieceData.every(piece =>
         piece.weight && piece.length && piece.width && piece.height
       );
-      
+
       if (!isValid) {
         toast.error("Please fill all piece dimensions");
         return;
@@ -298,7 +299,7 @@ const Customer_detail = () => {
 
     try {
       setLoading(true);
-      
+
       const apiData = {
         ...updatedFormData,
         piece_details: pieceData
@@ -332,9 +333,29 @@ const Customer_detail = () => {
   // }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#057fc4]">Edit Information</h1>
+    <div className="p-4 gap-3 w-full min-h-screen bg-white rounded-xl shadow">
+      <Mobile_Sidebar />
+      <div className="flex gap-2  ms-5 items-center">
+        <p
+          className="text-sm text-gray-500"
+          onClick={() => navigate("/dashboard")}
+        >
+          Dashboard
+        </p>
+        <p>{">"}</p>
+
+        <p className="text-sm md:text-md text-[#057fc4]">Order Form</p>
+      </div>
+      <div className="flex justify-between items-center ms-5  mt-1 md:mt-3 ">
+        <h1 className="text-xl md:text-2xl font-bold text-[#057fc4]">Edit Order Form</h1>
+        <button
+          onClick={() =>
+            navigate(-1)
+          }
+          className="md:mb-4 bg-[#057fc4] text-md text-white px-3 md:px-4 py-2 rounded-2xl"
+        >
+          Back
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="gap-3 flex flex-col w-full bg-white rounded-xl shadow p-6">
@@ -641,7 +662,7 @@ const Customer_detail = () => {
         {/* Parcel Section */}
         <div className="w-full p-4 border border-[#057fc4] rounded-xl shadow mt-4">
           <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Parcel Details</h3>
-          
+
           <div className="mt-2 flex justify-between items-center">
             <div className="w-[40%]">
               <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
@@ -757,7 +778,7 @@ const Customer_detail = () => {
         {/* Order Section */}
         <div className="w-full p-4 border border-[#057fc4] rounded-xl shadow mt-4">
           <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Order Details</h3>
-          
+
           <div className="mt-2 md:mt-4 flex justify-between items-center">
             <div className="w-[40%]">
               <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
@@ -779,7 +800,7 @@ const Customer_detail = () => {
             </div>
           </div>
 
-         
+
           <div className="mt-2 md:mt-4 flex justify-between items-center">
             <div className="w-[40%]">
               <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
@@ -787,7 +808,7 @@ const Customer_detail = () => {
               </label>
             </div>
             <div className="w-[60%] md:w-[50%]">
-              <select 
+              <select
                 name="cargo_mode"
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={formData.cargo_mode}
