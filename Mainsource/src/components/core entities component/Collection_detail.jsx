@@ -46,15 +46,27 @@ const Collection_detail = () => {
   const [dateTime, setDateTime] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
-  const [postcode, setpostcode] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [phone, setPhone] = useState("");
+  const [phoneAlter, setPhoneAlter] = useState("");
+  const [email, setEmail] = useState("");
+  const [notes, setNotes] = useState("");
+  const [collectionFor, setCollectionFor] = useState("");
   const [status, setStatus] = useState("");
+
   const [editOrderId, setEditOrderId] = useState("");
   const [editAddress, setEditAddress] = useState("");
   const [editDateTime, setEditDateTime] = useState("");
   const [editCity, setEditCity] = useState("");
   const [editCountry, setEditCountry] = useState("");
   const [editPostcode, setEditPostcode] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editPhoneAlter, setEditPhoneAlter] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+  const [editCollectionFor, setEditCollectionFor] = useState("");
   const [editStatus, setEditStatus] = useState("");
+
   const [selectedId, setSelectedId] = useState(null);
   const [collection, setCollection] = useState([]);
   const [senderOptions, setSenderOptions] = useState([]);
@@ -63,29 +75,43 @@ const Collection_detail = () => {
   const validateAddForm = () => {
     let errors = {};
 
-    // Order ID
     if (!senderId?.trim()) {
       errors.senderId = "Order Id is required";
     }
-
-    // Address
+    if (!email?.trim()) {
+      errors.email = "Email is required";
+    }
+    if (!phone?.trim()) {
+      errors.phone = "Phone Number is required";
+    }
+    if (!phoneAlter?.trim()) {
+      errors.phoneAlter = "Alter Phone Number is required";
+    }
+    if (!collectionFor?.trim()) {
+      errors.collectionFor = "Collection is required";
+    }
     if (!address?.trim()) {
       errors.address = "Address is required";
-    } 
+    }
     if (!city?.trim()) {
       errors.city = "City is required";
-    } 
+    }
     if (!country?.trim()) {
       errors.country = "Country is required";
-    } 
+    }
     if (!postcode?.trim()) {
       errors.postcode = "Postcode is required";
-    } 
-
-    // Date & Time
+    }
+    if (!notes?.trim()) {
+      errors.notes = "Notes is required";
+    }
     if (!dateTime?.trim()) {
       errors.dateTime = "Date & Time is required";
     }
+    if (status === "") {
+      errors.status = "Status is required";
+    }
+
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -94,12 +120,24 @@ const Collection_detail = () => {
   const validateEditForm = () => {
     let errors = {};
 
-    // Order ID
     if (!editOrderId?.trim()) {
       errors.editOrderId = "Order Id is required";
     }
-
-    // Address
+    if (!editPhone?.trim()) {
+      errors.editPhone = "Phone Number is required";
+    }
+    if (!editPhoneAlter?.trim()) {
+      errors.editPhoneAlter = "Alter Phone Number is required";
+    }
+    if (!editEmail?.trim()) {
+      errors.editEmail = "Email is required";
+    }
+    if (!editCollectionFor?.trim()) {
+      errors.editCollectionFor = "Collection is required";
+    }
+    if (!editOrderId?.trim()) {
+      errors.editOrderId = "Order Id is required";
+    }
     if (!editAddress?.trim()) {
       errors.editAddress = "Address is required";
     }
@@ -112,10 +150,14 @@ const Collection_detail = () => {
     if (!editPostcode?.trim()) {
       errors.editPostcode = "Postcode is required";
     }
-
-    // Date & Time
+    if (!editNotes?.trim()) {
+      errors.editNotes = "Notes is required";
+    }
     if (!editDateTime?.trim()) {
       errors.editDateTime = "Date & Time is required";
+    }
+    if (editStatus === "") {
+      errors.editStatus = "Status is required";
     }
 
     setFormErrors(errors);
@@ -159,6 +201,12 @@ const Collection_detail = () => {
       const payload = {
         orderId: senderId,
         address: address,
+        email: email,
+        phone_no: phone,
+        alter_phone: phoneAlter,
+        collection_for: collectionFor,
+        notes: notes,
+        status: status,
         date_time: dateTime,
         city: city,
         country: country,
@@ -195,6 +243,12 @@ const Collection_detail = () => {
         `api/collections/edit-collection/${selectedId}`,
         {
           orderId: editOrderId,
+          email: editEmail,
+          phone: editPhone,
+          alter_phone: editPhoneAlter,
+          collection_for: editCollectionFor,
+          notes: editNotes,
+          status: editStatus,
           address: editAddress,
           date_time: editDateTime,
           city: editCity,
@@ -284,6 +338,12 @@ const Collection_detail = () => {
   const openEditModal = (row) => {
     console.log("row", row);
     setSelectedId(row.id);
+    setEditEmail(row.email);
+    setEditPhone(row.phone);
+    setEditPhoneAlter(row.alter_phone);
+    setEditCollectionFor(row.collection_for);
+    setEditNotes(row.notes);
+    setEditStatus(row.status);
     setEditAddress(row.address);
     setEditDateTime(row.date_time);
     setEditOrderId(row.orderId?._id);
@@ -313,6 +373,26 @@ const Collection_detail = () => {
       render: (row) => row.tracking_number || "-",
     },
     {
+      title: "Email",
+      data: null,
+      render: (row) => row.email || "-",
+    },
+    {
+      title: "Phone No",
+      data: null,
+      render: (row) => row.phone || "-",
+    },
+    {
+      title: "Alter Phone No",
+      data: null,
+      render: (row) => row.alter_phone || "-",
+    },
+    {
+      title: "Collection ",
+      data: null,
+      render: (row) => row.collection_for || "-",
+    },
+    {
       title: "Address",
       data: null,
       render: (row) => row.address || "-",
@@ -338,14 +418,31 @@ const Collection_detail = () => {
       render: (row) => row.postcode || "-",
     },
     {
+      title: "Notes",
+      data: null,
+      render: (row) => row.notes || "-",
+    },
+    {
       title: "Status",
       data: "status",
       render: (data) => {
-        const textColor = data === 1 ? "red" : "green";
-        const bgColor = data === 1 ? "#ffe5e5" : "#e6fffa";
-        return ` <div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor};  border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
-                  ${data === 1 ? "Inactive" : "Active"}
-                </div>`;
+        let textColor = "";
+        let bgColor = "";
+
+        if (data === "Approve") {
+          textColor = "green";
+          bgColor = "#e6fffa";
+        } else if (data === "Pending") {
+          textColor = "orange";
+          bgColor = "#fff4e5";
+        } else if (data === "Cancel") {
+          textColor = "red";
+          bgColor = "#ffe5e5";
+        }
+
+        return `<div style="display: inline-block; padding: 4px 8px; color: ${textColor}; background-color: ${bgColor}; border: 1px solid ${bgColor}; border-radius: 50px; text-align: center; width:100px; font-size: 10px; font-weight: 700;">
+              ${data}
+            </div>`;
       },
     },
     {
@@ -494,7 +591,7 @@ const Collection_detail = () => {
                   type="date"
                   className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
                   value={fromDateFilter}
-                  onChange={(e) => setFromDateFilter (e.target.value)}
+                  onChange={(e) => setFromDateFilter(e.target.value)}
                 />
               </div>
               {/*To Date Filter */}
@@ -605,6 +702,114 @@ const Collection_detail = () => {
                     )}
                   </div>
                 </div>
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setFormErrors({ ...formErrors, email: "" });
+                      }}
+                      placeholder="Enter Email"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.email && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="number"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        setFormErrors({ ...formErrors, phone: "" });
+                      }}
+                      placeholder="Enter Phone Number"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.phone && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Alter Phone Number <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="number"
+                      value={phoneAlter}
+                      onChange={(e) => {
+                        setPhoneAlter(e.target.value);
+                        setFormErrors({ ...formErrors, phoneAlter: "" });
+                      }}
+                      placeholder="Enter Phone Number"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.phoneAlter && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.phoneAlter}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Collection For <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="text"
+                      value={collectionFor}
+                      onChange={(e) => {
+                        setCollectionFor(e.target.value);
+                        setFormErrors({ ...formErrors, collectionFor: "" });
+                      }}
+                      placeholder="Enter Collection"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.collectionFor && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.collectionFor}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
@@ -612,7 +817,7 @@ const Collection_detail = () => {
                       htmlFor="roleName"
                       className="block text-[15px] md:text-md font-medium mb-2 mt-3"
                     >
-                     Address <span className="text-red-500">*</span>
+                      Address <span className="text-red-500">*</span>
                     </label>
                   </div>
                   <div className="w-[60%] md:w-[50%]">
@@ -660,7 +865,7 @@ const Collection_detail = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="mt-2 md:mt-8 flex justify-between items-center ">
                   <div className="">
                     <label
@@ -729,7 +934,7 @@ const Collection_detail = () => {
                       type="number"
                       value={postcode}
                       onChange={(e) => {
-                        setpostcode(e.target.value);
+                        setPostcode(e.target.value);
                         setFormErrors({ ...formErrors, postcode: "" });
                       }}
                       placeholder="Enter postcode"
@@ -740,6 +945,62 @@ const Collection_detail = () => {
                         {formErrors.postcode}
                       </p>
                     )}
+                  </div>
+                </div>
+                <div className="mt-2 md:mt-8 flex justify-between items-center ">
+                  <div className="">
+                    <label
+                      htmlFor="roleName"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Notes <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <input
+                      type="text"
+                      value={notes}
+                      onChange={(e) => {
+                        setNotes(e.target.value);
+                        setFormErrors({ ...formErrors, notes: "" });
+                      }}
+                      placeholder="Enter Notes"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {formErrors.notes && (
+                      <p className="text-red-500 text-sm mb-4 mt-1">
+                        {formErrors.notes}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-2 md:mt-8 flex justify-between items-center">
+                  <div className="">
+                    <label
+                      htmlFor="status"
+                      className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                    >
+                      Status <span className="text-red-500">*</span>
+                    </label>
+
+                  </div>
+                  <div className="w-[60%] md:w-[50%]">
+                    <select
+                      value={status}
+                      onChange={(e) => {
+                        setStatus(e.target.value);
+                        setFormErrors({ ...formErrors, status: "" });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                    >
+                      <option value="">Select status</option>
+                      <option value="Approve">Approve</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Cancel">Cancel</option>
+                    </select>
+                    {formErrors.status && (<p className="text-red-500 text-sm">{formErrors.status}</p>)}
+
                   </div>
                 </div>
 
@@ -813,13 +1074,105 @@ const Collection_detail = () => {
                     </div>
                     <div className="mt-8 flex justify-between items-center">
                       <label className="block text-[15px] md:text-md font-medium mb-2">
-                        Address{" "}
+                        Email
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="email"
+                          placeholder="Enter Email"
+                          value={editEmail}
+                          onChange={(e) => {
+                            setEditEmail(e.target.value);
+                            setFormErrors({ ...formErrors, editEmail: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editEmail && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editEmail}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Phone Number
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="number"
+                          placeholder="Enter Phone Number"
+                          value={editPhone}
+                          onChange={(e) => {
+                            setEditPhone(e.target.value);
+                            setFormErrors({ ...formErrors, editPhone: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editPhone && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editPhone}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Alter Phone Number
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="number"
+                          placeholder="Enter Alter Phone Number"
+                          value={editPhoneAlter}
+                          onChange={(e) => {
+                            setEditPhoneAlter(e.target.value);
+                            setFormErrors({ ...formErrors, editPhoneAlter: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editPhoneAlter && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editPhoneAlter}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Collection For
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <input
+                          type="text"
+                          placeholder="Enter Collection "
+                          value={editCollectionFor}
+                          onChange={(e) => {
+                            setEditCollectionFor(e.target.value);
+                            setFormErrors({ ...formErrors, editCollectionFor: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editCollectionFor && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editCollectionFor}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Address
                         <span className="text-red-500">*</span>
                       </label>
                       <div className="w-[60%] md:w-[50%]">
                         <textarea
                           type="text"
-                          placeholder="Enter address"
+                          placeholder="Enter Address "
                           value={editAddress}
                           onChange={(e) => {
                             setEditAddress(e.target.value);
@@ -922,6 +1275,56 @@ const Collection_detail = () => {
                         )}
                       </div>
                     </div>
+                    <div className="mt-8 flex justify-between items-center">
+                      <label className="block text-[15px] md:text-md font-medium mb-2">
+                        Notes <span className="text-red-500">*</span>
+                      </label>
+                      <div className="w-[60%] md:w-[50%]">
+                        <textarea
+                          type="text"
+                          placeholder="Enter Notes"
+                          value={editNotes}
+                          onChange={(e) => {
+                            setEditNotes(e.target.value);
+                            setFormErrors({ ...formErrors, editNotes: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {formErrors.editNotes && (
+                          <p className="text-red-500 text-sm">
+                            {formErrors.editNotes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-2 md:mt-8 flex justify-between items-center">
+                      <div className="">
+                        <label
+                          htmlFor="status"
+                          className="block text-[15px] md:text-md font-medium mb-2 mt-3"
+                        >
+                          Status <span className="text-red-500">*</span>
+                        </label>
+
+                      </div>
+                      <div className="w-[60%] md:w-[50%]">
+                        <select
+                          value={editStatus}
+                          onChange={(e) => {
+                            setEditStatus(e.target.value);
+                            setFormErrors({ ...formErrors, editStatus: "" });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
+                        >
+                          <option value="">Select status</option>
+                          <option value="Approve">Approve</option>
+                          <option value="Pending">Pending</option>
+                          <option value="Cancel">Cancel</option>
+                        </select>
+                        {formErrors.editStatus && (<p className="text-red-500 text-sm">{formErrors.editStatus}</p>)}
+
+                      </div>
+                    </div>
 
                     <div className="flex justify-end gap-2 mt-14">
                       <button
@@ -967,6 +1370,26 @@ const Collection_detail = () => {
                   <span className="font-medium">Order ID</span>
                   <span>{viewCollection.tracking_number}</span>
                 </div>
+                {/* email */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Email</span>
+                  <span>{viewCollection.email}</span>
+                </div>
+                {/* phone no */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Phone No</span>
+                  <span>{viewCollection.phone_no}</span>
+                </div>
+                {/* alter phone no */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Alter Phone No</span>
+                  <span>{viewCollection.alter_phone}</span>
+                </div>
+                {/* collection for */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Collection For</span>
+                  <span>{viewCollection.collection_for}</span>
+                </div>
                 {/* address */}
                 <div className="flex justify-between ">
                   <span className="font-medium">Address</span>
@@ -991,6 +1414,16 @@ const Collection_detail = () => {
                 <div className="flex justify-between ">
                   <span className="font-medium">PostCode</span>
                   <span>{viewCollection.postcode}</span>
+                </div>
+                {/* notes */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Notes</span>
+                  <span>{viewCollection.notes}</span>
+                </div>
+                {/* status */}
+                <div className="flex justify-between ">
+                  <span className="font-medium">Status</span>
+                  <span>{viewCollection.status}</span>
                 </div>
               </div>
             </div>
