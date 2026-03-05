@@ -794,18 +794,19 @@ const CustomerDetails = () => {
           </div>
         </div>
       </div>
-
+      
+      <div className="flex flex-wrap md:flex-nowrap w-full gap-3">
       {/* Parcel Section */}
-      <div className="w-full p-4 border border-[#057fc4] rounded-xl shadow mt-4">
+      <div className="w-full md:w-[50%] p-4 border border-[#057fc4] rounded-xl shadow mt-4">
         <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Parcel Details</h3>
         
-        <div className="mt-2 flex justify-between items-center">
-          <div className="w-[40%]">
+        <div className="mt-2 flex flex-wrap md:flex-nowrap justify-between items-center">
+          <div className="w-full md:w-[40%]">
             <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
               Piece Number <span className="text-red-500">*</span>
             </label>
           </div>
-          <div className="w-[60%] md:w-[50%]">
+          <div className="w-full md:w-[60%]">
             <input
               type="number"
               name="piece_number"
@@ -890,12 +891,12 @@ const CustomerDetails = () => {
         )}
 
         <div className="mt-2 md:mt-4 flex flex-wrap justify-between items-center">
-          <div className="w-[40%]">
+          <div className="w-full md:w-[40%]">
             <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
               Description <span className="text-red-500">*</span>
             </label>
           </div>
-          <div className="w-[100%] md:w-[80%] h-auto">
+          <div className="w-full md:w-[60%] h-auto">
             <textarea
               name="description"
               value={formData.description}
@@ -912,16 +913,16 @@ const CustomerDetails = () => {
       </div>
 
       {/* Order Section */}
-      <div className="w-full p-4 border border-[#057fc4] rounded-xl shadow mt-4">
+      <div className="w-full md:w-[50%] p-4 border border-[#057fc4] rounded-xl shadow mt-4">
         <h3 className="text-lg font-semibold mb-4 text-[#057fc4]">Order Details</h3>
 
-        <div className="mt-2 md:mt-4 flex justify-between items-center">
-          <div className="w-[40%]">
+        <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
+          <div className="w-full md:w-[40%]">
             <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
               Tracking Number <span className="text-red-500">*</span>
             </label>
           </div>
-          <div className="w-[60%] md:w-[50%]">
+          <div className="w-full md:w-[60%]">
             <input
               type="text"
               name="tracking_number"
@@ -936,13 +937,13 @@ const CustomerDetails = () => {
           </div>
         </div>
 
-        <div className="mt-2 md:mt-4 flex justify-between items-center">
-          <div className="w-[40%]">
+        <div className="mt-2 md:mt-4 flex flex-wrap md:flex-nowrap justify-between items-center">
+          <div className="w-full md:w-[40%]">
             <label className="block text-[15px] md:text-md font-medium mb-2 mt-3">
               Cargo Mode <span className="text-red-500">*</span>
             </label>
           </div>
-          <div className="w-[60%] md:w-[50%]">
+          <div className="w-full md:w-[60%]">
             <select 
               name="cargo_mode"
               className="w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-[#057fc4] rounded-lg"
@@ -959,11 +960,13 @@ const CustomerDetails = () => {
           </div>
         </div>
 
-        <div className="mt-2 md:mt-8 flex justify-between items-center">
+        <div className="mt-2 md:mt-8 flex flex-wrap md:flex-nowrap justify-between items-center">
+          <div className="w-full md:w-[40%]">
           <label className="block text-[15px] md:text-md font-medium">
             Packed <span className="text-red-500">*</span>
           </label>
-          <div className="w-[60%] md:w-[50%]">
+          </div>
+          <div className="w-full md:w-[60%]">
             <div className="flex items-center gap-6">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -994,7 +997,7 @@ const CustomerDetails = () => {
           </div>
         </div>
       </div>
-
+      </div>
       {/* Buttons */}
       <div className="flex justify-end gap-4 mt-4 bg-white p-4">
         <button
