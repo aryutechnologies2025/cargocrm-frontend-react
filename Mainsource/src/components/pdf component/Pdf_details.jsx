@@ -133,8 +133,8 @@ const Pdf_details = () => {
               <th className="text-start px-2 py-1">BENEFICIARY</th>
             </tr>
             <tr className="flex flex-col">
-              <td className="text-start px-2 py-1">{data?.beneficiaries?.[0].name}</td>
-              <td className="text-start px-2 py-1"><span className="mr-1">{data?.beneficiaries?.[0].address},</span><span className="mr-1">{data?.beneficiaries?.[0].city},</span><span className="mr-1">{data?.beneficiaries?.[0].country}</span></td>
+              <td className="text-start px-2 py-1">{data?.beneficiaryName || "-"}</td>
+              <td className="text-start px-2 py-1"><span className="mr-1">{data?.beneficiaryAddress || "-"},{data?.beneficiaryCity || "-"},{data?.beneficiaryCountry || "-"}</span></td>
               {/* <td className="text-start px-2 py-1">Customer Address 2</td>
               <td className="text-start px-2 py-1">Customer Address 3</td> */}
             </tr>
@@ -144,9 +144,9 @@ const Pdf_details = () => {
 
         {/* TABLE */}
         <div className="flex gap-20 w-full border bg-[#e6f2fa] font-semibold p-2">
-          <div className="flex">TRACKING NUMBER: {data?.orders?.[0].tracking_number}</div>
-          <div className="flex">PIECE NO: {data?.parcels?.[0].piece_number}</div>
-          <div className="flex">DESCRIPTION: {data?.parcels?.[0].description}</div>
+          <div className="flex">TRACKING NUMBER: {data?.tracking_number || "-"}</div>
+          <div className="flex">PIECE NO: {data?.piece_number || "-"}</div>
+          <div className="flex">DESCRIPTION: {data?.description || "-"}</div>
         </div>
         <table className="w-full border text-center">
           <thead className="bg-[#e6f2fa]">
@@ -159,12 +159,12 @@ const Pdf_details = () => {
 
           <tbody>
             {/* Map through piece_details */}
-            {data?.parcels?.[0]?.piece_details?.map((piece, index) => (
+            {data?.piece_details?.map((piece, index) => (
               <tr key={piece._id || index}>
                 <td className="border px-2 py-1 text-start">{index + 1}</td>
-                <td className="border px-2 py-1 text-start">{piece.weight}KG</td>
+                <td className="border px-2 py-1 text-start">{piece.weight || "-"}KG</td>
                 <td className="border px-2 py-1 text-start">
-                  {piece.length} x {piece.width} x {piece.height}
+                  {piece.length || "-"} x {piece.width || "-"} x {piece.height || "-"}
                 </td>
               </tr>
             ))}
