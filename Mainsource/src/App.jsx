@@ -42,7 +42,6 @@ function App() {
           <Route path="/customer" element={<Customer_main />} />
           <Route path="/beneficiary" element={<Beneficiary_main />} />
           <Route path="/order" element={<Order_main />} />
-
           <Route path="/parcel" element={<Parcel_main />} />
           <Route path="/run" element={<Run_main />} />
           <Route path="/collection" element={<Collection_main />} />

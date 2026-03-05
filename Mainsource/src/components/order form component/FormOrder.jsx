@@ -58,6 +58,9 @@ const FormOrder = () => {
 
                     <p className="text-sm md:text-md text-[#057fc4]">Order Form</p>
                 </div>
+                <div>
+                    <p className="ms-5 mt-5 font-semibold text-2xl text-[#057fc4]">Order Form </p>
+                </div>
 
                 {/* STEP HEADER */}
                 {/* <div className="flex justify-between mb-6 mt-5 p-5 ">
