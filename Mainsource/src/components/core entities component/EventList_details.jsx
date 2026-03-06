@@ -37,13 +37,14 @@ const EventList_details = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
   };
-  const [dateFilter, setDateFilter] = useState(getToday());
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [formErrors, setFormErrors] = useState({});
   const [name, setName] = useState("");
   const [status, setStatus] = useState("");
   const [editName, setEditName] = useState("");
   const [editStatus, setEditStatus] = useState("");
-  
+
 
   const resetAddForm = () => {
     setName("");
@@ -54,11 +55,11 @@ const EventList_details = () => {
   const validateAddForm = () => {
     let errors = {};
 
-     const nameRegex = /^[A-Za-z\s]+$/;
+    const nameRegex = /^[A-Za-z\s]+$/;
 
     if (!name.trim()) {
       errors.name = "Name is required";
-    } else if(!nameRegex.test(name)) {
+    } else if (!nameRegex.test(name)) {
       errors.name = "Name must contain only alphabets"
     }
 
@@ -73,11 +74,11 @@ const EventList_details = () => {
   const validateEditForm = () => {
     let errors = {};
 
-     const nameRegex = /^[A-Za-z\s]+$/;
+    const nameRegex = /^[A-Za-z\s]+$/;
 
     if (!editName.trim()) {
       errors.editName = "Name is required";
-    } else if(!nameRegex.test(editName)) {
+    } else if (!nameRegex.test(editName)) {
       errors.editName = "Name must contain only alphabets"
     }
 
@@ -186,7 +187,7 @@ const EventList_details = () => {
         toast.error("Failed to update order");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message );
+      toast.error(error.response?.data?.message);
     }
   };
 
@@ -213,20 +214,20 @@ const EventList_details = () => {
         `api/eventmasters/delete-event-masters/${orderId}`,
       );
 
-        toast.success("Order deleted successfully");
-        fetchEventMasters();
-     
+      toast.success("Order deleted successfully");
+      fetchEventMasters();
+
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Error deleting order");
     }
   };
 
-  const resetFilters = () => {
-    setStatusFilter("");
-    setDateFilter(""); // reset to today
-    // setDateFilter(getToday());
-  };
+const resetFilters = () => {
+  setStatusFilter("");
+  setFromDate("");
+  setToDate("");
+};
 
   const openAddModal = () => {
     resetAddForm();
@@ -372,12 +373,23 @@ const EventList_details = () => {
     { Sno: 3, name: "Test Event", status: 1, date: "2026-02-03" },
   ];
 
-  const data = rawData.filter((item) => {
-    return (
-      (statusFilter ? String(item.status) === statusFilter : true) &&
-      (dateFilter ? item.date === dateFilter : true)
-    );
-  });
+const filteredData = event.filter((item) => {
+  const itemDate = new Date(item.createdAt || item.date);
+
+  const matchStatus = statusFilter
+    ? String(item.status) === statusFilter
+    : true;
+
+  const matchFromDate = fromDate
+    ? itemDate >= new Date(fromDate)
+    : true;
+
+  const matchToDate = toDate
+    ? itemDate <= new Date(toDate)
+    : true;
+
+  return matchStatus && matchFromDate && matchToDate;
+});
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
       <div>
@@ -409,24 +421,36 @@ const EventList_details = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <option value="">All Status</option>
-                  <option value="0">Active</option>
-                  <option value="1">Inactive</option>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
                 </select>
               </div>
 
-              {/* Date Filter */}
-              <div className="gap-2">
-                <label className="text-sm font-medium text-gray-600 p-1">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                />
-              </div>
+             {/* From Date */}
+<div>
+  <label className="text-sm font-medium text-gray-600 p-1">
+    From Date
+  </label>
+  <input
+    type="date"
+    className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+    value={fromDate}
+    onChange={(e) => setFromDate(e.target.value)}
+  />
+</div>
 
+{/* To Date */}
+<div>
+  <label className="text-sm font-medium text-gray-600 p-1">
+    To Date
+  </label>
+  <input
+    type="date"
+    className="mt-1 px-3 py-2 border rounded-lg min-w-[160px]"
+    value={toDate}
+    onChange={(e) => setToDate(e.target.value)}
+  />
+</div>
               {/* Reset */}
               <div className="flex items-end">
                 <button
@@ -454,7 +478,7 @@ const EventList_details = () => {
           {/* Responsive wrapper for the table */}
           <div className="table-scroll-container">
             <DataTable
-              data={event}
+              data={filteredData}
               columns={columns}
               options={{
                 paging: true,
