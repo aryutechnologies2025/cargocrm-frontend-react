@@ -40,7 +40,8 @@ const Event_detail = () => {
   console.log("filterValue", filterValue);
   const [visibleColumns, setVisibleColumns] = useState({
     event_name: true,
-    run_number: true,
+    run_no: true,
+    tracking_number: true,
     quantity: true,
     weight: true,
     event_date: true,
@@ -48,6 +49,7 @@ const Event_detail = () => {
     created_by: true,
     status: true,
   });
+
   const [statusFilter, setStatusFilter] = useState("");
   const getToday = () => {
     const today = new Date();
@@ -403,15 +405,15 @@ const Event_detail = () => {
       const newState = { ...prev, [key]: !prev[key] };
 
       const columnIndexMap = {
-        event_id: 1,
-        event_name: 2,
-        run_no: 3,
-        tracking_no: 4,
-        quantity: 5,
-        weight: 6,
-        event_date: 7,
-        event_time: 8,
-        created_by: 9,
+        event_name: 1,
+        run_no: 2,
+        tracking_number: 3,
+        quantity: 4,
+        weight: 5,
+        event_date: 6,
+        event_time: 7,
+        created_by: 8,
+        status: 9,
       };
 
       const index = columnIndexMap[key];
@@ -424,14 +426,16 @@ const Event_detail = () => {
     });
   };
 
-    const columnLabels = {
+  const columnLabels = {
     event_name: "Event Name",
-    run_number: "Run Number",
+    run_no: "Run Number",
+    tracking_number: "Tracking Number",
     quantity: "Quantity",
     weight: "Weight",
     event_date: "Event Date",
     event_time: "Event Time",
     created_by: "Created By",
+    status: "status",
   };
 
   const openAddModal = () => {
@@ -763,54 +767,55 @@ const Event_detail = () => {
               </div>
 
               {/* Reset */}
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
                 <button
                   onClick={resetFilters}
                   className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
                 >
                   Reset
                 </button>
-              </div>
+                {/* customize */}
+                <div className="flex justify-start items-center">
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowCustomize(!showCustomize)}
+                      className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                    >
+                      <BiCustomize className="text-[#046fac]" />
+                      Customize
+                    </button>
 
-              {/* customize */}
-              <div className="flex justify-start items-center">
-                <div className="relative">
-                  <button
-                    onClick={() => setShowCustomize(!showCustomize)}
-                    className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
-                  >
-                    <BiCustomize className="text-[#046fac]" />
-                    Customize
-                  </button>
+                    {showCustomize && (
+                      <div className="absolute left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-medium text-sm">
+                            Customize Columns
+                          </p>
+                          <button onClick={() => setShowCustomize(false)}>
+                            ✕
+                          </button>
+                        </div>
 
-                  {showCustomize && (
-                    <div className="absolute left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="font-medium text-sm">
-                          Customize Columns
-                        </p>
-                        <button onClick={() => setShowCustomize(false)}>
-                          ✕
-                        </button>
+                        {Object.keys(visibleColumns).map((col) => (
+                          <label
+                            key={col}
+                            className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={visibleColumns[col]}
+                              onChange={() => toggleColumn(col)}
+                            />
+                            {columnLabels[col]}
+                          </label>
+                        ))}
                       </div>
-
-                      {Object.keys(visibleColumns).map((col) => (
-                        <label
-                          key={col}
-                          className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={visibleColumns[col]}
-                            onChange={() => toggleColumn(col)}
-                          />
-                          {columnLabels[col]}
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
+
+
             </div>
 
             {/* Right Side Add Button */}
