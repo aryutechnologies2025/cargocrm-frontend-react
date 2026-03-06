@@ -33,25 +33,34 @@ const ContactUs_detail = () => {
   const [loading, setLoading] = useState(false);
   const [contact, setContact] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState({
-    Sno: true,
-    username: true,
-    date: true,
-    action: true,
-    ip_address: true,
-    // status: true,
+    firstName: true,
+    lastName: true,
+    type: true,
+    email: true,
+    appointmentDate: true,
+    message: true,
   });
+
+    const columnLabels = {
+    firstName: "First Name",
+    lastName: "Last Name",
+    type: "Type",
+    email: "Email",
+    appointmentDate: "Appointment Date",
+    message: "Message",
+  };
 
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
       const newState = { ...prev, [key]: !prev[key] };
 
       const columnIndexMap = {
-        Sno: 0,
-        username: 1,
-        date: 2,
-        action: 3,
-        ip_address: 4,
-        // status: 5,
+        firstName: 1,
+        lastName: 2,
+        type: 3,
+        email: 4,
+        appointmentDate: 5,
+        message: 6,
       };
 
       const index = columnIndexMap[key];
@@ -312,7 +321,7 @@ const ContactUs_detail = () => {
                         checked={visibleColumns[col]}
                         onChange={() => toggleColumn(col)}
                       />
-                      {col}
+                      {columnLabels[col]}
                     </label>
                   ))}
                 </div>
