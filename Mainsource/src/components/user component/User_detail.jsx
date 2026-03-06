@@ -24,7 +24,7 @@ import "primeicons/primeicons.css";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { BiCustomize } from "react-icons/bi";
 
 
 const User_detail = () => {
@@ -42,11 +42,21 @@ const User_detail = () => {
   const [users, setUsers] = useState([]);
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState([]);
-  console.log("statusFilter",statusFilter);
+  console.log("statusFilter", statusFilter);
   const getToday = () => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // YYYY-MM-DD
   };
+  const [showCustomize, setShowCustomize] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState({
+    first_name: true,
+    last_name: true,
+    email: true,
+    phone: true,
+    role_name: true,
+    status: true,
+  });
+
   const [dateFilter, setDateFilter] = useState(getToday());
   const [isDateTouched, setIsDateTouched] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -172,8 +182,8 @@ const User_detail = () => {
 
         setUsers(formattedUsers);
 
-       
-        if (response.data.role) {   
+
+        if (response.data.role) {
           const formattedRoles = response.data.role.map((r) => ({
             id: r._id,
             name: r.name,
@@ -211,7 +221,7 @@ const User_detail = () => {
         email: email,
         password: password,
         phone: phone,
-        role: role, 
+        role: role,
         status: status,
         createdBy: userid,
       };
@@ -236,52 +246,52 @@ const User_detail = () => {
   };
 
   // edit
-const openEditModal = async (row) => {
-  const userId = row?._id;
+  const openEditModal = async (row) => {
+    const userId = row?._id;
 
-  if (!userId) {
-    toast.error("Invalid User ID");
-    return;
-  }
-
-  try {
-    setEditingUserId(userId);
-
-    const response = await axiosInstance.get(
-      `api/users/get-users/${userId}`
-    );
-
-    console.log("EDIT RESPONSE:", response.data);
-
-    
-    const data =
-      response.data?.data ||
-      response.data?.user ||
-      response.data;
-
-    if (!data || !data._id) {
-      toast.error("User data not found");
+    if (!userId) {
+      toast.error("Invalid User ID");
       return;
     }
 
-    const [first = "", last = ""] = (data.name || "").split(" ");
+    try {
+      setEditingUserId(userId);
 
-    setEditFirstName(first);
-    setEditLastName(last);
-    setEditEmail(data.email || "");
-    setEditPhone(data.phone || "");
-    setEditPassword("");
-    setEditRole(data.role?._id || "");
-    setEditStatus(String(data.status ?? ""));
+      const response = await axiosInstance.get(
+        `api/users/get-users/${userId}`
+      );
 
-    setIsEditModalOpen(true);
-    setTimeout(() => setIsAnimating(true), 10);
+      console.log("EDIT RESPONSE:", response.data);
 
-  } catch (err) {
-    console.error("EDIT ERROR:", err.response?.data || err);
-    toast.error("Unable to fetch user details");
-  }
-};
+
+      const data =
+        response.data?.data ||
+        response.data?.user ||
+        response.data;
+
+      if (!data || !data._id) {
+        toast.error("User data not found");
+        return;
+      }
+
+      const [first = "", last = ""] = (data.name || "").split(" ");
+
+      setEditFirstName(first);
+      setEditLastName(last);
+      setEditEmail(data.email || "");
+      setEditPhone(data.phone || "");
+      setEditPassword("");
+      setEditRole(data.role?._id || "");
+      setEditStatus(String(data.status ?? ""));
+
+      setIsEditModalOpen(true);
+      setTimeout(() => setIsAnimating(true), 10);
+
+    } catch (err) {
+      console.error("EDIT ERROR:", err.response?.data || err);
+      toast.error("Unable to fetch user details");
+    }
+  };
 
   // update
   const handleUpdate = async () => {
@@ -303,7 +313,7 @@ const openEditModal = async (row) => {
 
       if (response.data?.status || response.data?.success) {
         toast.success("User updated successfully");
-        fetchUsers();   
+        fetchUsers();
         closeEditModal();
       } else {
         toast.error("Failed to update user");
@@ -314,52 +324,52 @@ const openEditModal = async (row) => {
   };
 
   // view
-const openViewModal = async (userId) => {
-  if (!userId) {
-    toast.error("Invalid User ID");
-    return;
-  }
-
-  try {
-    const response = await axiosInstance.get(
-      `api/users/get-users/${userId}`,
-      {
-        headers: {
-          "Cache-Control": "no-cache"
-        }
-      }
-    );
-
-    console.log("VIEW RESPONSE:", response.data);
-
-    // Handle multiple backend formats safely
-    const data =
-      response.data?.data ||
-      response.data?.user ||
-      response.data?.users ||
-      response.data;
-
-    if (!data || !data._id) {
-      toast.error("User data not found");
+  const openViewModal = async (userId) => {
+    if (!userId) {
+      toast.error("Invalid User ID");
       return;
     }
 
-    const [first = "", last = ""] = (data.name || "").split(" ");
+    try {
+      const response = await axiosInstance.get(
+        `api/users/get-users/${userId}`,
+        {
+          headers: {
+            "Cache-Control": "no-cache"
+          }
+        }
+      );
 
-    setViewUser({
-      ...data,
-      first_name: first,
-      last_name: last,
-      role_name: data.role?.name || "",
-    });
+      console.log("VIEW RESPONSE:", response.data);
 
-    setViewModalOpen(true);
+      // Handle multiple backend formats safely
+      const data =
+        response.data?.data ||
+        response.data?.user ||
+        response.data?.users ||
+        response.data;
 
-  } catch (error) {
-    console.error("VIEW ERROR:", error.response?.data || error);
-    toast.error("Error fetching user details");
-  }
-};
+      if (!data || !data._id) {
+        toast.error("User data not found");
+        return;
+      }
+
+      const [first = "", last = ""] = (data.name || "").split(" ");
+
+      setViewUser({
+        ...data,
+        first_name: first,
+        last_name: last,
+        role_name: data.role?.name || "",
+      });
+
+      setViewModalOpen(true);
+
+    } catch (error) {
+      console.error("VIEW ERROR:", error.response?.data || error);
+      toast.error("Error fetching user details");
+    }
+  };
 
   // delete
   const deleteUsers = async (userId) => {
@@ -397,21 +407,56 @@ const openViewModal = async (userId) => {
     }
   };
 
-const openAddModal = () => {
+  const toggleColumn = (key) => {
+    setVisibleColumns((prev) => {
+      const newState = { ...prev, [key]: !prev[key] };
 
-  setFirstName("");
-  setLastName("");
-  setEmail("");
-  setPassword("");
-  setPhone("");
-  setRole("");
-  setStatus("");
-  setFormErrors({});
+      const columnIndexMap = {
+        first_name: 1,
+        last_name: 2,
+        email: 3,
+        phone: 4,
+        role_name: 5,
+        status: 6,
+      };
 
-  setIsAddModalOpen(true);
-  setTimeout(() => setIsAnimating(true), 10);
-};
+      const index = columnIndexMap[key];
 
+      if (window.contactTable && index !== undefined) {
+        const column = window.contactTable.column(index);
+
+        if (column) {
+          column.visible(newState[key]);
+        }
+      }
+
+      return newState;
+    });
+  };
+
+  const columnLabels = {
+    first_name: "First Name",
+    last_name: "Last Name",
+    email: "Email",
+    phone: "Phone Number",
+    role_name: "Role",
+    status: "Status",
+  };
+
+  const openAddModal = () => {
+
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setPassword("");
+    setPhone("");
+    setRole("");
+    setStatus("");
+    setFormErrors({});
+
+    setIsAddModalOpen(true);
+    setTimeout(() => setIsAnimating(true), 10);
+  };
 
   useEffect(() => {
     const table = document.querySelector(".datatable-container");
@@ -583,11 +628,9 @@ const openAddModal = () => {
     return (
       (!roleFilter || item.role_id === roleFilter) &&
       (!statusFilter || String(item.status) === statusFilter) &&
-      (!isDateTouched ? true : itemDate === dateFilter) 
+      (!isDateTouched ? true : itemDate === dateFilter)
     );
   });
-
-
 
   return (
     <div className="bg-gray-100 flex flex-col justify-between w-screen min-h-screen px-5 pt-2 md:pt-4">
@@ -624,9 +667,6 @@ const openAddModal = () => {
                   placeholder="Select role"
                   className="border text-sm rounded-lg min-w-[140px]"
                 />
-
-
-
               </div>
 
               {/* Status Filter */}
@@ -659,13 +699,52 @@ const openAddModal = () => {
               </div>
 
               {/* Reset */}
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
                 <button
                   onClick={resetFilters}
                   className="bg-gray-300 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg"
                 >
                   Reset
                 </button>
+                {/* customize */}
+                <div className="flex justify-start items-center">
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowCustomize(!showCustomize)}
+                      className="border px-3 py-2 rounded-lg text-sm flex items-center gap-2 hover:bg-[#d5eeff] bg-[#e6f2fa] text-[#057fc4]"
+                    >
+                      <BiCustomize className="text-[#046fac]" />
+                      Customize
+                    </button>
+
+                    {showCustomize && (
+                      <div className="absolute left-0 mt-2 bg-white rounded-xl shadow-lg w-52 p-3 z-50">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-medium text-sm">
+                            Customize Columns
+                          </p>
+                          <button onClick={() => setShowCustomize(false)}>
+                            ✕
+                          </button>
+                        </div>
+
+                        {Object.keys(visibleColumns).map((col) => (
+                          <label
+                            key={col}
+                            className="flex items-center gap-2 text-sm py-1 cursor-pointer hover:bg-gray-50 px-2 rounded-md"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={visibleColumns[col]}
+                              onChange={() => toggleColumn(col)}
+                            />
+                            {columnLabels[col]}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -699,6 +778,7 @@ const openAddModal = () => {
                 autoWidth: false, // Disable auto width for proper column adjustments
               }}
               className="display nowrap bg-white"
+              ref={(el) => (window.contactTable = el?.dt())}
             />
           </div>
         </div>
