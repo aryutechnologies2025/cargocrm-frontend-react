@@ -46,14 +46,14 @@ const OrderDetail = () => {
     createdAt: true,
   });
   const columnLabels = {
-  customerName: "Sender",
-  beneficiaryName: "Beneficiary",
-  cargo_mode: "Cargo Mode",
-  packed: "Packed",
-  piece_number: "Quantity",
-  weight: "Weight",
-  createdAt: "Created Date",
-};
+    customerName: "Sender",
+    beneficiaryName: "Beneficiary",
+    cargo_mode: "Cargo Mode",
+    packed: "Packed",
+    piece_number: "Quantity",
+    weight: "Weight",
+    createdAt: "Created Date",
+  };
   const [senderOptions, setSenderOptions] = useState([]);
   const [beneficiaryOptions, setBeneficiaryOptions] = useState([]);
   const [beneficiaryFilter, setBeneficiaryFilter] = useState("");
@@ -78,6 +78,8 @@ const OrderDetail = () => {
   const [editPacked, setEditPacked] = useState("");
   const [editStatus, setEditStatus] = useState("");
   const [editingOrderId, setEditingOrderId] = useState(null);
+  const [user, setUser] = useState(null);
+  console.log("user:", user);
 
   // Get user from localStorage
   const storedDetails = localStorage.getItem("cargouser");
@@ -142,10 +144,13 @@ const OrderDetail = () => {
         ...filters, //  dynamic filters
       };
 
-      const response = await axiosInstance.get("api/customers/view-customers");
+      const response = await axiosInstance.get("api/customers/view-customers", {
+        params,
+      });
 
       if (response.data?.success || response.data?.status) {
         setOrder(response.data.data || []);
+        setUser(response.data.user || null);
       } else {
         setOrder([]);
       }
@@ -188,9 +193,9 @@ const OrderDetail = () => {
   const handleFilterSubmit = () => {
     const filters = {};
 
-    if (beneficiaryFilter) filters.beneficiary_name = beneficiaryFilter;
+    if (beneficiaryFilter) filters.beneficiaryName = beneficiaryFilter;
 
-    if (senderFilter) filters.customer_name = senderFilter;
+    if (senderFilter) filters.customerName = senderFilter;
 
     if (createdByFilter) filters.created_by_name = createdByFilter;
 
@@ -214,8 +219,6 @@ const OrderDetail = () => {
   useEffect(() => {
     fetchOrder();
   }, []);
-
-
 
   const handleViewOrder = (path) => {
     navigate(`/customer`, {
@@ -286,7 +289,7 @@ const OrderDetail = () => {
     fetchOrder();
   };
 
-    const toggleColumn = (key) => {
+  const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
       const newState = { ...prev, [key]: !prev[key] };
 
@@ -535,12 +538,24 @@ const OrderDetail = () => {
               <label className="text-sm font-medium text-gray-600 w-full md:w-[70%]">
                 Created By
               </label>
-              <input
+              {/* <input
                 type="date"
                 className="mt-1 px-3 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={createdByFilter}
                 onChange={(e) => setCreatedByFilter(e.target.value)}
                 placeholder="Enter Created By"
+              /> */}
+
+              <Dropdown
+                value={createdByFilter}
+                options={user}
+                onChange={(e) => {
+                  setCreatedByFilter(e.value);
+                }}
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Select created By"
+                className="w-full border border-gray-300 rounded-lg"
               />
             </div>
 
@@ -559,7 +574,9 @@ const OrderDetail = () => {
 
             {/* cargo air */}
             <div className="flex flex-wrap md:flex-nowrap items-center gap-1">
-              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">Cargo Mode</label>
+              <label className="text-sm font-medium text-gray-600 w-full md:w-[50%]">
+                Cargo Mode
+              </label>
               <select
                 className="mt-1 px-1 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#057fc4]"
                 value={cargoFilter}
@@ -685,8 +702,9 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeAddModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[45vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
+                isAnimating ? "translate-x-0" : "translate-x-full"
+              }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -884,8 +902,9 @@ const OrderDetail = () => {
           <div className="fixed inset-0 bg-black/10 backdrop-blur-sm z-50">
             <div className="absolute inset-0" onClick={closeEditModal}></div>
             <div
-              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "translate-x-full"
-                }`}
+              className={`fixed top-0 right-0 h-screen overflow-y-auto w-screen sm:w-[90vw] md:w-[53vw] bg-white shadow-lg transform transition-transform duration-500 ease-in-out ${
+                isAnimating ? "translate-x-0" : "translate-x-full"
+              }`}
             >
               <div
                 className="w-6 h-6 rounded-full mt-2 ms-2 border-2 bg-white border-gray-300 flex items-center justify-center cursor-pointer"
@@ -1176,45 +1195,43 @@ const OrderDetail = () => {
                         Piece Details
                       </span>
                       {viewOrder.piece_details &&
-                        viewOrder.piece_details.length > 0 ? (
-                        viewOrder.piece_details.map(
-                          (detail, index) => (
-                            <div
-                              key={index}
-                              className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
-                            >
-                              <div className="font-semibold text-[#057fc4] mb-2">
-                                Piece {index + 1}
+                      viewOrder.piece_details.length > 0 ? (
+                        viewOrder.piece_details.map((detail, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200"
+                          >
+                            <div className="font-semibold text-[#057fc4] mb-2">
+                              Piece {index + 1}
+                            </div>
+                            <div className="grid grid-cols-4 gap-2 text-sm">
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Weight:</span>
+                                <span className="font-medium">
+                                  {detail.weight}
+                                </span>
                               </div>
-                              <div className="grid grid-cols-4 gap-2 text-sm">
-                                <div className="flex justify-start gap-3">
-                                  <span className="text-gray-600">Weight:</span>
-                                  <span className="font-medium">
-                                    {detail.weight}
-                                  </span>
-                                </div>
-                                <div className="flex justify-start gap-3">
-                                  <span className="text-gray-600">Length:</span>
-                                  <span className="font-medium">
-                                    {detail.length}
-                                  </span>
-                                </div>
-                                <div className="flex justify-start gap-3">
-                                  <span className="text-gray-600">Width:</span>
-                                  <span className="font-medium">
-                                    {detail.width}
-                                  </span>
-                                </div>
-                                <div className="flex justify-start gap-3">
-                                  <span className="text-gray-600">Height:</span>
-                                  <span className="font-medium">
-                                    {detail.height}
-                                  </span>
-                                </div>
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Length:</span>
+                                <span className="font-medium">
+                                  {detail.length}
+                                </span>
+                              </div>
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Width:</span>
+                                <span className="font-medium">
+                                  {detail.width}
+                                </span>
+                              </div>
+                              <div className="flex justify-start gap-3">
+                                <span className="text-gray-600">Height:</span>
+                                <span className="font-medium">
+                                  {detail.height}
+                                </span>
                               </div>
                             </div>
-                          ),
-                        )
+                          </div>
+                        ))
                       ) : (
                         <p className="text-gray-500 text-sm">
                           No piece details available
