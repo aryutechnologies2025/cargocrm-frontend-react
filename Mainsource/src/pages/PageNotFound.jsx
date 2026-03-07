@@ -17,7 +17,7 @@ const PageNotFound = () => {
        
 
         <p className="font-semibold text-lg md:text-3xl">
-          Shipment Route Not Found
+          Page Not Found
         </p>
 
         <p className="text-gray-500 text-sm">

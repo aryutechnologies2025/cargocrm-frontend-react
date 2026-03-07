@@ -163,7 +163,7 @@ const Sidebar = () => {
                 }  `}
             >
               {/* dashboard */}
-              {role !== "Agent" && (
+            
               <div
                 onClick={() => onClickSidebarMenu("Dashboard")}
                 className={`flex items-center h-10 w-full ml-2 flex-grow ${arrowClicked ? "justify-center  " : "justify-normal"
@@ -175,7 +175,7 @@ const Sidebar = () => {
                 <CiBoxList />
                 {!arrowClicked && <p className="text-sm">Dashboard</p>}
               </div>
-              )}
+            
 
               {/* order form
               <div
